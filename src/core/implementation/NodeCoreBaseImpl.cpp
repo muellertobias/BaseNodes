@@ -6,6 +6,7 @@
  */
 
 #include "NodeCoreBaseImpl.h"
+#include <iostream>
 
 namespace core {
 namespace implementation {
@@ -16,7 +17,9 @@ NodeCoreBaseImpl::NodeCoreBaseImpl(NodeCore* core)
 }
 
 void NodeCoreBaseImpl::process(const Message& message) {
-	if (messages.insert(MessagePair(message.getNumber(), message)).second) {
+	cout << "a";
+	if (messageSet.insert(MinimalMessageInfoTupel(message.getSourceID(), message.getNumber())).second) {
+		cout << "b" << endl;
 		string content = to_string(core->getNodeInfo().NodeID);
 		int number = message.getNumber();
 		Message newMessage(MessageType::application, number, core->getNodeInfo().NodeID, content);

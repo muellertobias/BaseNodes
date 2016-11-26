@@ -13,6 +13,7 @@
 
 using namespace network;
 
+typedef int MessageSource;
 typedef int MessageNumber;
 typedef std::pair<MessageNumber, Message> MessagePair; // Number of Message and Message itself
 typedef std::map<MessagePair::first_type, MessagePair::second_type> MessageMap;

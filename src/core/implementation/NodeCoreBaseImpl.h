@@ -10,13 +10,16 @@
 
 #include "../../network/Message.h"
 #include "INodeImpl.h"
+#include "../data/MessageMap.h"
+#include <set>
+#include <tuple>
 
 namespace core {
 namespace implementation {
 
-typedef int MessageNumber;
-typedef std::pair<MessageNumber, Message> MessagePair; // Number of Message and Message itself
-typedef std::map<MessagePair::first_type, MessagePair::second_type> MessageMap;
+
+typedef tuple<MessageSource, MessageNumber> MinimalMessageInfoTupel;
+typedef set<MinimalMessageInfoTupel> MinimalMessageInfoSet;
 
 class NodeCoreBaseImpl : public INodeImpl {
 public:
@@ -31,7 +34,7 @@ public:
 private:
 	NodeCore* core;
 	NodeCore::_sendToAll sendToAll;
-	MessageMap messages;
+	MinimalMessageInfoSet messageSet;
 };
 
 } /* namespace implementation */

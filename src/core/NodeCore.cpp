@@ -84,7 +84,7 @@ void NodeCore::handleControlMessage(const Message& message) {
 }
 
 void NodeCore::handleApplicationMessage(const Message& message) {
-
+	nodeImpl->process(message);
 }
 
 bool NodeCore::sendToDestinationsImpl(const Message& message,
