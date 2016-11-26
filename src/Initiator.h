@@ -1,0 +1,35 @@
+/*
+ * Initiator.h
+ *
+ *  Created on: 11.11.2016
+ *      Author: tobias
+ */
+
+#ifndef INITIATOR_H_
+#define INITIATOR_H_
+
+#include <string>
+#include "core/NodeCore.h"
+
+using namespace node;
+using namespace std;
+
+class Initiator {
+public:
+	Initiator(const NodeCore& core);
+	virtual ~Initiator() { }
+
+	void loop();
+private:
+	const NodeCore& core;
+	const NodeMap& nodes;
+
+	void showDetails();
+	string readInput() const;
+	void tell();
+	void halt();
+	bool sendTo(const string& content, const NodeInfo& nodeID, int sourceID);
+};
+
+
+#endif /* INITIATOR_H_ */
