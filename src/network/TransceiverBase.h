@@ -19,6 +19,7 @@ public:
 	virtual std::string receive() const = 0;
 	virtual bool sendTo(const NodeInfo& destination, const std::string& message) = 0;
 	virtual bool closeReceiver() = 0;
+	virtual std::string resolve(const NodeInfo& nodeInfo) const = 0;
 
 protected:
 	virtual bool createReceiver(const NodeInfo& nodeInfo, const int& numberOfConnections) = 0;

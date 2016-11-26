@@ -30,6 +30,8 @@ public:
 	virtual string receive() const;
 	virtual bool sendTo(const NodeInfo& destination, const string& message);
 	virtual bool closeReceiver();
+	virtual string resolve(const NodeInfo& nodeInfo) const;
+
 protected:
 	virtual bool createReceiver(const NodeInfo& nodeInfo, const int& numberOfConnections);
 

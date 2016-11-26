@@ -60,6 +60,15 @@ bool NodeTransceiver::sendTo(const NodeInfo& destination, const string& message)
 	return true;
 }
 
+string NodeTransceiver::resolve(const NodeInfo& nodeInfo) const {
+	char cstr[INET_ADDRSTRLEN];
+	inet_ntop(AF_INET, &(nodeInfo.Address.sin_addr), cstr, INET_ADDRSTRLEN);
+
+	string addressStr(cstr);
+	addressStr.append(":");
+	addressStr.append(to_string(nodeInfo.Address.sin_port));
+	return addressStr;
+}
 
 bool NodeTransceiver::createReceiver(const NodeInfo& nodeInfo,
 		const int& numberOfConnections) {

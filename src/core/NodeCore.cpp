@@ -7,26 +7,25 @@
 
 #include "NodeCore.h"
 
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
 #include <chrono>
 #include <iostream>
 #include <sstream>
 #include <utility>
 
 #include "../helper/interfaces/IConfigureNode.h"
-#include "../helper/logging/ILogging.h"
 #include "../network/NodeTransceiver.h"
+#include "implementation/NodeCoreBaseImpl.h"
 
 
-namespace node {
+namespace core {
 
 NodeCore::NodeCore(IConfigureNode* configurator) {
 	this->nodeInfo = configurator->getCurrentNodeInfo();
 	this->neighbors = configurator->getNeighbors();
 	this->transceiver = new NodeTransceiver(this->nodeInfo, 10);
 	isRunning = true;
+	this->nodeImpl = new NodeCoreBaseImpl(this);
+	this->nodeImpl->setSendToDestinations(&NodeCore::sendToDestinations);
 }
 
 NodeCore::~NodeCore() {
@@ -54,13 +53,11 @@ void NodeCore::loop() {
 }
 
 void NodeCore::showDetails() {
-	// inet_ntop ausgliedern nach Transceiver oder ähnliches
-	char cstr[INET_ADDRSTRLEN];
-	inet_ntop(AF_INET, &(nodeInfo.Address.sin_addr), cstr, INET_ADDRSTRLEN);
 
-	cout << "NodeID: " << nodeInfo.NodeID << "\n" <<
-			"NodeID: " << cstr << "\n" <<
-			"NodeID: " << nodeInfo.Address.sin_port << endl;
+	string address = transceiver->resolve(this->nodeInfo);;
+
+	cout << "NodeID: " << nodeInfo.NodeID << "\t" <<
+			"Address: " << address << "\n" << endl;
 
 	for (NodeMap::iterator i = neighbors.begin(); i != neighbors.end(); ++i) {
 		cout << "Neighbor: " << i->first << endl;
@@ -82,22 +79,15 @@ void NodeCore::handleControlMessage(const Message& message) {
 		string c = to_string(nodeInfo.NodeID);
 		int number = message.getNumber();
 		Message newMessage(MessageType::application, number, nodeInfo.NodeID, c);
-		sendToDestinations(newMessage, neighbors);
-		messages.insert(MessagePair(number, newMessage));
+		sendToDestinationsImpl(newMessage, neighbors);
 	}
 }
 
 void NodeCore::handleApplicationMessage(const Message& message) {
-	if (messages.insert(MessagePair(message.getNumber(), message)).second) {
-		string content = to_string(nodeInfo.NodeID);
-		int number = message.getNumber();
-		Message newMessage(MessageType::application, number, nodeInfo.NodeID, content);
-		sendToDestinations(newMessage, neighbors, message.getSourceID());
-		messages.insert(MessagePair(number, newMessage));
-	}
+
 }
 
-bool NodeCore::sendToDestinations(const Message& message,
+bool NodeCore::sendToDestinationsImpl(const Message& message,
 		const NodeMap& destinations) {
 
 	bool successfully = false;
@@ -109,11 +99,10 @@ bool NodeCore::sendToDestinations(const Message& message,
 	return successfully;
 }
 
-bool NodeCore::sendToDestinations(const Message& message,
-		const NodeMap& destinations, const int& expectedNodeID) {
+bool NodeCore::sendToDestinations(const Message& message, const int& expectedNodeID) {
 	NodeMap otherNeighbors(neighbors.begin(), neighbors.end());
 	otherNeighbors.erase(expectedNodeID);
-	return sendToDestinations(message, otherNeighbors);
+	return sendToDestinationsImpl(message, otherNeighbors);
 }
 
 bool NodeCore::sendTo(const Message& message, const NodeInfo& destination) const {
@@ -135,11 +124,11 @@ void NodeCore::shutdown(const Message& message) {
 		isRunning = !isRunning;
 	} else if (message.getSourceID() == -1) {
 		isRunning = !isRunning;
-		sendToDestinations(message, neighbors);
+		sendToDestinationsImpl(message, neighbors);
 	} else {
 		NodeMap::iterator node = neighbors.find(message.getSourceID());
 		if (node != neighbors.end()) {
-			sendToDestinations(message, neighbors);
+			sendToDestinationsImpl(message, neighbors);
 		} else {
 			sendTo(message, node->second);
 		}

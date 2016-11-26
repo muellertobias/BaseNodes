@@ -11,7 +11,7 @@
 #include <string>
 #include "core/NodeCore.h"
 
-using namespace node;
+using namespace core;
 using namespace std;
 
 class Initiator {

@@ -13,7 +13,12 @@
 
 #include "../network/Message.h"
 #include "../NodeInfo.h"
-#include "data/MessageMap.h"
+
+namespace core {
+namespace implementation {
+class INodeImpl;
+} /* namespace implementation */
+} /* namespace core */
 
 namespace helper {
 class ILogging;
@@ -30,10 +35,12 @@ using namespace helper::interfaces;
 using namespace network;
 using namespace helper;
 
-namespace node {
+namespace core {
+using namespace implementation;
 
 class NodeCore {
 public:
+	typedef bool (NodeCore::*_sendToAll)(const Message&, const int&);
 	NodeCore(IConfigureNode* configurator);
 	virtual ~NodeCore();
 
@@ -49,19 +56,23 @@ public:
 
 	bool sendTo(const Message& message, const NodeInfo& destination) const;
 
+	const NodeInfo& getNodeInfo() const {
+		return nodeInfo;
+	}
+
 private:
 	NodeInfo nodeInfo;
 	NodeMap neighbors;
-	MessageMap messages;
 	bool isRunning;
 	TransceiverBase* transceiver;
+	INodeImpl* nodeImpl;
 
 	void showDetails();
 	Message receive() const;
 	void handleControlMessage(const Message& message);
 	void handleApplicationMessage(const Message& message);
-	bool sendToDestinations(const Message& message, const NodeMap& destinations);
-	bool sendToDestinations(const Message& message, const NodeMap& destinations, const int& expectedNodeID);
+	bool sendToDestinationsImpl(const Message& message, const NodeMap& destinations);
+	bool sendToDestinations(const Message& message, const int& expectedNodeID);
 	std::string getCurrentTime() const;
 
 	void shutdown(const Message& message);

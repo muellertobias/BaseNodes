@@ -19,7 +19,7 @@
 #include "helper/logging/Logger.h"
 
 using namespace std;
-using namespace node;
+using namespace core;
 using namespace network;
 
 int main(int argc, char** argv) {
