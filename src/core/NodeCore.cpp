@@ -12,6 +12,7 @@
 #include <sstream>
 #include <utility>
 
+#include "../helper/exception/NetworkException.h"
 #include "../helper/interfaces/IConfigureNode.h"
 #include "../network/NodeTransceiver.h"
 #include "implementation/NodeCoreBaseImpl.h"
@@ -35,18 +36,22 @@ void NodeCore::loop() {
 	showDetails();
 
 	while (isRunning) {
-		cout << "Listen..." << endl;
-		const Message& message = receive();
-		cout << getCurrentTime() << " Receive: " << message.toString() << endl;
+		try {
+			cout << "Listen..." << endl;
+			const Message& message = receive();
+			cout << getCurrentTime() << " Receive: " << message.toString() << endl;
 
-		if (message.getType() == MessageType::control) {
-			handleControlMessage(message);
-		} else if (message.getType() == MessageType::application) {
-			handleApplicationMessage(message);
-		} else {
-			cerr << "Unexpected type of message!" << endl;
+			if (message.getType() == MessageType::control) {
+				handleControlMessage(message);
+			} else if (message.getType() == MessageType::application) {
+				handleApplicationMessage(message);
+			} else {
+				cerr << "Unexpected type of message!" << endl;
+			}
+
+		} catch (const helper::exception::NetworkException& ex) {
+			cerr << ex.what() << endl;
 		}
-
 	}
 	cout << "Shutdown..." << endl;
 	transceiver->closeReceiver();
@@ -110,7 +115,7 @@ bool NodeCore::sendTo(const Message& message, const NodeInfo& destination) const
 	return transceiver->sendTo(destination, message.write());
 }
 
-// TODO: Fragen, ob Timestamp als Wert in Microsek OKAY ist
+// TODO: Überlegen, wegen Einführung Vectorzeit
 std::string NodeCore::getCurrentTime() const {
 	auto now = chrono::high_resolution_clock::now();
 	ostringstream oss;

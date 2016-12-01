@@ -10,20 +10,15 @@
 
 #include <exception>
 #include <string>
+#include "NodeBaseException.h"
 
 namespace helper {
 namespace exception {
 
-class ConfigurationException: public std::exception {
+class ConfigurationException: public NodeBaseException {
 public:
-	ConfigurationException(const std::string& msg) : message(msg) { }
+	ConfigurationException(const std::string& msg) : NodeBaseException(msg) { }
 	virtual ~ConfigurationException() { }
-
-	virtual const char* what() const noexcept{
-		return message.c_str();
-	}
-private:
-	const std::string& message;
 };
 
 }

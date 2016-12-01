@@ -65,11 +65,10 @@ void GraphvizNeighborsCreator::readFile() {
 	}
 }
 
-// TODO: Verkettung möglich machen 1 -- 2 -- 3
+// TODO: Verkettung möglich machen 1 -- 2 -- 3;
 void GraphvizNeighborsCreator::readLine(const string& line) {
 	vector<string> splittedLine = split(line, ";");
 
-	// TODO: Überlegen, wegen verkettete Nodes: 1 -- 2 -- 3;
 	for (vector<string>::const_iterator it = splittedLine.begin(); it != splittedLine.end(); ++it) {
 		if (!(*it).empty()) {
 			vector<string> edges = split((*it), "--");

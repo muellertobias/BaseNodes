@@ -1,27 +1,32 @@
-//============================================================================
-// Name        : NetAVA.cpp
-// Author      : 
-// Version     :
-// Copyright   : 
-// Description : Hello World in C++, Ansi-style
-//============================================================================
-
+/**
+ * @file 	NetAVA.cpp
+ * @author 	Tobias Müller
+ * @date 	27.10.2016
+ */
+#include <exception>
 #include <iostream>
-#include <map>
+#include <string>
+#include <vector>
+
 #include "core/NodeCore.h"
-#include "NodeInfo.h"
-#include "helper/NodeConfigReader.h"
 #include "helper/neighborFinders/ExplicitNeighborsCreater.h"
-#include "helper/neighborFinders/RandomNeighborsCreator.h"
 #include "helper/neighborFinders/GraphvizNeighborsCreator.h"
+#include "helper/neighborFinders/RandomNeighborsCreator.h"
+#include "helper/NodeConfigReader.h"
 #include "helper/utilities/utilities.h"
 #include "Initiator.h"
-#include "helper/logging/Logger.h"
 
 using namespace std;
 using namespace core;
 using namespace network;
 
+/**
+ * Main-Methode
+ *
+ * @param argc Anzahl Übergabeparameter
+ * @param argv Übergabeparameter als C-Strings
+ * @return 0
+ */
 int main(int argc, char** argv) {
 
 	int nodeID = 0;
