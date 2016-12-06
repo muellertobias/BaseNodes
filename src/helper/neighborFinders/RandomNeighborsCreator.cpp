@@ -29,7 +29,7 @@ void RandomNeighborsCreator::build(int nodeID, const NodeMap& nodes) {
 	NodeMap neighbors(nodes);
 	neighbors.erase(nodeID);
 
-	if (neighbors.size() <= (size_t)requestedNumberOfNeighbors) {
+	if (neighbors.size() <= (size_t)requestedNumberOfNeighbors || nodeID == -1) {
 		this->neighbors = neighbors;
 	} else {
 		size_t numberOfNeighbors = requestedNumberOfNeighbors;

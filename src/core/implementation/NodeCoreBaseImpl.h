@@ -34,7 +34,8 @@ public:
 private:
 	NodeCore* core;
 	NodeCore::_sendToAll sendToAll;
-	MinimalMessageInfoSet messageSet;
+	//MinimalMessageInfoSet messageSet;
+	MessageMap messages;
 };
 
 } /* namespace implementation */

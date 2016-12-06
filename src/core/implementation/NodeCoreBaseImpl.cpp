@@ -17,13 +17,14 @@ NodeCoreBaseImpl::NodeCoreBaseImpl(NodeCore* core)
 }
 
 void NodeCoreBaseImpl::process(const Message& message) {
-	cout << "a";
-	if (messageSet.insert(MinimalMessageInfoTupel(message.getSourceID(), message.getNumber())).second) {
-		cout << "b" << endl;
+	//if (messageSet.insert(MinimalMessageInfoTupel(message.getSourceID(), message.getNumber())).second) {
+	if (messages.insert(MessagePair(message.getSourceID(), message)).second) {
+
 		string content = to_string(core->getNodeInfo().NodeID);
 		int number = message.getNumber();
 		Message newMessage(MessageType::application, number, core->getNodeInfo().NodeID, content);
 		(core->*sendToAll)(newMessage, message.getSourceID());
+		messages.insert(MessagePair(number, newMessage));
 	}
 }
 
