@@ -25,7 +25,7 @@ enum MessageType {
 
 class Message : public Serializable {
 public:
-	Message(const string& str);
+	Message(const string& str, bool isNative);
 	Message(const MessageType& type, int number, int sourceID, const string& content);
 	virtual ~Message();
 
@@ -49,8 +49,8 @@ public:
 		return content;
 	}
 
-	virtual bool read(const string& str);
-	virtual string write() const;
+	virtual bool read(const string& str, bool isNative);
+	virtual string write(bool native) const;
 
 	string toString() const {
 		string str;

@@ -9,6 +9,7 @@
 #include <iostream>
 #include "helper/randomizer/Random.h"
 #include "network/Message.h"
+#include "Constants.h"
 
 Initiator::Initiator(const NodeCore& core)
 : core(core), nodes(core.getNeighbors()) {
@@ -28,12 +29,18 @@ void Initiator::loop() {
 			tell();
 		} else if (input == "halt") {
 			halt();
+		} else if (input == "snapshoot") {
+			snapshoot();
 		}
 	} while (isRunning);
 }
 
 void Initiator::showDetails() {
-	cout << "Befehle:\nhelp - Zeige Hilfe an\nexit - Beenden\ntell - Löse Initialnachricht aus\nhalt - Halte einen/alle Knoten an" << endl;
+	cout << "Befehle:\nhelp - Zeige Hilfe an\n" <<
+			"exit - Beenden\n" <<
+			"tell - Löse Initialnachricht aus\n" <<
+			"snapshoot - Erzeuge Schnappschuss\n" <<
+			"halt - Halte einen/alle Knoten an" << endl;
 	cout << "Mögliche Adressen:" << endl;
 
 	for (NodeMap::const_iterator it = nodes.begin(); it != nodes.end(); ++it) {
@@ -53,19 +60,19 @@ void Initiator::tell() {
 
 	try {
 		NodeInfo nodeInfo = nodes.at(nodeID);
-		cout << nodeInfo.NodeID << " founded!" << endl;
+		cout << nodeInfo.NodeID << " gefunden!" << endl;
 
 		cout << "Nachrichtentext > ";
-		string content = "Init|" + readInput();
+		string content = readInput();
 
 		if (sendTo(content, nodeInfo, 0)) {
-			cout << "Successful!" << endl;
+			cout << "Erfolgreich!" << endl;
 		} else {
-			cout << "Failed!" << endl;
+			cout << "Fehlgeschlagen!" << endl;
 		}
 
 	} catch (const out_of_range& ex) {
-		cout << nodeID << " not founded!" << endl;
+		cout << nodeID << " nicht gefunden!" << endl;
 	}
 }
 
@@ -74,23 +81,41 @@ void Initiator::halt() {
 	int nodeID = stoi(readInput());
 
 	try {
-			NodeInfo nodeInfo = nodes.at(nodeID);
-			cout << nodeInfo.NodeID << " gefunden!" << endl;
+		NodeInfo nodeInfo = nodes.at(nodeID);
+		cout << nodeInfo.NodeID << " gefunden!" << endl;
 
-			int sourceID = nodeID;
-			cout << "Alle Nodes anhalten? (y/n)> ";
-			if (readInput() == "y") {
-				sourceID = -1;
-			}
+		int sourceID = nodeID;
+		cout << "Alle Nodes anhalten? (y/n)> ";
+		if (readInput() == "y") {
+			sourceID = -1;
+		}
 
-			if (sendTo("Shutdown", nodeInfo, sourceID)) {
-				cout << "Successful!" << endl;
-			} else {
-				cout << "Failed!" << endl;
-			}
+		if (sendTo(constants::ShutdownMessage, nodeInfo, sourceID)) {
+			cout << "Erfolgreich!" << endl;
+		} else {
+			cout << "Fehlgeschlagen!" << endl;
+		}
 	} catch (const out_of_range& ex) {
-		cout << nodeID << " not founded!" << endl;
+		cout << nodeID << " nicht gefunden!" << endl;
 	}
+}
+
+void Initiator::snapshoot() {
+	cout << "Node > ";
+	int nodeID = stoi(readInput());
+	try {
+		NodeInfo nodeInfo = nodes.at(nodeID);
+		cout << nodeInfo.NodeID << " gefunden!" << endl;
+
+		if (sendTo("Snapshot", nodeInfo, 0)) {
+			cout << "Erfolgreich!" << endl;
+		} else {
+			cout << "Fehlgeschlagen!" << endl;
+		}
+	} catch (const out_of_range& ex) {
+		cout << nodeID << " nicht gefunden!" << endl;
+	}
+
 }
 
 bool Initiator::sendTo(const string& content, const NodeInfo& nodeInfo, int sourceID) {

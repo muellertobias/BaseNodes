@@ -15,7 +15,7 @@ namespace logging {
 
 class ILogging {
 public:
-	virtual ~ILogging() { }
+	//virtual ~ILogging() { }
 	void log(const std::string& content);
 };
 

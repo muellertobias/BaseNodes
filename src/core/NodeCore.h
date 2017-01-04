@@ -76,6 +76,7 @@ private:
 	std::string getCurrentTime() const;
 
 	void shutdown(const Message& message);
+	void sendSnapshot();
 };
 
 } /* namespace view */

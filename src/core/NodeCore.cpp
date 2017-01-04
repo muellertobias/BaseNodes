@@ -12,10 +12,12 @@
 #include <sstream>
 #include <utility>
 
+
 #include "../helper/exception/NetworkException.h"
 #include "../helper/interfaces/IConfigureNode.h"
 #include "../network/NodeTransceiver.h"
 #include "implementation/NodeCoreBaseImpl.h"
+#include "../Constants.h"
 
 
 namespace core {
@@ -71,16 +73,16 @@ void NodeCore::showDetails() {
 
 Message NodeCore::receive() const {
 	string incomingStr = transceiver->receive();
-	return Message(incomingStr);
+	return Message(incomingStr, false);
 }
 
 void NodeCore::handleControlMessage(const Message& message) {
 	const string& content = message.getContent();
-
-	if (content.find("Shutdown") != string::npos) {
+	if (content.find(constants::ShutdownMessage) != string::npos) {
 		shutdown(message);
-	} else if (content.find("Init") != string::npos) {
-		//string c = trimPrefix(content, Message::TOKEN); // für das GERÜCHT
+	} else if (content.find("Snapshot") != string::npos) {
+		sendSnapshot();
+	} else {
 		string c = to_string(nodeInfo.NodeID);
 		int number = message.getNumber();
 		Message newMessage(MessageType::application, number, nodeInfo.NodeID, c);
@@ -104,18 +106,18 @@ bool NodeCore::sendToDestinationsImpl(const Message& message,
 	return successfully;
 }
 
-bool NodeCore::sendToDestinations(const Message& message, const int& expectedNodeID) {
+bool NodeCore::sendToDestinations(const Message& message, const int& excludedNodeID) {
 	NodeMap otherNeighbors(neighbors.begin(), neighbors.end());
-	otherNeighbors.erase(expectedNodeID);
+	otherNeighbors.erase(excludedNodeID);
 	return sendToDestinationsImpl(message, otherNeighbors);
 }
 
 bool NodeCore::sendTo(const Message& message, const NodeInfo& destination) const {
 	cout << getCurrentTime() <<" Send: " << message.toString() << " to Node " << destination.NodeID << endl;
-	return transceiver->sendTo(destination, message.write());
+	return transceiver->sendTo(destination, message.write(false)); // native (true) or XML (false)
 }
 
-// TODO: Überlegen, wegen Einführung Vectorzeit
+// TODO: Überlegen, wegen Einführung Vectorzeit -> Übung 2
 std::string NodeCore::getCurrentTime() const {
 	auto now = chrono::high_resolution_clock::now();
 	ostringstream oss;
@@ -138,6 +140,21 @@ void NodeCore::shutdown(const Message& message) {
 			sendTo(message, node->second);
 		}
 	}
+}
+
+void NodeCore::sendSnapshot() {
+	cout << "SNAP" << endl;
+	string hallo = "Hallo, ich bin " + nodeInfo.NodeID;
+
+	Message msg(MessageType::control, 0, 0, hallo);
+
+	NodeInfo info;
+	info.NodeID = 0;
+
+	inet_pton(AF_INET, "127.0.0.1", &(info.Address.sin_addr));
+	info.Address.sin_port = 4999;
+	info.Address.sin_family = AF_INET;
+	sendTo(msg, info);
 }
 
 } /* namespace node */

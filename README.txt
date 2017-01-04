@@ -1,6 +1,6 @@
 Nachrichtenformat
 
-Message::Type::Source::Payload
+Message::Type::Number::Source::Payload
 	    Control
 	    	  Shutdown
 	    
@@ -12,7 +12,13 @@ Message::Type::Source::Payload
 Beispiele:
 
 Herunterfahren aller Knoten per Weiterleitung
-Message::Control::1::shutdown all
+Message::Control::1234::-1::Shutdown
+
+Herunterfahren eines Knoten (z.B. 3)
+Message::Control::1234::3::Shutdown
+
+Schnappschuss eines Knoten
+Message::Control::1234::1::Snapshot
 
 Anwendungsnachricht
-Message::Application::1::Hallo Knoten
+Message::Application::2345::1::Hallo Knoten

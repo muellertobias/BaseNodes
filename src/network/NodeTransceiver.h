@@ -33,7 +33,7 @@ public:
 	virtual string resolve(const NodeInfo& nodeInfo) const;
 
 protected:
-	virtual void createReceiver(const NodeInfo& nodeInfo, const int& numberOfConnections);
+	virtual bool createReceiver(const NodeInfo& nodeInfo, const int& numberOfConnections);
 
 private:
 	int socketID;

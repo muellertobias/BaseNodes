@@ -28,6 +28,7 @@ private:
 	string readInput() const;
 	void tell();
 	void halt();
+	void snapshoot();
 	bool sendTo(const string& content, const NodeInfo& nodeID, int sourceID);
 };
 

@@ -8,8 +8,6 @@
 #include "NodeTransceiver.h"
 #include "Message.h"
 #include <vector>
-#include <sstream>
-#include "../helper/exception/NetworkException.h"
 
 namespace network {
 
@@ -42,26 +40,22 @@ string NodeTransceiver::receive() const {
 bool NodeTransceiver::sendTo(const NodeInfo& destination, const string& message) {
 	int socketID = socket(AF_INET, SOCK_STREAM, 0);
 	if (socketID < 0) {
-		stringstream sstream;
-		sstream << "Send to " << destination.NodeID << ": socket failed";
-		throw new helper::exception::NetworkException(sstream.str());
+		cerr << "Error: socket" << endl;
+		return false;
 	}
 
 	if (connect(socketID, (struct sockaddr*)&destination.Address, sizeof(destination.Address)) < 0) {
-		stringstream sstream;
-		sstream << "Send to " << destination.NodeID << ": connect failed";
-		throw new helper::exception::NetworkException(sstream.str());
+		cerr << "Error: connect" << endl;
+		return false;
 	}
 
 	vector<char> cstr(message.c_str(), message.c_str() + message.size() + 1);
 
 	if (send(socketID, cstr.data(), cstr.size(), 0) < 0) {
+		cerr << "Error: send" << endl;
 		close(socketID);
-		stringstream sstream;
-		sstream << "Send to " << destination.NodeID << ": send failed";
-		throw new helper::exception::NetworkException(sstream.str());
+		return false;
 	}
-
 	close(socketID);
 	return true;
 }
@@ -76,21 +70,18 @@ string NodeTransceiver::resolve(const NodeInfo& nodeInfo) const {
 	return addressStr;
 }
 
-void NodeTransceiver::createReceiver(const NodeInfo& nodeInfo,
+bool NodeTransceiver::createReceiver(const NodeInfo& nodeInfo,
 		const int& numberOfConnections) {
 
 	socketID = socket(AF_INET, SOCK_STREAM, 0);
 	if (socketID < 0) {
-		throw new helper::exception::NetworkException("Create Receiver: socket failed");
+		return false;
 	}
 
-	if (bind(socketID, (struct sockaddr*)&nodeInfo.Address, sizeof(nodeInfo.Address)) == -1) {
-		throw new helper::exception::NetworkException("Create Receiver: bind failed");
-	}
+	bind(socketID, (struct sockaddr*)&nodeInfo.Address, sizeof(nodeInfo.Address));
+	listen(socketID, numberOfConnections);
 
-	if (listen(socketID, numberOfConnections) == -1) {
-		throw new helper::exception::NetworkException("Create Receiver: listen failed");
-	}
+	return true;
 }
 
 bool NodeTransceiver::closeReceiver() {
