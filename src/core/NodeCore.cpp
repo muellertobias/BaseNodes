@@ -73,7 +73,7 @@ void NodeCore::showDetails() {
 
 Message NodeCore::receive() const {
 	string incomingStr = transceiver->receive();
-	return Message(incomingStr, false);
+	return Message(incomingStr);
 }
 
 void NodeCore::handleControlMessage(const Message& message) {
@@ -114,7 +114,7 @@ bool NodeCore::sendToDestinations(const Message& message, const int& excludedNod
 
 bool NodeCore::sendTo(const Message& message, const NodeInfo& destination) const {
 	cout << getCurrentTime() <<" Send: " << message.toString() << " to Node " << destination.NodeID << endl;
-	return transceiver->sendTo(destination, message.write(false)); // native (true) or XML (false)
+	return transceiver->sendTo(destination, message.write()); // native (true) or XML (false)
 }
 
 // TODO: Überlegen, wegen Einführung Vectorzeit -> Übung 2

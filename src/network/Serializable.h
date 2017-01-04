@@ -15,8 +15,8 @@ namespace network {
 class Serializable {
 public:
 	virtual ~Serializable() {}
-	virtual bool read(const std::string& str, bool isNative) = 0;
-	virtual std::string write(bool native) const = 0;
+	virtual bool read(const std::string& str) = 0;
+	virtual std::string write() const = 0;
 
 	static constexpr const char* DELIMITER = "::";
 	static constexpr const char* TOKEN = "|";

@@ -7,18 +7,41 @@ Message::Type::Number::Source::Payload
 	    Application
 	          Content
 	          
+<Message Number="">
+	<Type></Type>
+	<SourceID></SourceID>
+	<Content></Content>
+</Message>
 	          
 	          
 Beispiele:
 
 Herunterfahren aller Knoten per Weiterleitung
-Message::Control::1234::-1::Shutdown
+<Message Number="1234">
+	<Type>1</Type>
+	<SourceID>-1</SourceID>
+	<Content>Shutdown</Content>
+</Message>
 
 Herunterfahren eines Knoten (z.B. 3)
-Message::Control::1234::3::Shutdown
+<Message Number="1234">
+	<Type>1</Type>
+	<SourceID>3</SourceID>
+	<Content>Shutdown</Content>
+</Message>
 
 Schnappschuss eines Knoten
-Message::Control::1234::1::Snapshot
+<Message Number="1234">
+	<Type>1</Type>
+	<SourceID>1</SourceID>
+	<Content>Snapshot</Content>
+</Message>
 
-Anwendungsnachricht
-Message::Application::2345::1::Hallo Knoten
+Anwendungsnachricht mit der Nachricht "Hello Node"
+<Message Number="1234">
+	<Type>2</Type>
+	<SourceID>1</SourceID>
+	<Content>Hello Node</Content>
+</Message>
+
+
