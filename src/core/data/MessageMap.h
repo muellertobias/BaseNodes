@@ -10,6 +10,7 @@
 
 #include <map>
 #include "../../network/Message.h"
+#include <string>
 
 using namespace network;
 

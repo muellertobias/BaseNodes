@@ -18,6 +18,7 @@
 #include "../network/NodeTransceiver.h"
 #include "implementation/NodeCoreBaseImpl.h"
 #include "../Constants.h"
+#include "../helper/utilities/tinyxml2.h"
 
 
 namespace core {
@@ -29,9 +30,17 @@ NodeCore::NodeCore(IConfigureNode* configurator) {
 	isRunning = true;
 	this->nodeImpl = new NodeCoreBaseImpl(this);
 	this->nodeImpl->setSendToDestinations(&NodeCore::sendToDestinations);
+	this->log = new vector<string*>();
 }
 
 NodeCore::~NodeCore() {
+	for (size_t i = 0; i < log->size(); ++i) {
+		log[i].clear();
+		//delete log[i];
+	}
+
+	log->clear();
+	delete log;
 }
 
 void NodeCore::loop() {
@@ -41,7 +50,6 @@ void NodeCore::loop() {
 		try {
 			cout << "Listen..." << endl;
 			const Message& message = receive();
-			cout << getCurrentTime() << " Receive: " << message.toString() << endl;
 
 			if (message.getType() == MessageType::control) {
 				handleControlMessage(message);
@@ -73,7 +81,12 @@ void NodeCore::showDetails() {
 
 Message NodeCore::receive() const {
 	string incomingStr = transceiver->receive();
-	return Message(incomingStr);
+	Message msg(incomingStr);
+
+	string* logStr = new string(getCurrentTime() + " Receive: " + msg.toString());
+	log->push_back(logStr);
+
+	return msg;
 }
 
 void NodeCore::handleControlMessage(const Message& message) {
@@ -113,8 +126,8 @@ bool NodeCore::sendToDestinations(const Message& message, const int& excludedNod
 }
 
 bool NodeCore::sendTo(const Message& message, const NodeInfo& destination) const {
-	cout << getCurrentTime() <<" Send: " << message.toString() << " to Node " << destination.NodeID << endl;
-	return transceiver->sendTo(destination, message.write()); // native (true) or XML (false)
+	log->push_back(new string(getCurrentTime() + " Send to "  + to_string(destination.NodeID) + ": " + message.toString()));
+	return transceiver->sendTo(destination, message.write());
 }
 
 // TODO: Überlegen, wegen Einführung Vectorzeit -> Übung 2
@@ -127,11 +140,9 @@ std::string NodeCore::getCurrentTime() const {
 }
 
 void NodeCore::shutdown(const Message& message) {
-	if (message.getSourceID() == this->nodeInfo.NodeID) {
+	if (message.getSourceID() == this->nodeInfo.NodeID || message.getSourceID() == -1) {
 		isRunning = !isRunning;
-	} else if (message.getSourceID() == -1) {
-		isRunning = !isRunning;
-		sendToDestinationsImpl(message, neighbors);
+		sendSnapshot();
 	} else {
 		NodeMap::iterator node = neighbors.find(message.getSourceID());
 		if (node != neighbors.end()) {
@@ -140,17 +151,36 @@ void NodeCore::shutdown(const Message& message) {
 			sendTo(message, node->second);
 		}
 	}
+
+	if (message.getSourceID() == -1) {
+		sendToDestinationsImpl(message, neighbors);
+	}
 }
 
 void NodeCore::sendSnapshot() {
-	cout << "SNAP" << endl;
-	string hallo = "Hallo, ich bin " + nodeInfo.NodeID;
+	using namespace tinyxml2;
 
-	Message msg(MessageType::control, 0, 0, hallo);
+	XMLDocument doc;
+	XMLElement* root = doc.NewElement("log");
+	int length = log->size();
+	root->QueryIntAttribute("length", &length);
+
+	for (vector<string*>::const_iterator it = log->begin(); it != log->end(); ++it) {
+		string* entry = (*it);
+		XMLElement* element = doc.NewElement("logEntry");
+		element->SetText(entry->c_str());
+		root->InsertEndChild(element);
+	}
+
+	doc.InsertEndChild(root);
+
+	XMLPrinter p;
+	doc.Print(&p);
+
+	Message msg(MessageType::control, 0, nodeInfo.NodeID, string(p.CStr()));
 
 	NodeInfo info;
 	info.NodeID = 0;
-
 	inet_pton(AF_INET, "127.0.0.1", &(info.Address.sin_addr));
 	info.Address.sin_port = 4999;
 	info.Address.sin_family = AF_INET;

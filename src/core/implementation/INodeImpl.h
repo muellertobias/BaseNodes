@@ -11,6 +11,7 @@
 #include "../../network/Message.h"
 #include "../../NodeInfo.h"
 #include "../NodeCore.h"
+#include "../data/MessageMap.h"
 
 namespace core {
 namespace implementation {
@@ -24,6 +25,7 @@ public:
 	virtual ~INodeImpl() {};
 	virtual void process(const Message& message) = 0;
 	virtual void setSendToDestinations(NodeCore::_sendToAll sendToAll) = 0;
+	virtual const MessageMap& getMessages() const = 0;
 };
 
 } /* namespace implementation */

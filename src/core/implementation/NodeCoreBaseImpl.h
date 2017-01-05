@@ -31,6 +31,10 @@ public:
 		this->sendToAll = sendToAll;
 	}
 
+	virtual const MessageMap& getMessages() const {
+		return messages;
+	}
+
 private:
 	NodeCore* core;
 	NodeCore::_sendToAll sendToAll;

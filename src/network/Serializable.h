@@ -8,18 +8,17 @@
 #ifndef NETWORK_SERIALIZABLE_H_
 #define NETWORK_SERIALIZABLE_H_
 
-namespace network {
-
+#include "../helper/utilities/tinyxml2.h"
 #include <string>
+
+namespace network {
 
 class Serializable {
 public:
 	virtual ~Serializable() {}
 	virtual bool read(const std::string& str) = 0;
 	virtual std::string write() const = 0;
-
-	static constexpr const char* DELIMITER = "::";
-	static constexpr const char* TOKEN = "|";
+	virtual tinyxml2::XMLElement* writeXMLElement(tinyxml2::XMLDocument& doc) const = 0;
 };
 
 }

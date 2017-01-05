@@ -9,8 +9,6 @@
 #include "../helper/string/trim.h"
 #include "../helper/utilities/tinyxml2.h"
 
-#include <iostream>
-
 namespace network {
 
 using namespace tinyxml2;
@@ -62,6 +60,18 @@ string Message::write() const {
 	string returnString;
 
 	XMLDocument doc;
+	XMLElement* root = writeXMLElement(doc);
+	doc.InsertEndChild(root);
+
+	XMLPrinter p;
+	doc.Print(&p);
+
+	returnString.append(p.CStr());
+
+	return returnString;
+}
+
+XMLElement* Message::writeXMLElement(XMLDocument& doc) const {
 	XMLElement* root = doc.NewElement("Message");
 	root->SetAttribute("Number", this->getNumber());
 
@@ -77,14 +87,21 @@ string Message::write() const {
 	content->SetText(this->getContent().c_str());
 	root->InsertEndChild(content);
 
-	doc.InsertEndChild(root);
-
-	XMLPrinter p;
-	doc.Print(&p);
-
-	returnString.append(p.CStr());
-
-	return returnString;
+	return root;
 }
+
+string Message::toString() const {
+		string str;
+		str.clear();
+		if (this->type == MessageType::application) {
+			str = "Application -";
+		} else if (this->type == MessageType::control) {
+			str = "Control -";
+		} else {
+			str = "Undefined -";
+		}
+		str += " Number=" + to_string(this->number) + " SourceID=" + to_string(this->sourceID) + " Content={" + this->content + "}";
+		return str;
+	}
 
 } /* namespace network */

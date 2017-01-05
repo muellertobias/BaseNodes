@@ -9,6 +9,7 @@
 #define NODECORE_H_
 
 #include <map>
+#include <vector>
 #include <string>
 
 #include "../network/Message.h"
@@ -66,6 +67,7 @@ private:
 	bool isRunning;
 	TransceiverBase* transceiver;
 	INodeImpl* nodeImpl;
+	vector<string*>* log;
 
 	void showDetails();
 	Message receive() const;

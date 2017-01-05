@@ -12,6 +12,8 @@
 #include <string>
 
 #include "Serializable.h"
+#include "../helper/utilities/tinyxml2.h"
+
 
 using namespace std;
 
@@ -51,25 +53,10 @@ public:
 
 	virtual bool read(const string& str);
 	virtual string write() const;
+	virtual tinyxml2::XMLElement* writeXMLElement(tinyxml2::XMLDocument& doc) const;
 
-	string toString() const {
-		string str;
-		if (this->type == MessageType::application) {
-			str.append("Application ");
-		} else if (this->type == MessageType::control) {
-			str.append("Control ");
-		} else {
-			str.append("Undefined ");
-		}
-		str.append("from ");
-		str.append(to_string(this->sourceID));
-		str.append(" with number ");
-		str.append(to_string(this->number));
-		str.append(": ");
-		str.append(this->content);
-		return str;
+	string toString() const;
 
-	}
 private:
 	MessageType type;
 	int number;
