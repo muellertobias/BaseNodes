@@ -19,17 +19,23 @@
 #include "implementation/NodeCoreBaseImpl.h"
 #include "../Constants.h"
 #include "../helper/utilities/tinyxml2.h"
+#include "implementation/rumor/RumorNodeCoreImpl.h"
 
 
 namespace core {
 
 NodeCore::NodeCore(IConfigureNode* configurator) {
-	this->nodeInfo = configurator->getCurrentNodeInfo();
+	if (configurator->getNodeId() > 0)
+		this->nodeInfo = configurator->getCurrentNodeInfo();
 	this->neighbors = configurator->getNeighbors();
 	this->transceiver = new NodeTransceiver(this->nodeInfo, 10);
 	isRunning = true;
+
+	// Implementierung hier austauschbar
 	this->nodeImpl = new NodeCoreBaseImpl(this);
+	//this->nodeImpl = new rumor::RumorNodeCoreImpl(this);
 	this->nodeImpl->setSendToDestinations(&NodeCore::sendToDestinations);
+
 	this->log = new vector<string*>();
 }
 
@@ -126,7 +132,9 @@ bool NodeCore::sendToDestinations(const Message& message, const int& excludedNod
 }
 
 bool NodeCore::sendTo(const Message& message, const NodeInfo& destination) const {
-	log->push_back(new string(getCurrentTime() + " Send to "  + to_string(destination.NodeID) + ": " + message.toString()));
+	if (message.getType() != MessageType::log)
+		log->push_back(new string(getCurrentTime() + " Send to "  + to_string(destination.NodeID) + ": " + message.toString()));
+
 	return transceiver->sendTo(destination, message.write());
 }
 
@@ -176,8 +184,9 @@ void NodeCore::sendSnapshot() {
 
 	XMLPrinter p;
 	doc.Print(&p);
+	doc.Clear();
 
-	Message msg(MessageType::control, 0, nodeInfo.NodeID, string(p.CStr()));
+	Message msg(MessageType::log, 0, nodeInfo.NodeID, string(p.CStr()));
 
 	NodeInfo info;
 	info.NodeID = 0;

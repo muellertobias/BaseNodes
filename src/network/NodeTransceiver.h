@@ -25,6 +25,7 @@ using namespace std;
 
 class NodeTransceiver: public TransceiverBase {
 public:
+	NodeTransceiver(const std::string& address, const int& port, const int& numberOfConnections);
 	NodeTransceiver(const NodeInfo& nodeInfo, const int& numberOfConnections);
 	virtual ~NodeTransceiver();
 	virtual string receive() const;
@@ -33,6 +34,7 @@ public:
 	virtual string resolve(const NodeInfo& nodeInfo) const;
 
 protected:
+	virtual bool createReceiver(const std::string& address, const int& port, const int& numberOfConnections);
 	virtual bool createReceiver(const NodeInfo& nodeInfo, const int& numberOfConnections);
 
 private:

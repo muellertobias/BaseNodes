@@ -97,6 +97,8 @@ string Message::toString() const {
 			str = "Application -";
 		} else if (this->type == MessageType::control) {
 			str = "Control -";
+		} else if (this->type == MessageType::log) {
+				str = "Logging -";
 		} else {
 			str = "Undefined -";
 		}

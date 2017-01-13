@@ -23,11 +23,16 @@
 
 namespace helper {
 
+NodeConfigReader::NodeConfigReader(const string& filename)
+	: NodeConfigReader(filename, -1, nullptr) {
+}
+
 NodeConfigReader::NodeConfigReader(const string& filename, int nodeID, ISearchNeighbors* neighborSearcher) {
 	this->nodeID = nodeID;
 	this->allNodes = readFile(filename);
+	this->neighborSearcher = neighborSearcher;
+
 	if (neighborSearcher != nullptr) {
-		this->neighborSearcher = neighborSearcher;
 		this->neighborSearcher->build(nodeID, allNodes);
 	}
 }
@@ -102,5 +107,4 @@ NodeInfo NodeConfigReader::readLine(const string& line) {
 }
 
 } /* namespace helper */
-
 

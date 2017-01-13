@@ -20,10 +20,13 @@ done
 
 # Starte Knoten und Initiator
 for ((i = 1 ; i <= numberOfNodes ; i++)); do 
-	gnome-terminal -e "./Debug/NetAVA $addressfile $i $graphfile"
+	#gnome-terminal -e "./Debug/NetAVA $addressfile node $i $graphfile"
+	./Debug/NetAVA $addressfile node $i $graphfile &
 done
 
-./Debug/NetAVA $addressfile -1 $graphfile
+#gnome-terminal -e "./Debug/NetAVA $addressfile listener"
+./Debug/NetAVA $addressfile initiator
+
 
 #gnome-terminal -e "./Debug/NetAVA $addressfile 1 $graphfile" --geometry 50x10+55+15
 #gnome-terminal -e "./Debug/NetAVA $addressfile 2 $graphfile" --geometry 50x10+55+215

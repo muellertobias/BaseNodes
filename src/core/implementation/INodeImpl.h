@@ -24,8 +24,12 @@ class INodeImpl {
 public:
 	virtual ~INodeImpl() {};
 	virtual void process(const Message& message) = 0;
-	virtual void setSendToDestinations(NodeCore::_sendToAll sendToAll) = 0;
-	virtual const MessageMap& getMessages() const = 0;
+	void setSendToDestinations(NodeCore::_sendToAll sendToAll) {
+		this->sendToAll = sendToAll;
+	}
+
+protected:
+	NodeCore::_sendToAll sendToAll;
 };
 
 } /* namespace implementation */

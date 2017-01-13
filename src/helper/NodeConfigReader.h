@@ -20,12 +20,17 @@ using namespace interfaces;
 
 class NodeConfigReader : public IConfigureNode {
 public:
+	NodeConfigReader(const string& filename);
 	NodeConfigReader(const string& filename, int nodeID, ISearchNeighbors* neighborSearcher);
 	virtual ~NodeConfigReader();
 
 	NodeInfo getCurrentNodeInfo();
 	NodeInfo getNodeInfo(int nodeID);
 	NodeMap getNeighbors();
+
+	virtual int getNodeId() const {
+		return nodeID;
+	}
 
 private:
 	NodeMap allNodes;

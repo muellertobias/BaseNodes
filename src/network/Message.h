@@ -22,7 +22,8 @@ namespace network {
 enum MessageType {
 	undefined,
 	control,
-	application
+	application,
+	log
 };
 
 class Message : public Serializable {

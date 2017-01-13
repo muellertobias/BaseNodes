@@ -18,6 +18,7 @@ public:
 	virtual NodeInfo getCurrentNodeInfo() = 0;
 	virtual NodeInfo getNodeInfo(int nodeID) = 0;
 	virtual NodeMap getNeighbors() = 0;
+	virtual int getNodeId() const = 0;
 };
 
 }

@@ -61,6 +61,8 @@ public:
 		return nodeInfo;
 	}
 
+	Message receive() const;
+
 private:
 	NodeInfo nodeInfo;
 	NodeMap neighbors;
@@ -70,7 +72,7 @@ private:
 	vector<string*>* log;
 
 	void showDetails();
-	Message receive() const;
+
 	void handleControlMessage(const Message& message);
 	void handleApplicationMessage(const Message& message);
 	bool sendToDestinationsImpl(const Message& message, const NodeMap& destinations);

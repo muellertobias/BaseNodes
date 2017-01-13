@@ -11,12 +11,17 @@
 
 namespace network {
 
+NodeTransceiver::NodeTransceiver(const std::string& address, const int& port,
+		const int& numberOfConnections) {
+	createReceiver(address, port, numberOfConnections);
+}
+
 NodeTransceiver::NodeTransceiver(const NodeInfo& nodeInfo, const int& numberOfConnections) {
 	createReceiver(nodeInfo, numberOfConnections);
 }
 
 NodeTransceiver::~NodeTransceiver() {
-
+	closeReceiver();
 }
 
 string NodeTransceiver::receive() const {
@@ -70,6 +75,26 @@ string NodeTransceiver::resolve(const NodeInfo& nodeInfo) const {
 	return addressStr;
 }
 
+bool NodeTransceiver::createReceiver(const std::string& address,
+		const int& port, const int& numberOfConnections) {
+	NodeInfo nodeInfo;
+	nodeInfo.NodeID = 0;
+
+	if (isdigit(address.at(0))) {
+		inet_pton(AF_INET, address.c_str(), &(nodeInfo.Address.sin_addr));
+	} else {
+		struct addrinfo *result;
+		getaddrinfo(address.c_str(), NULL, NULL, &result);
+		nodeInfo.Address = *(struct sockaddr_in*)result->ai_addr;
+		freeaddrinfo(result);
+	}
+
+	nodeInfo.Address.sin_port = port;
+	nodeInfo.Address.sin_family = AF_INET;
+
+	return createReceiver(nodeInfo, numberOfConnections);
+}
+
 bool NodeTransceiver::createReceiver(const NodeInfo& nodeInfo,
 		const int& numberOfConnections) {
 
@@ -85,6 +110,7 @@ bool NodeTransceiver::createReceiver(const NodeInfo& nodeInfo,
 }
 
 bool NodeTransceiver::closeReceiver() {
+	shutdown(this->socketID, SHUT_RDWR);
 	close(this->socketID);
 	return true;
 }

@@ -25,19 +25,15 @@ class NodeCoreBaseImpl : public INodeImpl {
 public:
 	NodeCoreBaseImpl(NodeCore* core);
 	virtual ~NodeCoreBaseImpl() { };
+
 	virtual void process(const Message& message);
 
-	virtual void setSendToDestinations(NodeCore::_sendToAll sendToAll) {
-		this->sendToAll = sendToAll;
-	}
-
-	virtual const MessageMap& getMessages() const {
+	const MessageMap& getMessages() const {
 		return messages;
 	}
 
 private:
 	NodeCore* core;
-	NodeCore::_sendToAll sendToAll;
 	//MinimalMessageInfoSet messageSet;
 	MessageMap messages;
 };

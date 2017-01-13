@@ -12,11 +12,13 @@ namespace core {
 namespace implementation {
 
 NodeCoreBaseImpl::NodeCoreBaseImpl(NodeCore* core)
-: core(core), sendToAll(nullptr) {
+: core(core) {
 
 }
 
 void NodeCoreBaseImpl::process(const Message& message) {
+	// TODO Message aufbereiten
+
 	//if (messageSet.insert(MinimalMessageInfoTupel(message.getSourceID(), message.getNumber())).second) {
 	if (messages.insert(MessagePair(message.getNumber(), message)).second) {
 

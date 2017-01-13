@@ -22,6 +22,7 @@ public:
 	virtual std::string resolve(const NodeInfo& nodeInfo) const = 0;
 
 protected:
+	virtual bool createReceiver(const std::string& address, const int& port, const int& numberOfConnections) = 0;
 	virtual bool createReceiver(const NodeInfo& nodeInfo, const int& numberOfConnections) = 0;
 };
 
