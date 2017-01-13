@@ -11,8 +11,8 @@ namespace core {
 namespace implementation {
 namespace rumor {
 
-RumorNodeCoreImpl::RumorNodeCoreImpl(NodeCore* core)
-: core(core) {
+
+RumorNodeCoreImpl::RumorNodeCoreImpl(int threshold) : threshold(threshold) {
 }
 
 RumorNodeCoreImpl::~RumorNodeCoreImpl() {
@@ -34,12 +34,13 @@ void RumorNodeCoreImpl::process(const Message& message) {
 
 		rumors.insert(RumorInfoPair(rumor->Rumor, rumor));
 
-		Message newMessage(MessageType::application, message.getNumber(), core->getNodeInfo().NodeID, rumor->Rumor);
+		Message newMessage(MessageType::application, message.getNumber(), getCore()->getNodeInfo().NodeID, rumor->Rumor);
 
-		(core->*sendToAll)(newMessage, message.getSourceID());
+		(getCore()->*sendToAll)(newMessage, message.getSourceID());
 	}
 }
 
 } /* namespace rumor */
 } /* namespace implementation */
 } /* namespace core */
+

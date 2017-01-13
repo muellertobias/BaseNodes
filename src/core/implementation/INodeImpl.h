@@ -28,7 +28,16 @@ public:
 		this->sendToAll = sendToAll;
 	}
 
+	NodeCore* getCore() const {
+		return core;
+	}
+
+	void setCore(NodeCore* core) {
+		this->core = core;
+	}
+
 protected:
+	NodeCore* core;
 	NodeCore::_sendToAll sendToAll;
 };
 

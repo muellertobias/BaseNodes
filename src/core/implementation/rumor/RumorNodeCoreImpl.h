@@ -28,13 +28,14 @@ typedef map<RumorInfoPair::first_type, RumorInfoPair::second_type> RumorInfoMap;
 
 class RumorNodeCoreImpl : public INodeImpl {
 public:
-	RumorNodeCoreImpl(NodeCore* core);
+	RumorNodeCoreImpl(int threshold);
+	RumorNodeCoreImpl(NodeCore* core, int threshold);
 	virtual ~RumorNodeCoreImpl();
 
 	virtual void process(const Message& message);
 
 private:
-	NodeCore* core;
+	int threshold;
 	RumorInfoMap rumors;
 };
 

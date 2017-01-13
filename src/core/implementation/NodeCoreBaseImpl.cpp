@@ -11,9 +11,7 @@
 namespace core {
 namespace implementation {
 
-NodeCoreBaseImpl::NodeCoreBaseImpl(NodeCore* core)
-: core(core) {
-
+NodeCoreBaseImpl::NodeCoreBaseImpl() {
 }
 
 void NodeCoreBaseImpl::process(const Message& message) {
@@ -24,8 +22,8 @@ void NodeCoreBaseImpl::process(const Message& message) {
 
 		string content = to_string(core->getNodeInfo().NodeID);
 		int number = message.getNumber();
-		Message newMessage(MessageType::application, number, core->getNodeInfo().NodeID, content);
-		(core->*sendToAll)(newMessage, message.getSourceID());
+		Message newMessage(MessageType::application, number, getCore()->getNodeInfo().NodeID, content);
+		(getCore()->*sendToAll)(newMessage, message.getSourceID());
 		messages.insert(MessagePair(number, newMessage));
 	}
 }

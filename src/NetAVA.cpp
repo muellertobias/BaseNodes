@@ -16,6 +16,8 @@
 #include "helper/utilities/utilities.h"
 #include "Initiator.h"
 #include "helper/listener/NodeListener.h"
+#include "core/implementation/rumor/RumorNodeCoreImpl.h"
+#include "core/implementation/NodeCoreBaseImpl.h"
 
 using namespace std;
 using namespace core;
@@ -37,11 +39,11 @@ int main(int argc, char** argv) {
 	if (argc == 1) {
 		cout << "Wrong Parameters:\n";
 		cout << "NetAVA address_file type\n";
-		cout
-				<< "NetAVA address_file type node_id neighbor_node_id_1 neighbor_node_id_2 ...\n";
-		cout << "NetAVA address_file type node_id graph_file" << endl;
+		cout << "NetAVA address_file type node_id impl neighbor_node_id_1 neighbor_node_id_2 ...\n";
+		cout << "NetAVA address_file type node_id impl graph_file" << endl;
 
 		cout << "Types: node listener initiator" << endl;
+		cout << "Implementations: base rumor" << endl;
 		return -1;
 	}
 
@@ -77,21 +79,32 @@ int main(int argc, char** argv) {
 			helper::neighborFinders::ISearchNeighbors* neighborSearcher = nullptr;
 
 			if (argc > 4) {
-				if (helper::utilities::isNumber(argv[4])) {
+				if (helper::utilities::isNumber(argv[5])) {
 					vector<int> nodeIDs;
-					readNeighbors(&nodeIDs, 4, argc, argv);
+					readNeighbors(&nodeIDs, 5, argc, argv);
 
 					neighborSearcher = new helper::neighborFinders::ExplicitNeighborsCreater(nodeIDs);
 				} else {
-					neighborSearcher = new helper::neighborFinders::GraphvizNeighborsCreator(argv[4]);
+					neighborSearcher = new helper::neighborFinders::GraphvizNeighborsCreator(argv[5]);
 				}
 			} else {
 				neighborSearcher = new helper::neighborFinders::RandomNeighborsCreator(3);
 			}
 
 			helper::NodeConfigReader configReader(addressFilename, nodeID, neighborSearcher);
-			NodeCore node(&configReader);
 
+			// Implementierung anlegen
+			implementation::INodeImpl* nodeImpl;
+
+			string impl(argv[4]);
+			if (impl == "rumor") {
+				cout << "Impl: Rumor" << endl;
+				nodeImpl = new core::implementation::rumor::RumorNodeCoreImpl(3);
+			} else {
+				nodeImpl = new core::implementation::NodeCoreBaseImpl();
+			}
+
+			NodeCore node(&configReader, nodeImpl);
 			node.loop();
 		} catch (const exception& e) {
 			cerr << "Fehler: " << e.what() << endl;

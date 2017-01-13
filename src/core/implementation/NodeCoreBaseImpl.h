@@ -23,6 +23,7 @@ typedef set<MinimalMessageInfoTupel> MinimalMessageInfoSet;
 
 class NodeCoreBaseImpl : public INodeImpl {
 public:
+	NodeCoreBaseImpl();
 	NodeCoreBaseImpl(NodeCore* core);
 	virtual ~NodeCoreBaseImpl() { };
 
@@ -33,7 +34,6 @@ public:
 	}
 
 private:
-	NodeCore* core;
 	//MinimalMessageInfoSet messageSet;
 	MessageMap messages;
 };

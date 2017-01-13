@@ -6,7 +6,7 @@ port=5000
 
 numberOfNodes=$1
 numberOfEdges=$2
-
+impl=$3
 
 # Erstelle zufälligen Graphen
 ./GraphGen $graphfile $numberOfNodes $numberOfEdges
@@ -21,7 +21,7 @@ done
 # Starte Knoten und Initiator
 for ((i = 1 ; i <= numberOfNodes ; i++)); do 
 	#gnome-terminal -e "./Debug/NetAVA $addressfile node $i $graphfile"
-	./Debug/NetAVA $addressfile node $i $graphfile &
+	./Debug/NetAVA $addressfile node $i $impl $graphfile &
 done
 
 #gnome-terminal -e "./Debug/NetAVA $addressfile listener"

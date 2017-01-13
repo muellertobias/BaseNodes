@@ -19,7 +19,7 @@
 #include "implementation/NodeCoreBaseImpl.h"
 #include "../Constants.h"
 #include "../helper/utilities/tinyxml2.h"
-#include "implementation/rumor/RumorNodeCoreImpl.h"
+#include "implementation/INodeImpl.h"
 
 
 namespace core {
@@ -27,17 +27,36 @@ namespace core {
 NodeCore::NodeCore(IConfigureNode* configurator) {
 	if (configurator->getNodeId() > 0)
 		this->nodeInfo = configurator->getCurrentNodeInfo();
+
 	this->neighbors = configurator->getNeighbors();
 	this->transceiver = new NodeTransceiver(this->nodeInfo, 10);
 	isRunning = true;
 
 	// Implementierung hier austauschbar
-	this->nodeImpl = new NodeCoreBaseImpl(this);
-	//this->nodeImpl = new rumor::RumorNodeCoreImpl(this);
+	this->nodeImpl = new NodeCoreBaseImpl();
+	this->nodeImpl->setCore(this);
 	this->nodeImpl->setSendToDestinations(&NodeCore::sendToDestinations);
 
 	this->log = new vector<string*>();
 }
+
+NodeCore::NodeCore(IConfigureNode* configurator, INodeImpl* nodeImpl) {
+	this->nodeImpl = nodeImpl;
+	this->nodeImpl->setCore(this);
+	this->nodeImpl->setSendToDestinations(&NodeCore::sendToDestinations);
+
+
+	if (configurator->getNodeId() > 0)
+		this->nodeInfo = configurator->getCurrentNodeInfo();
+
+	this->neighbors = configurator->getNeighbors();
+	this->transceiver = new NodeTransceiver(this->nodeInfo, 10);
+	isRunning = true;
+
+
+	this->log = new vector<string*>();
+}
+
 
 NodeCore::~NodeCore() {
 	for (size_t i = 0; i < log->size(); ++i) {
@@ -134,6 +153,8 @@ bool NodeCore::sendToDestinations(const Message& message, const int& excludedNod
 bool NodeCore::sendTo(const Message& message, const NodeInfo& destination) const {
 	if (message.getType() != MessageType::log)
 		log->push_back(new string(getCurrentTime() + " Send to "  + to_string(destination.NodeID) + ": " + message.toString()));
+
+	cout << "send..." << endl;
 
 	return transceiver->sendTo(destination, message.write());
 }
