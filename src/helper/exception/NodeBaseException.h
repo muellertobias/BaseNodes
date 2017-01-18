@@ -23,7 +23,7 @@ public:
 		return message.c_str();
 	}
 protected:
-	const std::string& message;
+	std::string message;
 };
 
 }

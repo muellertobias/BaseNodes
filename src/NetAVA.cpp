@@ -18,10 +18,13 @@
 #include "helper/listener/NodeListener.h"
 #include "core/implementation/rumor/RumorNodeCoreImpl.h"
 #include "core/implementation/NodeCoreBaseImpl.h"
+#include "helper/exception/NodeBaseException.h"
+
 
 using namespace std;
 using namespace core;
 using namespace network;
+using namespace helper::exception;
 
 void readNeighbors(vector<int>* nodeIDs, int startIndex, int endIndex, char** rawData);
 
@@ -69,7 +72,7 @@ int main(int argc, char** argv) {
 				Initiator initiator(core);
 				initiator.loop();
 			}
-		} catch (const exception& e) {
+		} catch (std::exception& e) {
 			cerr << "Fehler: " << e.what() << endl;
 		}
 	} else {
@@ -106,8 +109,11 @@ int main(int argc, char** argv) {
 
 			NodeCore node(&configReader, nodeImpl);
 			node.loop();
-		} catch (const exception& e) {
-			cerr << "Fehler: " << e.what() << endl;
+
+		} catch (NodeBaseException& e) {
+			cerr << e.what() << endl;
+		} catch (std::exception& e) {
+			cerr << "Allgemeiner Fehler: " << e.what() << endl;
 		}
 	}
 

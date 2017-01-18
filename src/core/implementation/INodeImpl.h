@@ -28,6 +28,10 @@ public:
 		this->sendToAll = sendToAll;
 	}
 
+	void setSendResult(NodeCore::_sendResult sendResult) {
+		this->sendResultImpl = sendResult;
+	}
+
 	NodeCore* getCore() const {
 		return core;
 	}
@@ -39,6 +43,7 @@ public:
 protected:
 	NodeCore* core;
 	NodeCore::_sendToAll sendToAll;
+	NodeCore::_sendResult sendResultImpl;
 };
 
 } /* namespace implementation */

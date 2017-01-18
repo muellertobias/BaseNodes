@@ -21,6 +21,7 @@ typedef struct {
 	string Rumor;
 	vector<int> Sources;
 	unsigned int counter;
+	bool convinced;
 } RumorInfo;
 
 typedef pair<string, RumorInfo*> RumorInfoPair;
@@ -28,14 +29,15 @@ typedef map<RumorInfoPair::first_type, RumorInfoPair::second_type> RumorInfoMap;
 
 class RumorNodeCoreImpl : public INodeImpl {
 public:
-	RumorNodeCoreImpl(int threshold);
-	RumorNodeCoreImpl(NodeCore* core, int threshold);
+	RumorNodeCoreImpl(unsigned int threshold);
+	RumorNodeCoreImpl(NodeCore* core, unsigned int threshold);
 	virtual ~RumorNodeCoreImpl();
 
 	virtual void process(const Message& message);
+	void sendResult(const Message& message);
 
 private:
-	int threshold;
+	unsigned int threshold;
 	RumorInfoMap rumors;
 };
 

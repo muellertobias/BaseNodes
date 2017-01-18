@@ -8,16 +8,21 @@
 #include "NodeTransceiver.h"
 #include "Message.h"
 #include <vector>
+#include "../helper/exception/NetworkException.h"
 
 namespace network {
 
 NodeTransceiver::NodeTransceiver(const std::string& address, const int& port,
-		const int& numberOfConnections) {
-	createReceiver(address, port, numberOfConnections);
+		const int& numberOfConnections, bool isReceiver) {
+	if (isReceiver) {
+		createReceiver(address, port, numberOfConnections);
+	}
 }
 
-NodeTransceiver::NodeTransceiver(const NodeInfo& nodeInfo, const int& numberOfConnections) {
-	createReceiver(nodeInfo, numberOfConnections);
+NodeTransceiver::NodeTransceiver(const NodeInfo& nodeInfo, const int& numberOfConnections, bool isReceiver) {
+	if (isReceiver) {
+		createReceiver(nodeInfo, numberOfConnections);
+	}
 }
 
 NodeTransceiver::~NodeTransceiver() {
@@ -25,6 +30,8 @@ NodeTransceiver::~NodeTransceiver() {
 }
 
 string NodeTransceiver::receive() const {
+	string msg;
+
 	struct sockaddr_in client;
 
 	socklen_t length = sizeof(client);
@@ -32,12 +39,15 @@ string NodeTransceiver::receive() const {
 	int clientSocketID = accept(socketID, (struct sockaddr*)&client, &length);
 
 	vector<char> buffer(1024);
-	int receivedSize;
+	size_t receivedSize;
 
-	receivedSize = recv(clientSocketID, buffer.data(), buffer.size(), 0);
+	do {
+		memset(buffer.data(), '\0', buffer.size());
+		receivedSize = recv(clientSocketID, buffer.data(), buffer.size(), 0);
+		msg.append(buffer.begin(), buffer.end());
+	} while (receivedSize == buffer.size());
+
 	close(clientSocketID);
-
-	string msg(buffer.begin(), buffer.end());
 
 	return msg;
 }
@@ -103,8 +113,15 @@ bool NodeTransceiver::createReceiver(const NodeInfo& nodeInfo,
 		return false;
 	}
 
-	bind(socketID, (struct sockaddr*)&nodeInfo.Address, sizeof(nodeInfo.Address));
-	listen(socketID, numberOfConnections);
+	int b = bind(socketID, (struct sockaddr*)&nodeInfo.Address, sizeof(nodeInfo.Address));
+	if (b < 0) {
+		cout << strerror(errno) << endl;
+		throw helper::exception::NetworkException("Blocked Socket! - Bind");
+	}
+	int l = listen(socketID, numberOfConnections);
+	if (l < 0) {
+		throw helper::exception::NetworkException("Blocked Socket! - Listen");
+	}
 
 	return true;
 }

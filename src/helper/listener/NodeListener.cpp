@@ -25,7 +25,6 @@ void NodeListener::loop() {
 	while (true) {
 		cout << "Listen..." << endl;
 		Message message = receive();
-		//cout << message.toString() << endl;
 		print(message);
 	}
 }
@@ -50,7 +49,7 @@ void NodeListener::print(const Message& message) {
 		for (XMLElement* element = root->FirstChildElement("logEntry"); element != NULL; element = element->NextSiblingElement("logEntry")) {
 			cout << element->GetText() << endl;
 		}
-	} else {
+	} else if (message.getType() == MessageType::application){
 		cout << message.getContent() << endl;
 	}
 }

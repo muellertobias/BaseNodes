@@ -25,11 +25,14 @@
 namespace core {
 
 NodeCore::NodeCore(IConfigureNode* configurator) {
-	if (configurator->getNodeId() > 0)
+	bool isReceiver = true;
+	if (configurator->getNodeId() > 0) {
 		this->nodeInfo = configurator->getCurrentNodeInfo();
-
+	} else {
+		isReceiver = false;
+	}
 	this->neighbors = configurator->getNeighbors();
-	this->transceiver = new NodeTransceiver(this->nodeInfo, 10);
+	this->transceiver = new NodeTransceiver(this->nodeInfo, 10, isReceiver);
 	isRunning = true;
 
 	// Implementierung hier austauschbar
@@ -44,6 +47,7 @@ NodeCore::NodeCore(IConfigureNode* configurator, INodeImpl* nodeImpl) {
 	this->nodeImpl = nodeImpl;
 	this->nodeImpl->setCore(this);
 	this->nodeImpl->setSendToDestinations(&NodeCore::sendToDestinations);
+	this->nodeImpl->setSendResult(&NodeCore::sendToListener);
 
 
 	if (configurator->getNodeId() > 0)
@@ -121,9 +125,9 @@ void NodeCore::handleControlMessage(const Message& message) {
 	} else if (content.find("Snapshot") != string::npos) {
 		sendSnapshot();
 	} else {
-		string c = to_string(nodeInfo.NodeID);
+		//string c = to_string(nodeInfo.NodeID);
 		int number = message.getNumber();
-		Message newMessage(MessageType::application, number, nodeInfo.NodeID, c);
+		Message newMessage(MessageType::application, number, nodeInfo.NodeID, message.getContent());
 		sendToDestinationsImpl(newMessage, neighbors);
 	}
 }
@@ -205,16 +209,21 @@ void NodeCore::sendSnapshot() {
 
 	XMLPrinter p;
 	doc.Print(&p);
-	doc.Clear();
 
 	Message msg(MessageType::log, 0, nodeInfo.NodeID, string(p.CStr()));
+	sendToListener(msg);
 
+	cout << msg.toString() << endl;
+	doc.Clear();
+}
+
+bool NodeCore::sendToListener(const Message& message) {
 	NodeInfo info;
 	info.NodeID = 0;
 	inet_pton(AF_INET, "127.0.0.1", &(info.Address.sin_addr));
 	info.Address.sin_port = 4999;
 	info.Address.sin_family = AF_INET;
-	sendTo(msg, info);
+	return sendTo(message, info);
 }
 
 } /* namespace node */

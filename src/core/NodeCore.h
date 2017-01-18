@@ -42,6 +42,7 @@ using namespace implementation;
 class NodeCore {
 public:
 	typedef bool (NodeCore::*_sendToAll)(const Message&, const int&);
+	typedef bool (NodeCore::*_sendResult)(const Message&);
 	NodeCore(IConfigureNode* configurator);
 	NodeCore(IConfigureNode* configurator, INodeImpl* nodeImpl);
 	virtual ~NodeCore();
@@ -82,6 +83,7 @@ private:
 
 	void shutdown(const Message& message);
 	void sendSnapshot();
+	bool sendToListener(const Message& message);
 };
 
 } /* namespace view */
