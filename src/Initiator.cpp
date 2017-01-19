@@ -65,7 +65,10 @@ void Initiator::tell() {
 		cout << "Nachrichtentext > ";
 		string content = readInput();
 
-		if (sendTo(content, nodeInfo, 0)) {
+		int number = helper::randomizer::random(0, 9999);
+		Message message(MessageType::application, number, 0, content);
+
+		if (sendTo(message, nodeInfo)) {
 			cout << "Erfolgreich!" << endl;
 		} else {
 			cout << "Fehlgeschlagen!" << endl;
@@ -122,5 +125,9 @@ bool Initiator::sendTo(const string& content, const NodeInfo& nodeInfo, int sour
 	int number = helper::randomizer::random(0, 9999);
 
 	Message message(MessageType::control, number, sourceID, content);
+	return this->core.sendTo(message, nodeInfo);
+}
+
+bool Initiator::sendTo(const Message& message, const NodeInfo& nodeInfo) {
 	return this->core.sendTo(message, nodeInfo);
 }

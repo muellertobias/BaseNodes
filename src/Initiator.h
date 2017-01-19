@@ -30,6 +30,7 @@ private:
 	void halt();
 	void snapshoot();
 	bool sendTo(const string& content, const NodeInfo& nodeID, int sourceID);
+	bool sendTo(const Message& message, const NodeInfo& nodeID);
 };
 
 

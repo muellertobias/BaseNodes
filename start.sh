@@ -4,33 +4,41 @@ graphfile=graph.gv
 addressfile=addresses.txt
 port=5000
 
-numberOfNodes=$1
-numberOfEdges=$2
-impl=$3
+if [ "$#" -lt 4 ]
+then
+	echo "./start.h NumberOfNodes NumberOfEdge Impl Config"
+else
 
-# Erstelle zufälligen Graphen
-./GraphGen $graphfile $numberOfNodes $numberOfEdges
-
-# Erstelle Adressdatei
-echo "1 127.0.0.1:$port" > $addressfile
-for ((i = 2 ; i <= numberOfNodes ; i++)); do 
-	((port+=1))
-	echo "$i 127.0.0.1:$port" >> $addressfile
-done
-
-# Starte Knoten und Initiator
-for ((i = 1 ; i <= numberOfNodes ; i++)); do 
-	#gnome-terminal -e "./Debug/NetAVA $addressfile node $i $graphfile"
-	./Debug/NetAVA $addressfile node $i $impl $graphfile &
-done
-
-#gnome-terminal -e "./Debug/NetAVA $addressfile listener"
-./Debug/NetAVA $addressfile initiator
+	numberOfNodes=$1
+	numberOfEdges=$2
+	impl=$3
+	config=$4
 
 
-#gnome-terminal -e "./Debug/NetAVA $addressfile 1 $graphfile" --geometry 50x10+55+15
-#gnome-terminal -e "./Debug/NetAVA $addressfile 2 $graphfile" --geometry 50x10+55+215
-#gnome-terminal -e "./Debug/NetAVA $addressfile 3 $graphfile" --geometry 50x10+55+415
-#gnome-terminal -e "./Debug/NetAVA $addressfile 4 $graphfile" --geometry 50x10+55+615
-#gnome-terminal -e "./Debug/NetAVA $addressfile 5 $graphfile" --geometry 50x10+555+15
+	if [ "$#" -eq 5 ]
+	then
+		echo "use graphfile"
+		graphfile=$5
+	else
+		# Erstelle zufälligen Graphen
+		./GraphGen $graphfile $numberOfNodes $numberOfEdges
+	fi
+	# Erstelle Adressdatei
+	echo "1 127.0.0.1:$port" > $addressfile
+	for ((i = 2 ; i <= numberOfNodes ; i++)); do 
+		((port+=1))
+		echo "$i 127.0.0.1:$port" >> $addressfile
+	done
+
+	# Starte Knoten und Initiator
+	for ((i = 1 ; i <= numberOfNodes ; i++)); do 
+		./Debug/NetAVA $addressfile node $i $impl $config $graphfile &
+	done
+
+	#gnome-terminal -e "./Debug/NetAVA $addressfile listener"
+	./Debug/NetAVA $addressfile initiator
+
+fi
+
+
 

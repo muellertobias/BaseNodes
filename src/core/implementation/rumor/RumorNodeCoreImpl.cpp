@@ -21,7 +21,6 @@ RumorNodeCoreImpl::~RumorNodeCoreImpl() {
 }
 
 void RumorNodeCoreImpl::process(const Message& message) {
-
 	RumorInfoMap::iterator it = rumors.find(message.getContent());
 
 	if (it != rumors.end()) { // Gerücht existiert, wird hochgezählt und SourceID wird gespeichert. Das Gerücht wird nicht mehr verteilt.
@@ -33,7 +32,7 @@ void RumorNodeCoreImpl::process(const Message& message) {
 			stringstream strStream;
 			strStream <<  getCore()->getNodeInfo().NodeID << " believes " << it->first;
 			string result(strStream.str());
-			cout << result << endl;
+			//cout << result << endl;
 			Message resultMsg(MessageType::application, 0, getCore()->getNodeInfo().NodeID, result);
 			sendResult(resultMsg);
 		}

@@ -8,7 +8,6 @@
 #include "NodeCore.h"
 
 #include <chrono>
-#include <iostream>
 #include <sstream>
 #include <utility>
 
@@ -57,12 +56,13 @@ NodeCore::NodeCore(IConfigureNode* configurator, INodeImpl* nodeImpl) {
 	this->transceiver = new NodeTransceiver(this->nodeInfo, 10);
 	isRunning = true;
 
-
 	this->log = new vector<string*>();
 }
 
 
 NodeCore::~NodeCore() {
+	delete transceiver;
+
 	for (size_t i = 0; i < log->size(); ++i) {
 		log[i].clear();
 		//delete log[i];
@@ -77,7 +77,7 @@ void NodeCore::loop() {
 
 	while (isRunning) {
 		try {
-			cout << "Listen..." << endl;
+			//cout << "Listen..." << endl;
 			const Message& message = receive();
 
 			if (message.getType() == MessageType::control) {
@@ -87,25 +87,25 @@ void NodeCore::loop() {
 			} else {
 				cerr << "Unexpected type of message!" << endl;
 			}
-
 		} catch (const helper::exception::NetworkException& ex) {
 			cerr << ex.what() << endl;
 		}
 	}
-	cout << "Shutdown..." << endl;
+	//cout << "Shutdown..." << endl;
 	transceiver->closeReceiver();
 }
 
 void NodeCore::showDetails() {
-
+	stringstream strStream;
 	string address = transceiver->resolve(this->nodeInfo);;
 
-	cout << "NodeID: " << nodeInfo.NodeID << "\t" <<
+	strStream << "NodeID: " << nodeInfo.NodeID << "\t" <<
 			"Address: " << address << "\n" << endl;
 
 	for (NodeMap::iterator i = neighbors.begin(); i != neighbors.end(); ++i) {
-		cout << "Neighbor: " << i->first << endl;
+		strStream << "Neighbor: " << i->first << endl;
 	}
+	sendStatusToListener(strStream.str());
 }
 
 Message NodeCore::receive() const {
@@ -136,9 +136,7 @@ void NodeCore::handleApplicationMessage(const Message& message) {
 	nodeImpl->process(message);
 }
 
-bool NodeCore::sendToDestinationsImpl(const Message& message,
-		const NodeMap& destinations) {
-
+bool NodeCore::sendToDestinationsImpl(const Message& message, const NodeMap& destinations) {
 	bool successfully = false;
 
 	for (NodeMap::const_iterator it = destinations.begin(); it != destinations.end(); ++it) {
@@ -158,8 +156,7 @@ bool NodeCore::sendTo(const Message& message, const NodeInfo& destination) const
 	if (message.getType() != MessageType::log)
 		log->push_back(new string(getCurrentTime() + " Send to "  + to_string(destination.NodeID) + ": " + message.toString()));
 
-	cout << "send..." << endl;
-
+	//cout << "send..." << endl;
 	return transceiver->sendTo(destination, message.write());
 }
 
@@ -213,7 +210,7 @@ void NodeCore::sendSnapshot() {
 	Message msg(MessageType::log, 0, nodeInfo.NodeID, string(p.CStr()));
 	sendToListener(msg);
 
-	cout << msg.toString() << endl;
+	//cout << msg.toString() << endl;
 	doc.Clear();
 }
 
@@ -225,6 +222,12 @@ bool NodeCore::sendToListener(const Message& message) {
 	info.Address.sin_family = AF_INET;
 	return sendTo(message, info);
 }
+
+bool NodeCore::sendStatusToListener(const string& status) {
+	Message statusMsg(MessageType::application, 0, nodeInfo.NodeID, status);
+	return sendToListener(statusMsg);
+}
+
 
 } /* namespace node */
 

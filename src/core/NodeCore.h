@@ -84,6 +84,7 @@ private:
 	void shutdown(const Message& message);
 	void sendSnapshot();
 	bool sendToListener(const Message& message);
+	bool sendStatusToListener(const string& status);
 };
 
 } /* namespace view */

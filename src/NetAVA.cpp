@@ -42,11 +42,13 @@ int main(int argc, char** argv) {
 	if (argc == 1) {
 		cout << "Wrong Parameters:\n";
 		cout << "NetAVA address_file type\n";
-		cout << "NetAVA address_file type node_id impl neighbor_node_id_1 neighbor_node_id_2 ...\n";
-		cout << "NetAVA address_file type node_id impl graph_file" << endl;
+		cout << "NetAVA address_file type node_id impl conf neighbor_node_id_1 neighbor_node_id_2 ...\n";
+		cout << "NetAVA address_file type node_id impl conf graph_file" << endl;
 
 		cout << "Types: node listener initiator" << endl;
 		cout << "Implementations: base rumor" << endl;
+		cout << "Config (dependent on implementation): rumor {1..n}, base {ignored}" << endl;
+
 		return -1;
 	}
 
@@ -63,12 +65,12 @@ int main(int argc, char** argv) {
 
 
 			if (type == "listener") {
-				cout << "Starte Listener..." << endl;
+				cout << "start Listener..." << endl;
 				TransceiverBase* transceiver = new NodeTransceiver("127.0.0.1", 4999, 10);
 				helper::listener::NodeListener listener(transceiver);
 				listener.loop();
 			} else if (type == "initiator") {
-				cout << "Starte Initiator..." << endl;
+				cout << "start Initiator..." << endl;
 				Initiator initiator(core);
 				initiator.loop();
 			}
@@ -82,13 +84,13 @@ int main(int argc, char** argv) {
 			helper::neighborFinders::ISearchNeighbors* neighborSearcher = nullptr;
 
 			if (argc > 4) {
-				if (helper::utilities::isNumber(argv[5])) {
+				if (helper::utilities::isNumber(argv[6])) {
 					vector<int> nodeIDs;
-					readNeighbors(&nodeIDs, 5, argc, argv);
+					readNeighbors(&nodeIDs, 6, argc, argv);
 
 					neighborSearcher = new helper::neighborFinders::ExplicitNeighborsCreater(nodeIDs);
 				} else {
-					neighborSearcher = new helper::neighborFinders::GraphvizNeighborsCreator(argv[5]);
+					neighborSearcher = new helper::neighborFinders::GraphvizNeighborsCreator(argv[6]);
 				}
 			} else {
 				neighborSearcher = new helper::neighborFinders::RandomNeighborsCreator(3);
@@ -101,8 +103,9 @@ int main(int argc, char** argv) {
 
 			string impl(argv[4]);
 			if (impl == "rumor") {
-				cout << "Impl: Rumor" << endl;
-				nodeImpl = new core::implementation::rumor::RumorNodeCoreImpl(3);
+				int threshold = stoi(argv[5]);
+				//cout << "Impl: Rumor" << endl;
+				nodeImpl = new core::implementation::rumor::RumorNodeCoreImpl(threshold);
 			} else {
 				nodeImpl = new core::implementation::NodeCoreBaseImpl();
 			}
