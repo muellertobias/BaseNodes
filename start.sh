@@ -14,6 +14,7 @@ else
 	impl=$3
 	config=$4
 
+	gnome-terminal -e "./Debug/NetAVA $addressfile listener"
 
 	if [ "$#" -eq 5 ]
 	then
@@ -35,7 +36,6 @@ else
 		./Debug/NetAVA $addressfile node $i $impl $config $graphfile &
 	done
 
-	gnome-terminal -e "./Debug/NetAVA $addressfile listener"
 	./Debug/NetAVA $addressfile initiator
 
 fi

@@ -165,7 +165,9 @@ bool NodeCore::sendTo(const Message& message, const NodeInfo& destination) const
 		this->vectorTime->increase();
 	}
 	Message msg = const_cast<Message&>(message);
-	msg.setVectorTimes(this->vectorTime->getTimeMap());
+
+	if (this->nodeInfo.NodeID > 0)
+		msg.setVectorTimes(this->vectorTime->getTimeMap());
 
 	cout << msg.toString() << endl;
 
