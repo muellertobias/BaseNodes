@@ -40,6 +40,7 @@ NodeCore::NodeCore(IConfigureNode* configurator) {
 	this->nodeImpl->setSendToDestinations(&NodeCore::sendToDestinations);
 
 	this->log = new vector<string*>();
+	vectorTime = new VectorTime(this->nodeInfo.NodeID);
 }
 
 NodeCore::NodeCore(IConfigureNode* configurator, INodeImpl* nodeImpl) {
@@ -57,6 +58,7 @@ NodeCore::NodeCore(IConfigureNode* configurator, INodeImpl* nodeImpl) {
 	isRunning = true;
 
 	this->log = new vector<string*>();
+	vectorTime = new VectorTime(this->nodeInfo.NodeID);
 }
 
 
@@ -108,11 +110,16 @@ void NodeCore::showDetails() {
 	sendStatusToListener(strStream.str());
 }
 
-Message NodeCore::receive() const {
+const Message NodeCore::receive() {
 	string incomingStr = transceiver->receive();
 	Message msg(incomingStr);
+	if (msg.getType() == MessageType::application) {
+		this->vectorTime->increase();
+		cout << this->vectorTime->getLocalTime();
+		this->vectorTime->merge(msg.getVectorTimes());
+	}
 
-	string* logStr = new string(getCurrentTime() + " Receive: " + msg.toString());
+	string* logStr = new string(to_string(this->vectorTime->getLocalTime()) + " Receive: " + msg.toString());
 	log->push_back(logStr);
 
 	return msg;
@@ -125,10 +132,11 @@ void NodeCore::handleControlMessage(const Message& message) {
 	} else if (content.find("Snapshot") != string::npos) {
 		sendSnapshot();
 	} else {
+		this->nodeImpl->process(message);
 		//string c = to_string(nodeInfo.NodeID);
-		int number = message.getNumber();
-		Message newMessage(MessageType::application, number, nodeInfo.NodeID, message.getContent());
-		sendToDestinationsImpl(newMessage, neighbors);
+//		int number = message.getNumber();
+//		Message newMessage(MessageType::application, number, nodeInfo.NodeID, message.getContent());
+//		sendToDestinationsImpl(newMessage, neighbors);
 	}
 }
 
@@ -153,11 +161,19 @@ bool NodeCore::sendToDestinations(const Message& message, const int& excludedNod
 }
 
 bool NodeCore::sendTo(const Message& message, const NodeInfo& destination) const {
-	if (message.getType() != MessageType::log)
-		log->push_back(new string(getCurrentTime() + " Send to "  + to_string(destination.NodeID) + ": " + message.toString()));
+	if (message.getType() == MessageType::application) {
+		this->vectorTime->increase();
+	}
+	Message msg = const_cast<Message&>(message);
+	msg.setVectorTimes(this->vectorTime->getTimeMap());
 
-	//cout << "send..." << endl;
-	return transceiver->sendTo(destination, message.write());
+	cout << msg.toString() << endl;
+
+	if (message.getType() != MessageType::log)
+		log->push_back(new string(to_string(vectorTime->getLocalTime()) + " Send to "  + to_string(destination.NodeID) + ": " + msg.toString()));
+
+
+	return transceiver->sendTo(destination, msg.write());
 }
 
 // TODO: Überlegen, wegen Einführung Vectorzeit -> Übung 2
@@ -220,11 +236,14 @@ bool NodeCore::sendToListener(const Message& message) {
 	inet_pton(AF_INET, "127.0.0.1", &(info.Address.sin_addr));
 	info.Address.sin_port = 4999;
 	info.Address.sin_family = AF_INET;
-	return sendTo(message, info);
+
+	Message msg = const_cast<Message&>(message);
+	msg.setVectorTimes(this->vectorTime->getTimeMap());
+	return sendTo(msg, info);
 }
 
 bool NodeCore::sendStatusToListener(const string& status) {
-	Message statusMsg(MessageType::application, 0, nodeInfo.NodeID, status);
+	Message statusMsg(MessageType::control, 0, nodeInfo.NodeID, status);
 	return sendToListener(statusMsg);
 }
 

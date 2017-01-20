@@ -48,7 +48,7 @@ string NodeTransceiver::receive() const {
 	} while (receivedSize == buffer.size());
 
 	close(clientSocketID);
-
+	cout << "Received: "<< msg << endl;
 	return msg;
 }
 

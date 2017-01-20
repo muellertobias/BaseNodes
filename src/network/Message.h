@@ -13,11 +13,15 @@
 
 #include "Serializable.h"
 #include "../helper/utilities/tinyxml2.h"
+#include "VectorTime.h"
 
 
 using namespace std;
 
+
 namespace network {
+
+using namespace helper::time;
 
 enum MessageType {
 	undefined,
@@ -58,11 +62,24 @@ public:
 
 	string toString() const;
 
+	bool setVectorTime(const int& nodeID, const int& time);
+
+	const VectorTimeMap& getVectorTimes() const {
+		return vectorTime.getTimeMap();
+	}
+
+	void setVectorTimes(const VectorTimeMap& vectorTimes) {
+		this->vectorTime.merge(vectorTimes);
+	}
+
 private:
+
 	MessageType type;
 	int number;
 	int sourceID;
+	//int destinationID;
 	string content;
+	VectorTime vectorTime;
 };
 
 

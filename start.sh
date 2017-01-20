@@ -6,7 +6,7 @@ port=5000
 
 if [ "$#" -lt 4 ]
 then
-	echo "./start.h NumberOfNodes NumberOfEdge Impl Config"
+	echo "./start.h NumberOfNodes NumberOfEdge Impl Config [Graphfile]"
 else
 
 	numberOfNodes=$1
@@ -35,7 +35,7 @@ else
 		./Debug/NetAVA $addressfile node $i $impl $config $graphfile &
 	done
 
-	#gnome-terminal -e "./Debug/NetAVA $addressfile listener"
+	gnome-terminal -e "./Debug/NetAVA $addressfile listener"
 	./Debug/NetAVA $addressfile initiator
 
 fi

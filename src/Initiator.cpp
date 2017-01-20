@@ -66,7 +66,7 @@ void Initiator::tell() {
 		string content = readInput();
 
 		int number = helper::randomizer::random(0, 9999);
-		Message message(MessageType::application, number, 0, content);
+		Message message(MessageType::control, number, 0, content);
 
 		if (sendTo(message, nodeInfo)) {
 			cout << "Erfolgreich!" << endl;

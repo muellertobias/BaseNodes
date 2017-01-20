@@ -9,6 +9,7 @@
 #include "../helper/string/trim.h"
 #include "../helper/utilities/tinyxml2.h"
 
+
 namespace network {
 
 using namespace tinyxml2;
@@ -49,6 +50,13 @@ bool Message::read(const string& str) {
 	element = root->FirstChildElement("SourceID");
 	element->QueryIntText(&this->sourceID);
 
+	element = root->FirstChildElement("VectorTimes");
+	for (XMLElement* timeElement = element->FirstChildElement("Time"); timeElement != NULL; timeElement = timeElement->NextSiblingElement("Time")) {
+		int id = stoi(timeElement->Attribute("NodeID"));
+		int time = stoi(timeElement->GetText());
+		setVectorTime(id, time);
+	}
+
 	element = root->FirstChildElement("Content");
 	this->content = string(element->GetText());
 
@@ -83,6 +91,15 @@ XMLElement* Message::writeXMLElement(XMLDocument& doc) const {
 	sourceID->SetText(this->getSourceID());
 	root->InsertEndChild(sourceID);
 
+	XMLElement* xvectorTimes = doc.NewElement("VectorTimes");
+	for (VectorTimeMap::const_iterator it = vectorTime.getTimeMap().begin(); it != vectorTime.getTimeMap().end(); ++it) {
+		XMLElement* element = doc.NewElement("Time");
+		element->SetAttribute("NodeID", it->first);
+		element->SetText(it->second);
+		xvectorTimes->InsertEndChild(element);
+	}
+	root->InsertEndChild(xvectorTimes);
+
 	XMLElement* content = doc.NewElement("Content");
 	content->SetText(this->getContent().c_str());
 	root->InsertEndChild(content);
@@ -91,19 +108,36 @@ XMLElement* Message::writeXMLElement(XMLDocument& doc) const {
 }
 
 string Message::toString() const {
-		string str;
-		str.clear();
-		if (this->type == MessageType::application) {
-			str = "Application -";
-		} else if (this->type == MessageType::control) {
-			str = "Control -";
-		} else if (this->type == MessageType::log) {
-				str = "Logging -";
-		} else {
-			str = "Undefined -";
-		}
-		str += " Number=" + to_string(this->number) + " SourceID=" + to_string(this->sourceID) + " Content={" + this->content + "}";
-		return str;
+	//TODO StringStream statt string+=
+	string str;
+	str.clear();
+	if (this->type == MessageType::application) {
+		str = "Application -";
+	} else if (this->type == MessageType::control) {
+		str = "Control -";
+	} else if (this->type == MessageType::log) {
+			str = "Logging -";
+	} else {
+		str = "Undefined -";
+	}
+	str += " Number=" + to_string(this->number) + " SourceID=" + to_string(this->sourceID) + " Content={" + this->content + "} VectorTimes={";
+
+	for (VectorTimeMap::const_iterator it = vectorTime.getTimeMap().begin(); it != vectorTime.getTimeMap().end(); it++) {
+		str += "[" + to_string((*it).first) + "," + to_string((*it).second) + "]";
+	}
+	str += "}";
+
+	return str;
 	}
 
+bool Message::setVectorTime(const int& nodeID, const int& time) {
+	cout << nodeID << "/" << time << endl;
+	vectorTime.setTime(nodeID, time);
+
+	return true;
+
+}
+
 } /* namespace network */
+
+

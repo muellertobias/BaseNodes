@@ -14,6 +14,7 @@
 
 #include "../network/Message.h"
 #include "../NodeInfo.h"
+#include "../network/VectorTime.h"
 
 namespace core {
 namespace implementation {
@@ -63,7 +64,7 @@ public:
 		return nodeInfo;
 	}
 
-	Message receive() const;
+	const Message receive();
 
 private:
 	NodeInfo nodeInfo;
@@ -72,6 +73,10 @@ private:
 	TransceiverBase* transceiver;
 	INodeImpl* nodeImpl;
 	vector<string*>* log;
+	//vector<Message> messages;
+	//VectorTimeMap vectorTimes;
+	helper::time::VectorTime* vectorTime;
+
 
 	void showDetails();
 
