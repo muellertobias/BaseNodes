@@ -8,8 +8,8 @@
 #include "Initiator.h"
 #include <iostream>
 #include "helper/randomizer/Random.h"
-#include "network/Message.h"
 #include "Constants.h"
+#include "message/Message.h"
 
 Initiator::Initiator(const NodeCore& core)
 : core(core), nodes(core.getNeighbors()) {

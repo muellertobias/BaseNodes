@@ -5,8 +5,8 @@
  *      Author: tobias
  */
 
-#ifndef NETWORK_SERIALIZABLE_H_
-#define NETWORK_SERIALIZABLE_H_
+#ifndef MESSAGE_SERIALIZABLE_H_
+#define MESSAGE_SERIALIZABLE_H_
 
 #include "../helper/utilities/tinyxml2.h"
 #include <string>
@@ -24,4 +24,4 @@ public:
 }
 
 
-#endif /* NETWORK_SERIALIZABLE_H_ */
+#endif /* MESSAGE_SERIALIZABLE_H_ */

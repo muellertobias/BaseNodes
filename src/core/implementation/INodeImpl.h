@@ -8,7 +8,7 @@
 #ifndef CORE_IMPLEMENTATION_INODEIMPL_H_
 #define CORE_IMPLEMENTATION_INODEIMPL_H_
 
-#include "../../network/Message.h"
+#include "../../message/Message.h"
 #include "../../NodeInfo.h"
 #include "../NodeCore.h"
 #include "../data/MessageMap.h"

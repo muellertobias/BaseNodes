@@ -5,15 +5,15 @@
  *      Author: tobias
  */
 
-#ifndef NETWORK_MESSAGE_H_
-#define NETWORK_MESSAGE_H_
+#ifndef MESSAGE_MESSAGE_H_
+#define MESSAGE_MESSAGE_H_
 
 #include <iostream>
 #include <string>
 
-#include "Serializable.h"
+#include "../helper/time/VectorTime.h"
 #include "../helper/utilities/tinyxml2.h"
-#include "VectorTime.h"
+#include "Serializable.h"
 
 
 using namespace std;
@@ -72,12 +72,20 @@ public:
 		this->vectorTime.merge(vectorTimes);
 	}
 
+	int getDestinationId() const {
+		return destinationID;
+	}
+
+	void setDestinationId(int destinationId) {
+		destinationID = destinationId;
+	}
+
 private:
 
 	MessageType type;
 	int number;
 	int sourceID;
-	//int destinationID;
+	int destinationID;
 	string content;
 	VectorTime vectorTime;
 };
@@ -85,4 +93,4 @@ private:
 
 } /* namespace network */
 
-#endif /* NETWORK_MESSAGE_H_ */
+#endif /* MESSAGE_MESSAGE_H_ */

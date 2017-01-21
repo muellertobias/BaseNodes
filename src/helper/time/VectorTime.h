@@ -5,8 +5,8 @@
  *      Author: tobias
  */
 
-#ifndef NETWORK_VECTORTIME_H_
-#define NETWORK_VECTORTIME_H_
+#ifndef HELPER_TIME_VECTORTIME_H_
+#define HELPER_TIME_VECTORTIME_H_
 
 #include <map>
 
@@ -40,6 +40,7 @@ public:
 
 
 	void merge(const VectorTimeMap& timeMap);
+	int getMaximum();
 
 private:
 	const int& localID;
@@ -49,4 +50,4 @@ private:
 } /* namespace time */
 } /* namespace helper */
 
-#endif /* NETWORK_VECTORTIME_H_ */
+#endif /* HELPER_TIME_VECTORTIME_H_ */

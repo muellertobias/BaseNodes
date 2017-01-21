@@ -6,9 +6,9 @@
  */
 
 #include "NodeTransceiver.h"
-#include "Message.h"
 #include <vector>
 #include "../helper/exception/NetworkException.h"
+#include "../message/Message.h"
 
 namespace network {
 
@@ -48,7 +48,6 @@ string NodeTransceiver::receive() const {
 	} while (receivedSize == buffer.size());
 
 	close(clientSocketID);
-	cout << "Received: "<< msg << endl;
 	return msg;
 }
 

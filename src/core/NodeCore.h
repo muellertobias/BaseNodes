@@ -12,9 +12,9 @@
 #include <vector>
 #include <string>
 
-#include "../network/Message.h"
 #include "../NodeInfo.h"
-#include "../network/VectorTime.h"
+#include "../helper/time/VectorTime.h"
+#include "../message/Message.h"
 
 namespace core {
 namespace implementation {

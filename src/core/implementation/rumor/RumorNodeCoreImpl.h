@@ -10,7 +10,7 @@
 
 #include "../INodeImpl.h"
 #include "../../NodeCore.h"
-#include "../../../network/Message.h"
+#include "../../../message/Message.h"
 #include <map>
 
 namespace core {

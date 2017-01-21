@@ -8,9 +8,9 @@
 #ifndef HELPER_LISTENER_NODELISTENER_H_
 #define HELPER_LISTENER_NODELISTENER_H_
 
+#include "../../message/Message.h"
 #include "../../network/TransceiverBase.h"
 #include "../../network/NodeTransceiver.h"
-#include "../../network/Message.h"
 
 namespace helper {
 namespace listener {

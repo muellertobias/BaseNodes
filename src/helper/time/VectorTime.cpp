@@ -7,6 +7,8 @@
 
 #include "VectorTime.h"
 
+#include <algorithm>
+
 namespace helper {
 namespace time {
 
@@ -70,6 +72,13 @@ void VectorTime::merge(const VectorTimeMap& otherTimeMap) {
 	for (VectorTimeMap::const_iterator it = otherTimeMap.begin(); it != otherTimeMap.end(); it++) {
 		setTime(it->first, it->second);
 	}
+}
+
+int VectorTime::getMaximum() {
+	VectorTimeMap::iterator max = std::max_element(timeMap.begin(), timeMap.end(), [](const VectorTimePair& p1, const VectorTimePair& p2) {
+        return p1.second < p2.second;
+    });
+	return max->second;
 }
 
 } /* namespace time */

@@ -9,7 +9,7 @@
 #define CORE_DATA_MESSAGEMAP_H_
 
 #include <map>
-#include "../../network/Message.h"
+#include "../../message/Message.h"
 #include <string>
 
 using namespace network;
