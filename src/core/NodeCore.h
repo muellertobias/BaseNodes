@@ -12,7 +12,7 @@
 #include <vector>
 #include <string>
 
-#include "../NodeInfo.h"
+#include "../helper/NodeInfo.h"
 #include "../helper/time/VectorTime.h"
 #include "../message/Message.h"
 
@@ -24,16 +24,16 @@ class INodeImpl;
 
 namespace helper {
 class ILogging;
-namespace interfaces {
-class IConfigureNode;
-} /* namespace interfaces */
+namespace settings {
+class Settings;
+} /* namespace settings */
 } /* namespace helper */
 namespace network {
 class TransceiverBase;
 } /* namespace network */
 
 using namespace std;
-using namespace helper::interfaces;
+using namespace helper::settings;
 using namespace network;
 using namespace helper;
 
@@ -44,8 +44,8 @@ class NodeCore {
 public:
 	typedef bool (NodeCore::*_sendToAll)(const Message&, const int&);
 	typedef bool (NodeCore::*_sendResult)(const Message&);
-	NodeCore(IConfigureNode* configurator);
-	NodeCore(IConfigureNode* configurator, INodeImpl* nodeImpl);
+	NodeCore(Settings* configurator);
+	NodeCore(Settings* configurator, INodeImpl* nodeImpl);
 	virtual ~NodeCore();
 
 	void setNeighbors(NodeMap neighbors) {
@@ -73,8 +73,7 @@ private:
 	TransceiverBase* transceiver;
 	INodeImpl* nodeImpl;
 	vector<string*>* log;
-	//vector<Message> messages;
-	//VectorTimeMap vectorTimes;
+	NodeInfo listenerNodeInfo;
 	helper::time::VectorTime* vectorTime;
 
 

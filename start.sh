@@ -25,7 +25,7 @@ else
 		./GraphGen $graphfile $numberOfNodes $numberOfEdges
 	fi
 	# Erstelle Adressdatei
-	echo "1 127.0.0.1:$port" > $addressfile
+	echo "0 127.0.0.1:$port" > $addressfile
 	for ((i = 2 ; i <= numberOfNodes ; i++)); do 
 		((port+=1))
 		echo "$i 127.0.0.1:$port" >> $addressfile

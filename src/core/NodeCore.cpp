@@ -7,28 +7,31 @@
 
 #include "NodeCore.h"
 
+#include <stddef.h>
+#include <iterator>
 #include <sstream>
-#include <utility>
 
+#include "../helper/Constants.h"
 #include "../helper/exception/NetworkException.h"
-#include "../helper/interfaces/IConfigureNode.h"
-#include "../network/NodeTransceiver.h"
-#include "implementation/NodeCoreBaseImpl.h"
-#include "../Constants.h"
+#include "../helper/exception/NodeBaseException.h"
+#include "../helper/settings/Settings.h"
 #include "../helper/utilities/tinyxml2.h"
+#include "../network/NodeTransceiver.h"
 #include "implementation/INodeImpl.h"
+#include "implementation/NodeCoreBaseImpl.h"
 
 
 namespace core {
 
-NodeCore::NodeCore(IConfigureNode* configurator) {
+NodeCore::NodeCore(Settings* setting) {
 	bool isReceiver = true;
-	if (configurator->getNodeId() > 0) {
-		this->nodeInfo = configurator->getCurrentNodeInfo();
+	if (setting->getNodeId() > 0) {
+		this->nodeInfo = setting->getCurrentNodeInfo();
 	} else {
 		isReceiver = false;
 	}
-	this->neighbors = configurator->getNeighbors();
+	this->neighbors = setting->getNeighbors();
+	this->listenerNodeInfo = setting->getNodeInfo(ListenerNodeID);
 	this->transceiver = new NodeTransceiver(this->nodeInfo, 10, isReceiver);
 	isRunning = true;
 
@@ -41,7 +44,7 @@ NodeCore::NodeCore(IConfigureNode* configurator) {
 	vectorTime = new VectorTime(this->nodeInfo.NodeID);
 }
 
-NodeCore::NodeCore(IConfigureNode* configurator, INodeImpl* nodeImpl) {
+NodeCore::NodeCore(Settings* configurator, INodeImpl* nodeImpl) {
 	this->nodeImpl = nodeImpl;
 	this->nodeImpl->setCore(this);
 	this->nodeImpl->setSendToDestinations(&NodeCore::sendToDestinations);
@@ -221,15 +224,15 @@ void NodeCore::sendSnapshot() {
 }
 
 bool NodeCore::sendToListener(const Message& message) {
-	NodeInfo info;
-	info.NodeID = 0;
-	inet_pton(AF_INET, "127.0.0.1", &(info.Address.sin_addr));
-	info.Address.sin_port = 4999;
-	info.Address.sin_family = AF_INET;
+//	NodeInfo info;
+//	info.NodeID = 0;
+//	inet_pton(AF_INET, "127.0.0.1", &(info.Address.sin_addr));
+//	info.Address.sin_port = 5000;
+//	info.Address.sin_family = AF_INET;
 
 	Message msg = const_cast<Message&>(message);
 	msg.setVectorTimes(this->vectorTime->getTimeMap());
-	return sendTo(msg, info);
+	return sendTo(msg, listenerNodeInfo);
 }
 
 bool NodeCore::sendStatusToListener(const string& status) {

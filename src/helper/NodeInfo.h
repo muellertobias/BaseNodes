@@ -4,8 +4,8 @@
  * @date 	27.10.2016
  */
 
-#ifndef NODEINFO_H_
-#define NODEINFO_H_
+#ifndef HELPER_NODEINFO_H_
+#define HELPER_NODEINFO_H_
 
 #include <map>
 #include <netinet/in.h>
@@ -23,4 +23,4 @@ typedef std::map<NodePair::first_type, NodePair::second_type> NodeMap;
 
 
 
-#endif /* NODEINFO_H_ */
+#endif /* HELPER_NODEINFO_H_ */

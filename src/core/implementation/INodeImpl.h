@@ -9,9 +9,7 @@
 #define CORE_IMPLEMENTATION_INODEIMPL_H_
 
 #include "../../message/Message.h"
-#include "../../NodeInfo.h"
 #include "../NodeCore.h"
-#include "../data/MessageMap.h"
 
 namespace core {
 namespace implementation {

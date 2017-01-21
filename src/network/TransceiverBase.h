@@ -8,8 +8,8 @@
 #ifndef NETWORK_TRANSCEIVERBASE_H_
 #define NETWORK_TRANSCEIVERBASE_H_
 
-#include "../NodeInfo.h"
 #include <string>
+#include "../helper/NodeInfo.h"
 
 namespace network {
 

@@ -8,7 +8,7 @@
 #ifndef HELPER_NEIGHBORFINDERS_ISEARCHNEIGHBORS_H_
 #define HELPER_NEIGHBORFINDERS_ISEARCHNEIGHBORS_H_
 
-#include "../../NodeInfo.h"
+#include "../NodeInfo.h"
 
 namespace helper {
 namespace neighborFinders {

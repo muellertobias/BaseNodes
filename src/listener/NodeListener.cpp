@@ -6,7 +6,8 @@
  */
 
 #include "NodeListener.h"
-#include "../utilities/tinyxml2.h"
+
+#include "../helper/utilities/tinyxml2.h"
 
 namespace helper {
 namespace listener {

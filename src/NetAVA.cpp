@@ -3,28 +3,28 @@
  * @author 	Tobias Müller
  * @date 	27.10.2016
  */
-#include <exception>
+
 #include <iostream>
 #include <string>
 #include <vector>
 
-#include "core/NodeCore.h"
-#include "helper/neighborFinders/ExplicitNeighborsCreater.h"
-#include "helper/neighborFinders/GraphvizNeighborsCreator.h"
-#include "helper/neighborFinders/RandomNeighborsCreator.h"
-#include "helper/NodeConfigReader.h"
-#include "helper/utilities/utilities.h"
-#include "Initiator.h"
-#include "helper/listener/NodeListener.h"
-#include "core/implementation/rumor/RumorNodeCoreImpl.h"
 #include "core/implementation/NodeCoreBaseImpl.h"
+#include "core/implementation/rumor/RumorNodeCoreImpl.h"
+#include "core/NodeCore.h"
 #include "helper/exception/NodeBaseException.h"
+#include "helper/neighborFinders/GraphvizNeighborsCreator.h"
+#include "initiator/Initiator.h"
+#include "listener/NodeListener.h"
+#include "network/NodeTransceiver.h"
+#include "helper/Constants.h"
+#include "helper/settings/NodeBaseSettings.h"
 
 
 using namespace std;
 using namespace core;
 using namespace network;
 using namespace helper::exception;
+using namespace helper::neighborFinders;
 
 void readNeighbors(vector<int>* nodeIDs, int startIndex, int endIndex, char** rawData);
 
@@ -42,12 +42,11 @@ int main(int argc, char** argv) {
 	if (argc == 1) {
 		cout << "Wrong Parameters:\n";
 		cout << "NetAVA address_file type\n";
-		cout << "NetAVA address_file type node_id impl conf neighbor_node_id_1 neighbor_node_id_2 ...\n";
 		cout << "NetAVA address_file type node_id impl conf graph_file" << endl;
 
 		cout << "Types: node listener initiator" << endl;
-		cout << "Implementations: base rumor" << endl;
-		cout << "Config (dependent on implementation): rumor {1..n}, base {ignored}" << endl;
+		cout << "Implementations: candidate voter" << endl;
+		cout << "Config: candidate r={1..n}, voter {ignored}" << endl;
 
 		return -1;
 	}
@@ -58,7 +57,7 @@ int main(int argc, char** argv) {
 	if (argc == 3) {
 		try {
 			cout << "load configure..." << endl;
-			helper::NodeConfigReader configReader(addressFilename);
+			helper::settings::NodeBaseSettings configReader(addressFilename);
 			cout << "init core configuration..." << endl;
 			NodeCore core(&configReader);
 			cout << "init core application..." << endl;
@@ -66,7 +65,7 @@ int main(int argc, char** argv) {
 
 			if (type == "listener") {
 				cout << "start Listener..." << endl;
-				TransceiverBase* transceiver = new NodeTransceiver("127.0.0.1", 4999, 10);
+				TransceiverBase* transceiver = new NodeTransceiver("127.0.0.1", 5000, 10);
 				helper::listener::NodeListener listener(transceiver);
 				listener.loop();
 			} else if (type == "initiator") {
@@ -80,31 +79,18 @@ int main(int argc, char** argv) {
 	} else {
 		try {
 			nodeID = stoi(argv[3]);
+			string impl(argv[4]);
 
-			helper::neighborFinders::ISearchNeighbors* neighborSearcher = nullptr;
+			ISearchNeighbors* neighborSearcher = new helper::neighborFinders::GraphvizNeighborsCreator(argv[6]);
 
-			if (argc > 4) {
-				if (helper::utilities::isNumber(argv[6])) {
-					vector<int> nodeIDs;
-					readNeighbors(&nodeIDs, 6, argc, argv);
-
-					neighborSearcher = new helper::neighborFinders::ExplicitNeighborsCreater(nodeIDs);
-				} else {
-					neighborSearcher = new helper::neighborFinders::GraphvizNeighborsCreator(argv[6]);
-				}
-			} else {
-				neighborSearcher = new helper::neighborFinders::RandomNeighborsCreator(3);
-			}
-
-			helper::NodeConfigReader configReader(addressFilename, nodeID, neighborSearcher);
+			helper::settings::NodeBaseSettings configReader(addressFilename, nodeID, neighborSearcher);
 
 			// Implementierung anlegen
 			implementation::INodeImpl* nodeImpl;
 
-			string impl(argv[4]);
+
 			if (impl == "rumor") {
 				int threshold = stoi(argv[5]);
-				//cout << "Impl: Rumor" << endl;
 				nodeImpl = new core::implementation::rumor::RumorNodeCoreImpl(threshold);
 			} else {
 				nodeImpl = new core::implementation::NodeCoreBaseImpl();

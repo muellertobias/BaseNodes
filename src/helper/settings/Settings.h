@@ -5,16 +5,18 @@
  *      Author: tobias
  */
 
-#ifndef HELPER_INTERFACES_ICONFIGURENODE_H_
-#define HELPER_INTERFACES_ICONFIGURENODE_H_
+#ifndef HELPER_SETTINGS_SETTINGS_H_
+#define HELPER_SETTINGS_SETTINGS_H_
 
 
 namespace helper {
-namespace interfaces {
+namespace settings {
 
-class IConfigureNode {
+const int ListenerNodeID = 0;
+
+class Settings {
 public:
-	virtual ~IConfigureNode() { }
+	virtual ~Settings() { }
 	virtual NodeInfo getCurrentNodeInfo() = 0;
 	virtual NodeInfo getNodeInfo(int nodeID) = 0;
 	virtual NodeMap getNeighbors() = 0;
@@ -25,4 +27,4 @@ public:
 }
 
 
-#endif /* HELPER_INTERFACES_ICONFIGURENODE_H_ */
+#endif /* HELPER_SETTINGS_SETTINGS_H_ */

@@ -5,12 +5,12 @@
  *      Author: tobias
  */
 
-#ifndef HELPER_LISTENER_NODELISTENER_H_
-#define HELPER_LISTENER_NODELISTENER_H_
+#ifndef LISTENER_NODELISTENER_H_
+#define LISTENER_NODELISTENER_H_
 
-#include "../../message/Message.h"
-#include "../../network/TransceiverBase.h"
-#include "../../network/NodeTransceiver.h"
+#include "../message/Message.h"
+#include "../network/TransceiverBase.h"
+#include "../network/NodeTransceiver.h"
 
 namespace helper {
 namespace listener {
@@ -34,4 +34,4 @@ private:
 } /* namespace listener */
 } /* namespace helper */
 
-#endif /* HELPER_LISTENER_NODELISTENER_H_ */
+#endif /* LISTENER_NODELISTENER_H_ */

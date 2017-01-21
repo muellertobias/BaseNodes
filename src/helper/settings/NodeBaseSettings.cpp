@@ -5,7 +5,7 @@
  *      Author: tobias
  */
 
-#include "NodeConfigReader.h"
+#include "../settings/NodeBaseSettings.h"
 
 #include <arpa/inet.h>
 #include <netdb.h>
@@ -14,20 +14,21 @@
 #include <cctype>
 #include <fstream>
 #include <map>
-#include <string>
 #include <utility>
 #include <vector>
 
-#include "exception/ConfigurationException.h"
-#include "string/trim.h"
+#include "../exception/ConfigurationException.h"
+#include "../neighborFinders/ISearchNeighbors.h"
+#include "../string/trim.h"
 
 namespace helper {
+namespace settings {
 
-NodeConfigReader::NodeConfigReader(const string& filename)
-	: NodeConfigReader(filename, -1, nullptr) {
+NodeBaseSettings::NodeBaseSettings(const string& filename)
+	: NodeBaseSettings(filename, -1, nullptr) {
 }
 
-NodeConfigReader::NodeConfigReader(const string& filename, int nodeID, ISearchNeighbors* neighborSearcher) {
+NodeBaseSettings::NodeBaseSettings(const string& filename, int nodeID, ISearchNeighbors* neighborSearcher) {
 	this->nodeID = nodeID;
 	this->allNodes = readFile(filename);
 	this->neighborSearcher = neighborSearcher;
@@ -37,27 +38,27 @@ NodeConfigReader::NodeConfigReader(const string& filename, int nodeID, ISearchNe
 	}
 }
 
-NodeConfigReader::~NodeConfigReader() {
+NodeBaseSettings::~NodeBaseSettings() {
 	if (neighborSearcher != nullptr)
 		delete neighborSearcher;
 }
 
-NodeInfo NodeConfigReader::getCurrentNodeInfo() {
+NodeInfo NodeBaseSettings::getCurrentNodeInfo() {
 	return getNodeInfo(this->nodeID);
 }
 
-NodeMap NodeConfigReader::getNeighbors() {
+NodeMap NodeBaseSettings::getNeighbors() {
 	if (neighborSearcher != nullptr)
 		return neighborSearcher->getNeighbors(this->nodeID);
 	else
 		return this->allNodes;
 }
 
-NodeInfo NodeConfigReader::getNodeInfo(int nodeID) {
+NodeInfo NodeBaseSettings::getNodeInfo(int nodeID) {
 	return (NodeInfo)this->allNodes[nodeID];
 }
 
-NodeMap NodeConfigReader::readFile(const string& filename) {
+NodeMap NodeBaseSettings::readFile(const string& filename) {
 	NodeMap nodes;
 
 	string line;
@@ -76,7 +77,7 @@ NodeMap NodeConfigReader::readFile(const string& filename) {
 }
 
 //TODO: Handling der Adresse herausziehen
-NodeInfo NodeConfigReader::readLine(const string& line) {
+NodeInfo NodeBaseSettings::readLine(const string& line) {
 	NodeInfo nodeInfo;
 
 	vector<string> splittedLine = split(line, " ");
@@ -106,5 +107,6 @@ NodeInfo NodeConfigReader::readLine(const string& line) {
 	return nodeInfo;
 }
 
+}
 } /* namespace helper */
 

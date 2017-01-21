@@ -6,10 +6,12 @@
  */
 
 #include "Initiator.h"
+
 #include <iostream>
-#include "helper/randomizer/Random.h"
-#include "Constants.h"
-#include "message/Message.h"
+#include <map>
+
+#include "../helper/Constants.h"
+#include "../helper/randomizer/Random.h"
 
 Initiator::Initiator(const NodeCore& core)
 : core(core), nodes(core.getNeighbors()) {

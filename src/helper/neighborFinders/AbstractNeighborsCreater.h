@@ -9,7 +9,7 @@
 #define HELPER_NEIGHBORFINDERS_ABSTRACTNEIGHBORSCREATER_H_
 
 #include "ISearchNeighbors.h"
-#include "../../NodeInfo.h"
+#include "../../helper/NodeInfo.h"
 
 namespace helper {
 namespace neighborFinders {

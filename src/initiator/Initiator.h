@@ -5,11 +5,14 @@
  *      Author: tobias
  */
 
-#ifndef INITIATOR_H_
-#define INITIATOR_H_
+#ifndef INITIATOR_INITIATOR_H_
+#define INITIATOR_INITIATOR_H_
 
 #include <string>
-#include "core/NodeCore.h"
+
+#include "../core/NodeCore.h"
+#include "../message/Message.h"
+#include "../helper/NodeInfo.h"
 
 using namespace core;
 using namespace std;
@@ -34,4 +37,4 @@ private:
 };
 
 
-#endif /* INITIATOR_H_ */
+#endif /* INITIATOR_INITIATOR_H_ */

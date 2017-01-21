@@ -5,10 +5,15 @@
  *      Author: tobias
  */
 
-#ifndef CONSTANTS_H_
-#define CONSTANTS_H_
+#ifndef HELPER_CONSTANTS_H_
+#define HELPER_CONSTANTS_H_
 
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
 #include <string>
+
+#include "NodeInfo.h"
 
 using namespace std;
 
@@ -17,4 +22,4 @@ namespace constants {
 	const string SnapShotMessage = "Snapshot";
 }
 
-#endif /* CONSTANTS_H_ */
+#endif /* HELPER_CONSTANTS_H_ */

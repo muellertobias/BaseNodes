@@ -9,14 +9,13 @@
 
 #include <stddef.h>
 #include <fstream>
-#include <initializer_list>
 #include <iterator>
 #include <map>
+#include <string>
 #include <utility>
-#include <algorithm>
 #include <vector>
 
-#include "../../NodeInfo.h"
+#include "../NodeInfo.h"
 #include "../string/trim.h"
 
 namespace helper {
