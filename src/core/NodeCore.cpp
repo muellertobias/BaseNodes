@@ -7,10 +7,8 @@
 
 #include "NodeCore.h"
 
-#include <chrono>
 #include <sstream>
 #include <utility>
-
 
 #include "../helper/exception/NetworkException.h"
 #include "../helper/interfaces/IConfigureNode.h"
@@ -115,8 +113,9 @@ const Message NodeCore::receive() {
 	Message msg(incomingStr);
 	if (msg.getType() == MessageType::application) {
 		this->vectorTime->increase();
-		cout << this->vectorTime->getLocalTime();
 		this->vectorTime->merge(msg.getVectorTimes());
+		this->vectorTime->setTime(this->nodeInfo.NodeID, this->vectorTime->getMaximum());
+		cout << msg.toString() << "/" << nodeInfo.NodeID << "-Local: "<< this->vectorTime->getLocalTime() << std::endl;
 	}
 
 	string* logStr = new string(to_string(this->vectorTime->getLocalTime()) + " Receive: " + msg.toString());
@@ -165,26 +164,15 @@ bool NodeCore::sendTo(const Message& message, const NodeInfo& destination) const
 		this->vectorTime->increase();
 	}
 	Message msg = const_cast<Message&>(message);
+	msg.setDestinationId(destination.NodeID);
 
 	if (this->nodeInfo.NodeID > 0)
 		msg.setVectorTimes(this->vectorTime->getTimeMap());
 
-	cout << msg.toString() << endl;
-
 	if (message.getType() != MessageType::log)
 		log->push_back(new string(to_string(vectorTime->getLocalTime()) + " Send to "  + to_string(destination.NodeID) + ": " + msg.toString()));
 
-
 	return transceiver->sendTo(destination, msg.write());
-}
-
-// TODO: Überlegen, wegen Einführung Vectorzeit -> Übung 2
-std::string NodeCore::getCurrentTime() const {
-	auto now = chrono::high_resolution_clock::now();
-	ostringstream oss;
-	auto d = chrono::duration_cast<chrono::microseconds>(now.time_since_epoch());
-	oss << d.count();
-	return oss.str();
 }
 
 void NodeCore::shutdown(const Message& message) {
