@@ -22,6 +22,7 @@ class INodeImpl {
 public:
 	virtual ~INodeImpl() {};
 	virtual void process(const Message& message) = 0;
+
 	void setSendToDestinations(NodeCore::_sendToAll sendToAll) {
 		this->sendToAll = sendToAll;
 	}

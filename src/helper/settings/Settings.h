@@ -8,6 +8,7 @@
 #ifndef HELPER_SETTINGS_SETTINGS_H_
 #define HELPER_SETTINGS_SETTINGS_H_
 
+#include "../../core/implementation/INodeImpl.h"
 
 namespace helper {
 namespace settings {
@@ -21,6 +22,7 @@ public:
 	virtual NodeInfo getNodeInfo(int nodeID) = 0;
 	virtual NodeMap getNeighbors() = 0;
 	virtual int getNodeId() const = 0;
+	virtual core::implementation::INodeImpl* getNodeImplementation() = 0;
 };
 
 }

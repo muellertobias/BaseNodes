@@ -44,8 +44,8 @@ class NodeCore {
 public:
 	typedef bool (NodeCore::*_sendToAll)(const Message&, const int&);
 	typedef bool (NodeCore::*_sendResult)(const Message&);
+
 	NodeCore(Settings* configurator);
-	NodeCore(Settings* configurator, INodeImpl* nodeImpl);
 	virtual ~NodeCore();
 
 	void setNeighbors(NodeMap neighbors) {

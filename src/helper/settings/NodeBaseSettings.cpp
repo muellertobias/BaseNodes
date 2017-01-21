@@ -25,11 +25,16 @@ namespace helper {
 namespace settings {
 
 NodeBaseSettings::NodeBaseSettings(const string& filename)
-	: NodeBaseSettings(filename, -1, nullptr) {
+	: NodeBaseSettings(filename, -1, nullptr, "") {
 }
 
-NodeBaseSettings::NodeBaseSettings(const string& filename, int nodeID, ISearchNeighbors* neighborSearcher) {
+NodeBaseSettings::NodeBaseSettings(const string& filename, int nodeID, ISearchNeighbors* neighborSearcher, string config) {
 	this->nodeID = nodeID;
+
+	if (config.size() > 0) {
+		this->config = stoi(config);
+	}
+
 	this->allNodes = readFile(filename);
 	this->neighborSearcher = neighborSearcher;
 

@@ -36,32 +36,14 @@ NodeCore::NodeCore(Settings* setting) {
 	isRunning = true;
 
 	// Implementierung hier austauschbar
-	this->nodeImpl = new NodeCoreBaseImpl();
-	this->nodeImpl->setCore(this);
-	this->nodeImpl->setSendToDestinations(&NodeCore::sendToDestinations);
-
-	this->log = new vector<string*>();
-	vectorTime = new VectorTime(this->nodeInfo.NodeID);
-}
-
-NodeCore::NodeCore(Settings* configurator, INodeImpl* nodeImpl) {
-	this->nodeImpl = nodeImpl;
+	this->nodeImpl = setting->getNodeImplementation();
 	this->nodeImpl->setCore(this);
 	this->nodeImpl->setSendToDestinations(&NodeCore::sendToDestinations);
 	this->nodeImpl->setSendResult(&NodeCore::sendToListener);
 
-
-	if (configurator->getNodeId() > 0)
-		this->nodeInfo = configurator->getCurrentNodeInfo();
-
-	this->neighbors = configurator->getNeighbors();
-	this->transceiver = new NodeTransceiver(this->nodeInfo, 10);
-	isRunning = true;
-
 	this->log = new vector<string*>();
 	vectorTime = new VectorTime(this->nodeInfo.NodeID);
 }
-
 
 NodeCore::~NodeCore() {
 	delete transceiver;
@@ -73,6 +55,8 @@ NodeCore::~NodeCore() {
 
 	log->clear();
 	delete log;
+
+	delete nodeImpl;
 }
 
 void NodeCore::loop() {

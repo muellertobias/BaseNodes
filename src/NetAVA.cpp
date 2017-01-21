@@ -42,10 +42,9 @@ int main(int argc, char** argv) {
 	if (argc == 1) {
 		cout << "Wrong Parameters:\n";
 		cout << "NetAVA address_file type\n";
-		cout << "NetAVA address_file type node_id impl conf graph_file" << endl;
+		cout << "NetAVA address_file type node_id conf graph_file" << endl;
 
 		cout << "Types: node listener initiator" << endl;
-		cout << "Implementations: candidate voter" << endl;
 		cout << "Config: candidate r={1..n}, voter {ignored}" << endl;
 
 		return -1;
@@ -79,24 +78,11 @@ int main(int argc, char** argv) {
 	} else {
 		try {
 			nodeID = stoi(argv[3]);
-			string impl(argv[4]);
+			string config(argv[4]);
 
-			ISearchNeighbors* neighborSearcher = new helper::neighborFinders::GraphvizNeighborsCreator(argv[6]);
-
-			helper::settings::NodeBaseSettings configReader(addressFilename, nodeID, neighborSearcher);
-
-			// Implementierung anlegen
-			implementation::INodeImpl* nodeImpl;
-
-
-			if (impl == "rumor") {
-				int threshold = stoi(argv[5]);
-				nodeImpl = new core::implementation::rumor::RumorNodeCoreImpl(threshold);
-			} else {
-				nodeImpl = new core::implementation::NodeCoreBaseImpl();
-			}
-
-			NodeCore node(&configReader, nodeImpl);
+			ISearchNeighbors* neighborSearcher = new helper::neighborFinders::GraphvizNeighborsCreator(argv[5]);
+			helper::settings::NodeBaseSettings configReader(addressFilename, nodeID, neighborSearcher, config);
+			NodeCore node(&configReader);
 			node.loop();
 
 		} catch (NodeBaseException& e) {
