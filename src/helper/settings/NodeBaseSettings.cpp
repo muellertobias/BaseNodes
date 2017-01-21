@@ -5,7 +5,7 @@
  *      Author: tobias
  */
 
-#include "../settings/NodeBaseSettings.h"
+#include "NodeBaseSettings.h"
 
 #include <arpa/inet.h>
 #include <netdb.h>
@@ -17,6 +17,7 @@
 #include <utility>
 #include <vector>
 
+#include "../../network/NodeTransceiver.h"
 #include "../exception/ConfigurationException.h"
 #include "../neighborFinders/ISearchNeighbors.h"
 #include "../string/trim.h"
@@ -112,6 +113,12 @@ NodeInfo NodeBaseSettings::readLine(const string& line) {
 	return nodeInfo;
 }
 
+network::TransceiverBase* NodeBaseSettings::getTransceiver() {
+	bool isReceiver = this->nodeID < 0 ? false : true;
+	return new network::NodeTransceiver(this->getCurrentNodeInfo(), numberOfConnections, isReceiver);
+}
+
 }
 } /* namespace helper */
+
 

@@ -33,7 +33,7 @@ void RumorNodeCoreImpl::process(const Message& message) {
 			strStream <<  getCore()->getNodeInfo().NodeID << " believes " << it->first;
 			string result(strStream.str());
 			//cout << result << endl;
-			Message resultMsg(MessageType::undefined, 0, getCore()->getNodeInfo().NodeID, result);
+			Message resultMsg(MessageType::application, 0, getCore()->getNodeInfo().NodeID, result);
 			sendResult(resultMsg);
 		}
 
@@ -46,9 +46,9 @@ void RumorNodeCoreImpl::process(const Message& message) {
 
 		rumors.insert(RumorInfoPair(rumor->Rumor, rumor));
 
-		Message newMessage(MessageType::application, message.getNumber(), getCore()->getNodeInfo().NodeID, rumor->Rumor);
+		Message rumorMsg(MessageType::application, message.getNumber(), getCore()->getNodeInfo().NodeID, rumor->Rumor);
 
-		(getCore()->*sendToAll)(newMessage, message.getSourceID());
+		(getCore()->*sendToAll)(rumorMsg, message.getSourceID());
 	}
 }
 

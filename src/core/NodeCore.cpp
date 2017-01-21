@@ -23,25 +23,25 @@
 
 namespace core {
 
-NodeCore::NodeCore(Settings* setting) {
-	bool isReceiver = true;
-	if (setting->getNodeId() > 0) {
-		this->nodeInfo = setting->getCurrentNodeInfo();
-	} else {
-		isReceiver = false;
-	}
-	this->neighbors = setting->getNeighbors();
-	this->listenerNodeInfo = setting->getNodeInfo(ListenerNodeID);
-	this->transceiver = new NodeTransceiver(this->nodeInfo, 10, isReceiver);
+NodeCore::NodeCore(Settings* settings) {
+	this->nodeInfo = settings->getCurrentNodeInfo();
+
+	// Communication
+	this->neighbors = settings->getNeighbors();
+	this->listenerNodeInfo = settings->getNodeInfo(ListenerNodeID);
+	this->transceiver = settings->getTransceiver();
 	isRunning = true;
 
-	// Implementierung hier austauschbar
-	this->nodeImpl = setting->getNodeImplementation();
+	// Implementation
+	this->nodeImpl = settings->getNodeImplementation();
 	this->nodeImpl->setCore(this);
 	this->nodeImpl->setSendToDestinations(&NodeCore::sendToDestinations);
 	this->nodeImpl->setSendResult(&NodeCore::sendToListener);
 
+	// Simple Logging
 	this->log = new vector<string*>();
+
+	// Vectortime
 	vectorTime = new VectorTime(this->nodeInfo.NodeID);
 }
 

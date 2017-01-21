@@ -54,19 +54,19 @@ string NodeTransceiver::receive() const {
 bool NodeTransceiver::sendTo(const NodeInfo& destination, const string& message) {
 	int socketID = socket(AF_INET, SOCK_STREAM, 0);
 	if (socketID < 0) {
-		cerr << "Error: socket" << endl;
+		//cerr << "Error: socket" << endl;
 		return false;
 	}
 
 	if (connect(socketID, (struct sockaddr*)&destination.Address, sizeof(destination.Address)) < 0) {
-		cerr << "Error: connect" << endl;
+		//cerr << "Error: connect" << endl;
 		return false;
 	}
 
 	vector<char> cstr(message.c_str(), message.c_str() + message.size() + 1);
 
 	if (send(socketID, cstr.data(), cstr.size(), 0) < 0) {
-		cerr << "Error: send" << endl;
+		//cerr << "Error: send" << endl;
 		close(socketID);
 		return false;
 	}

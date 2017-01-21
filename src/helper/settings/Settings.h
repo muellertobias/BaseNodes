@@ -8,7 +8,16 @@
 #ifndef HELPER_SETTINGS_SETTINGS_H_
 #define HELPER_SETTINGS_SETTINGS_H_
 
-#include "../../core/implementation/INodeImpl.h"
+#include "../NodeInfo.h"
+
+namespace core {
+namespace implementation {
+class INodeImpl;
+} /* namespace implementation */
+} /* namespace core */
+namespace network {
+class TransceiverBase;
+} /* namespace network */
 
 namespace helper {
 namespace settings {
@@ -23,6 +32,7 @@ public:
 	virtual NodeMap getNeighbors() = 0;
 	virtual int getNodeId() const = 0;
 	virtual core::implementation::INodeImpl* getNodeImplementation() = 0;
+	virtual network::TransceiverBase* getTransceiver() = 0;
 };
 
 }

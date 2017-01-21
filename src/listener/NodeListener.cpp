@@ -7,6 +7,10 @@
 
 #include "NodeListener.h"
 
+
+#include <string>
+
+#include "../helper/Constants.h"
 #include "../helper/utilities/tinyxml2.h"
 
 namespace helper {
@@ -19,13 +23,22 @@ NodeListener::NodeListener(TransceiverBase* transceiver) {
 }
 
 NodeListener::~NodeListener() {
-	// TODO Auto-generated destructor stub
+	delete this->transceiver;
 }
 
 void NodeListener::loop() {
-	while (true) {
+	bool isRunning = true;
+	while (isRunning) {
 		cout << "Listen..." << endl;
 		Message message = receive();
+
+		if (message.getType() == MessageType::control) {
+			const string& content = message.getContent();
+			if (content.find(constants::ShutdownMessage) != string::npos) {
+				isRunning = false;
+			}
+		}
+
 		print(message);
 	}
 }
@@ -50,7 +63,7 @@ void NodeListener::print(const Message& message) {
 		for (XMLElement* element = root->FirstChildElement("logEntry"); element != NULL; element = element->NextSiblingElement("logEntry")) {
 			cout << element->GetText() << endl;
 		}
-	} else if (message.getType() == MessageType::application){
+	} else {
 		cout << message.getContent() << endl;
 	}
 }

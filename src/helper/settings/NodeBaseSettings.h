@@ -10,9 +10,9 @@
 
 #include <string>
 
-#include "../../helper/NodeInfo.h"
-#include "../settings/Settings.h"
 #include "../../core/implementation/rumor/RumorNodeCoreImpl.h"
+#include "../NodeInfo.h"
+#include "Settings.h"
 
 namespace helper {
 namespace neighborFinders {
@@ -44,7 +44,11 @@ public:
 		return new core::implementation::rumor::RumorNodeCoreImpl(config);
 	}
 
+	virtual network::TransceiverBase* getTransceiver();
+
 protected:
+	const int numberOfConnections = 10;
+
 	NodeMap allNodes;
 	int nodeID;
 	ISearchNeighbors* neighborSearcher;
