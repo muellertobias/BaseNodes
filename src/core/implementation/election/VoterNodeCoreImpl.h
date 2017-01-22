@@ -10,6 +10,7 @@
 
 #include "../../../message/Message.h"
 #include "../INodeImpl.h"
+#include "ElectionTypes.h"
 
 using network::Message;
 
@@ -19,11 +20,13 @@ namespace election {
 
 class VoterNodeCoreImpl : public INodeImpl {
 public:
-	VoterNodeCoreImpl();
+	VoterNodeCoreImpl(ConfidenceLevels* confidenceLevels);
 	virtual ~VoterNodeCoreImpl();
 
 	virtual void process(const Message& message);
 
+private:
+	ConfidenceLevels* confidenceLevels;
 };
 
 } /* namespace election */

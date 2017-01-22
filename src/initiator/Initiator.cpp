@@ -31,7 +31,7 @@ void Initiator::loop() {
 			tell();
 		} else if (input == "halt") {
 			halt();
-		} else if (input == "snapshoot") {
+		} else if (input == "snap") {
 			snapshoot();
 		}
 	} while (isRunning);
@@ -41,7 +41,7 @@ void Initiator::showDetails() {
 	cout << "Befehle:\nhelp - Zeige Hilfe an\n" <<
 			"exit - Beenden\n" <<
 			"tell - Löse Initialnachricht aus\n" <<
-			"snapshoot - Erzeuge Schnappschuss\n" <<
+			"snap - Erzeuge Schnappschuss\n" <<
 			"halt - Halte einen/alle Knoten an" << endl;
 	cout << "Mögliche Adressen:" << endl;
 
@@ -58,9 +58,11 @@ string Initiator::readInput() const {
 
 void Initiator::tell() {
 	cout << "Node > ";
-	int nodeID = stoi(readInput());
+	int nodeID = 0;
 
 	try {
+		nodeID = stoi(readInput());
+
 		NodeInfo nodeInfo = nodes.at(nodeID);
 		cout << nodeInfo.NodeID << " gefunden!" << endl;
 
@@ -78,6 +80,8 @@ void Initiator::tell() {
 
 	} catch (const out_of_range& ex) {
 		cout << nodeID << " nicht gefunden!" << endl;
+	} catch (const std::exception& ex) {
+		cout << "Falsche Eingabe!" << endl;
 	}
 }
 

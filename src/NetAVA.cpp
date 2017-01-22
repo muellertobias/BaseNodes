@@ -8,16 +8,13 @@
 #include <string>
 #include <vector>
 
-#include "core/implementation/NodeCoreBaseImpl.h"
-#include "core/implementation/rumor/RumorNodeCoreImpl.h"
 #include "core/NodeCore.h"
 #include "helper/exception/NodeBaseException.h"
 #include "helper/neighborFinders/GraphvizNeighborsCreator.h"
+#include "helper/settings/NodeElectionSettings.h"
 #include "initiator/Initiator.h"
 #include "listener/NodeListener.h"
 #include "network/NodeTransceiver.h"
-#include "helper/Constants.h"
-#include "helper/settings/NodeBaseSettings.h"
 
 
 using namespace std;
@@ -81,8 +78,8 @@ int main(int argc, char** argv) {
 			string config(argv[4]);
 
 			ISearchNeighbors* neighborSearcher = new helper::neighborFinders::GraphvizNeighborsCreator(argv[5]);
-			helper::settings::NodeBaseSettings configReader(addressFilename, nodeID, neighborSearcher, config);
-			NodeCore node(&configReader);
+			helper::settings::NodeElectionSettings settings(addressFilename, nodeID, neighborSearcher, config);
+			NodeCore node(&settings);
 			node.loop();
 
 		} catch (NodeBaseException& e) {
@@ -96,11 +93,4 @@ int main(int argc, char** argv) {
 	return 0;
 }
 
-void readNeighbors(vector<int>* nodeIDs, int startIndex, int endIndex, char** rawData) {
-	for (int i = startIndex; i < endIndex; ++i) {
-		int id = stoi(rawData[i]);
-		nodeIDs->push_back(id);
-		cout << "Neighbore NodeID: " << id << endl;
-	}
-}
 

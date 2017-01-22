@@ -6,6 +6,7 @@ port=5000
 
 if [ "$#" -lt 3 ]
 then
+	echo $#
 	echo "./start.h NumberOfNodes NumberOfEdge Config [Graphfile]"
 else
 
@@ -15,10 +16,10 @@ else
 
 	gnome-terminal -e "./Debug/NetAVA $addressfile listener"
 
-	if [ "$#" -eq 5 ]
+	if [ "$#" -eq 4 ]
 	then
 		echo "use graphfile"
-		graphfile=$5
+		graphfile=$4
 	else
 		# Erstelle zufälligen Graphen
 		./GraphGen $graphfile $numberOfNodes $numberOfEdges

@@ -7,20 +7,25 @@
 
 #include "VoterNodeCoreImpl.h"
 
+#include <iostream>
+#include <map>
+
+#include "../../NodeCore.h"
+
 namespace core {
 namespace implementation {
 namespace election {
 
-VoterNodeCoreImpl::VoterNodeCoreImpl() {
-	// TODO Auto-generated constructor stub
-
+VoterNodeCoreImpl::VoterNodeCoreImpl(ConfidenceLevels* confidenceLevels)
+: confidenceLevels(confidenceLevels) {
 }
 
 VoterNodeCoreImpl::~VoterNodeCoreImpl() {
-	// TODO Auto-generated destructor stub
+	delete confidenceLevels;
 }
 
 void VoterNodeCoreImpl::process(const Message& message) {
+	cout << core->getNodeInfo().NodeID << " : Red=" << confidenceLevels->at(Party::Red) << ", Blue=" << confidenceLevels->at(Party::Blue) << endl;
 }
 
 } /* namespace election */

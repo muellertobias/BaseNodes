@@ -11,16 +11,15 @@ namespace core {
 namespace implementation {
 namespace election {
 
-CandidateNodeCoreImpl::CandidateNodeCoreImpl() {
-	// TODO Auto-generated constructor stub
-
+CandidateNodeCoreImpl::CandidateNodeCoreImpl(const int& callPeriod, const Party& party)
+: callPeriod(callPeriod), party(party) {
 }
 
 CandidateNodeCoreImpl::~CandidateNodeCoreImpl() {
-	// TODO Auto-generated destructor stub
 }
 
 void CandidateNodeCoreImpl::process(const Message& message) {
+	cout << core->getNodeInfo().NodeID << " : Callperiod=" <<callPeriod << ", Party=" << party << endl;
 }
 
 } /* namespace election */
