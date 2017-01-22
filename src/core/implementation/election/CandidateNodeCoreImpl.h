@@ -25,8 +25,9 @@ public:
 
 	virtual void process(const Message& message);
 private:
-	const int callPeriod;
+	const int recallPeriod;
 	const Party party;
+	int recalls;
 };
 
 } /* namespace election */

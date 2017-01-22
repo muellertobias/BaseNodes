@@ -27,7 +27,9 @@ enum MessageType {
 	undefined,
 	control,
 	application,
-	log
+	log,
+	explorer,
+	echo
 };
 
 class Message : public Serializable {

@@ -13,7 +13,7 @@
 #include <iostream>
 
 #include "../../core/implementation/election/CandidateNodeCoreImpl.h"
-#include "../../core/implementation/election/ElectionConstants.h"
+#include "../../core/implementation/election/ElectionTypes.h"
 #include "../../core/implementation/election/VoterNodeCoreImpl.h"
 #include "../neighborFinders/ISearchNeighbors.h"
 #include "../NodeInfo.h"

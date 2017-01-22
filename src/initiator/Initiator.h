@@ -31,6 +31,7 @@ private:
 	string readInput() const;
 	void tell();
 	void halt();
+	void echo();
 	void snapshoot();
 	bool sendTo(const string& content, const NodeInfo& nodeID, int sourceID);
 	bool sendTo(const Message& message, const NodeInfo& nodeID);

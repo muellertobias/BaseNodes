@@ -12,14 +12,14 @@ namespace implementation {
 namespace election {
 
 CandidateNodeCoreImpl::CandidateNodeCoreImpl(const int& callPeriod, const Party& party)
-: callPeriod(callPeriod), party(party) {
+: recallPeriod(callPeriod), party(party), recalls(0) {
 }
 
 CandidateNodeCoreImpl::~CandidateNodeCoreImpl() {
 }
 
 void CandidateNodeCoreImpl::process(const Message& message) {
-	cout << core->getNodeInfo().NodeID << " : Callperiod=" <<callPeriod << ", Party=" << party << endl;
+	cout << core->getNodeInfo().NodeID << " : Callperiod=" << recallPeriod << ", current Recalls= " << recalls << ", Party=" << party << endl;
 }
 
 } /* namespace election */

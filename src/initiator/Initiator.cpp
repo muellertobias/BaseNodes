@@ -33,6 +33,8 @@ void Initiator::loop() {
 			halt();
 		} else if (input == "snap") {
 			snapshoot();
+		} else if (input == "echo") {
+			echo();
 		}
 	} while (isRunning);
 }
@@ -71,6 +73,32 @@ void Initiator::tell() {
 
 		int number = helper::randomizer::random(0, 9999);
 		Message message(MessageType::control, number, 0, content);
+
+		if (sendTo(message, nodeInfo)) {
+			cout << "Erfolgreich!" << endl;
+		} else {
+			cout << "Fehlgeschlagen!" << endl;
+		}
+
+	} catch (const out_of_range& ex) {
+		cout << nodeID << " nicht gefunden!" << endl;
+	} catch (const std::exception& ex) {
+		cout << "Falsche Eingabe!" << endl;
+	}
+}
+
+void Initiator::echo() {
+	cout << "Node > ";
+	int nodeID = 0;
+
+	try {
+		nodeID = stoi(readInput());
+
+		NodeInfo nodeInfo = nodes.at(nodeID);
+		cout << nodeInfo.NodeID << " gefunden!" << endl;
+
+		int number = helper::randomizer::random(0, 9999);
+		Message message(MessageType::control, number, 0, "Echo");
 
 		if (sendTo(message, nodeInfo)) {
 			cout << "Erfolgreich!" << endl;

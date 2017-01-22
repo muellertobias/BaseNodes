@@ -15,6 +15,7 @@
 #include "../helper/NodeInfo.h"
 #include "../helper/time/VectorTime.h"
 #include "../message/Message.h"
+#include "data/Echo.h"
 
 namespace core {
 namespace implementation {
@@ -76,14 +77,15 @@ private:
 	NodeInfo listenerNodeInfo;
 	helper::time::VectorTime* vectorTime;
 
+	Echos echoData;
 
 	void showDetails();
 
 	void handleControlMessage(const Message& message);
 	void handleApplicationMessage(const Message& message);
+	void handleEchoMessage(const Message& message);
 	bool sendToDestinationsImpl(const Message& message, const NodeMap& destinations);
 	bool sendToDestinations(const Message& message, const int& expectedNodeID);
-	std::string getCurrentTime() const;
 
 	void shutdown(const Message& message);
 	void sendSnapshot();

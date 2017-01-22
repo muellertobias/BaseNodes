@@ -43,6 +43,9 @@ NodeCore::NodeCore(Settings* settings) {
 
 	// Vectortime
 	vectorTime = new VectorTime(this->nodeInfo.NodeID);
+
+	// Echo
+	this->echoData = { 0, 0, 0};
 }
 
 NodeCore::~NodeCore() {
@@ -50,7 +53,7 @@ NodeCore::~NodeCore() {
 
 	for (size_t i = 0; i < log->size(); ++i) {
 		log[i].clear();
-		//delete log[i];
+		delete log[i];
 	}
 
 	log->clear();
@@ -64,21 +67,27 @@ void NodeCore::loop() {
 
 	while (isRunning) {
 		try {
-			//cout << "Listen..." << endl;
 			const Message& message = receive();
 
-			if (message.getType() == MessageType::control) {
+			switch (message.getType()) {
+			case MessageType::control:
 				handleControlMessage(message);
-			} else if (message.getType() == MessageType::application) {
+				break;
+			case MessageType::application:
 				handleApplicationMessage(message);
-			} else {
+				break;
+			case MessageType::explorer:
+			case MessageType::echo:
+				handleEchoMessage(message);
+				break;
+			default:
 				cerr << "Unexpected type of message!" << endl;
+				break;
 			}
 		} catch (const helper::exception::NetworkException& ex) {
 			cerr << ex.what() << endl;
 		}
 	}
-	//cout << "Shutdown..." << endl;
 	transceiver->closeReceiver();
 }
 
@@ -117,12 +126,15 @@ void NodeCore::handleControlMessage(const Message& message) {
 		shutdown(message);
 	} else if (content.find("Snapshot") != string::npos) {
 		sendSnapshot();
+	} else if (content.find("Echo") != string::npos) {
+		this->echoData.EchoID = message.getNumber();
+		this->echoData.FirstNeighborID = nodeInfo.NodeID;
+		this->echoData.counter = 0;
+		Message explorerMsg(MessageType::explorer, message.getNumber(), nodeInfo.NodeID, "Explorer");
+		sendToDestinationsImpl(explorerMsg, neighbors);
+
 	} else {
 		this->nodeImpl->process(message);
-		//string c = to_string(nodeInfo.NodeID);
-//		int number = message.getNumber();
-//		Message newMessage(MessageType::application, number, nodeInfo.NodeID, message.getContent());
-//		sendToDestinationsImpl(newMessage, neighbors);
 	}
 }
 
@@ -130,13 +142,47 @@ void NodeCore::handleApplicationMessage(const Message& message) {
 	nodeImpl->process(message);
 }
 
+void NodeCore::handleEchoMessage(const Message& message) {
+	if (message.getType() == MessageType::explorer) {
+		if (this->echoData.FirstNeighborID != message.getSourceID() && this->echoData.EchoID != message.getNumber()) {
+			this->echoData.EchoID = message.getNumber();
+			this->echoData.FirstNeighborID = message.getSourceID();
+			this->echoData.counter = 1;
+
+			Message explorerMsg(MessageType::explorer, message.getNumber(), nodeInfo.NodeID, "Explorer");
+			sendToDestinations(explorerMsg, message.getSourceID());
+			cout << nodeInfo.NodeID << " - Send Explorer!" << endl;
+
+		} else if (this->echoData.FirstNeighborID != message.getSourceID() && this->echoData.EchoID == message.getNumber()) {
+			this->echoData.counter++;
+		} else {
+			// FEHLER?! Zweimal Explorer vom selben Knoten mit selber ECHO-ID (=MessageNumber)
+		}
+
+		if (this->echoData.counter == this->neighbors.size()) {
+			Message echoMsg(MessageType::echo, message.getNumber(), nodeInfo.NodeID, "Echo");
+			sendTo(echoMsg, this->neighbors.at(echoData.FirstNeighborID));
+			cout << nodeInfo.NodeID << " - Send Echo!" << endl;
+		}
+	} else if (message.getType() == MessageType::echo) {
+		this->echoData.counter++;
+		if (this->echoData.counter == this->neighbors.size()) {
+			if (this->echoData.FirstNeighborID == nodeInfo.NodeID) {
+				//Echo erfolgreich!
+				cout << nodeInfo.NodeID << " - ECHO erfolgreich!" << endl;
+			} else {
+				Message echoMsg(MessageType::echo, message.getNumber(), nodeInfo.NodeID, "Echo");
+				sendTo(echoMsg, this->neighbors.at(echoData.FirstNeighborID));
+			}
+		}
+	}
+}
+
 bool NodeCore::sendToDestinationsImpl(const Message& message, const NodeMap& destinations) {
 	bool successfully = false;
-
 	for (NodeMap::const_iterator it = destinations.begin(); it != destinations.end(); ++it) {
 		successfully = sendTo(message, it->second);
 	}
-
 	return successfully;
 }
 
@@ -208,12 +254,6 @@ void NodeCore::sendSnapshot() {
 }
 
 bool NodeCore::sendToListener(const Message& message) {
-//	NodeInfo info;
-//	info.NodeID = 0;
-//	inet_pton(AF_INET, "127.0.0.1", &(info.Address.sin_addr));
-//	info.Address.sin_port = 5000;
-//	info.Address.sin_family = AF_INET;
-
 	Message msg = const_cast<Message&>(message);
 	msg.setVectorTimes(this->vectorTime->getTimeMap());
 	return sendTo(msg, listenerNodeInfo);

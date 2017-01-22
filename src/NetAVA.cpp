@@ -78,7 +78,8 @@ int main(int argc, char** argv) {
 			string config(argv[4]);
 
 			ISearchNeighbors* neighborSearcher = new helper::neighborFinders::GraphvizNeighborsCreator(argv[5]);
-			helper::settings::NodeElectionSettings settings(addressFilename, nodeID, neighborSearcher, config);
+			helper::settings::NodeBaseSettings settings(addressFilename, nodeID, neighborSearcher, config);
+			//helper::settings::NodeElectionSettings settings(addressFilename, nodeID, neighborSearcher, config);
 			NodeCore node(&settings);
 			node.loop();
 
@@ -89,7 +90,6 @@ int main(int argc, char** argv) {
 		}
 	}
 
-	cout << "Finish" << endl;
 	return 0;
 }
 
