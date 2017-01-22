@@ -19,7 +19,21 @@ CandidateNodeCoreImpl::~CandidateNodeCoreImpl() {
 }
 
 void CandidateNodeCoreImpl::process(const Message& message) {
-	cout << core->getNodeInfo().NodeID << " : Callperiod=" << recallPeriod << ", current Recalls= " << recalls << ", Party=" << party << endl;
+	//cout << core->getNodeInfo().NodeID << " : Callperiod=" << recallPeriod << ", current Recalls= " << recalls << ", Party=" << party << endl;
+
+	// Messages to handle
+	// - Init
+	// - Reset
+	// - MessageType::echo -> Auflistung aller Stimmen und Gegenstimmen
+	// - MessageType::application -> IVoteYou
+	// - MessageType::application -> IDontVoteYou
+
+	// Messages to send
+	// - MessageType::explorer -> Campaign
+	// - MessageType::application -> VoteMe
+}
+
+void CandidateNodeCoreImpl::getState(string& state) {
 }
 
 } /* namespace election */

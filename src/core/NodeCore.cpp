@@ -53,7 +53,6 @@ NodeCore::~NodeCore() {
 
 	for (size_t i = 0; i < log->size(); ++i) {
 		log[i].clear();
-		delete log[i];
 	}
 
 	log->clear();
@@ -149,7 +148,9 @@ void NodeCore::handleEchoMessage(const Message& message) {
 			this->echoData.FirstNeighborID = message.getSourceID();
 			this->echoData.counter = 1;
 
-			Message explorerMsg(MessageType::explorer, message.getNumber(), nodeInfo.NodeID, "Explorer");
+			nodeImpl->process(message);
+
+			Message explorerMsg(MessageType::explorer, message.getNumber(), nodeInfo.NodeID, message.getContent());
 			sendToDestinations(explorerMsg, message.getSourceID());
 			cout << nodeInfo.NodeID << " - Send Explorer!" << endl;
 
@@ -158,22 +159,18 @@ void NodeCore::handleEchoMessage(const Message& message) {
 		} else {
 			// FEHLER?! Zweimal Explorer vom selben Knoten mit selber ECHO-ID (=MessageNumber)
 		}
-
-		if (this->echoData.counter == this->neighbors.size()) {
-			Message echoMsg(MessageType::echo, message.getNumber(), nodeInfo.NodeID, "Echo");
-			sendTo(echoMsg, this->neighbors.at(echoData.FirstNeighborID));
-			cout << nodeInfo.NodeID << " - Send Echo!" << endl;
-		}
 	} else if (message.getType() == MessageType::echo) {
 		this->echoData.counter++;
-		if (this->echoData.counter == this->neighbors.size()) {
-			if (this->echoData.FirstNeighborID == nodeInfo.NodeID) {
-				//Echo erfolgreich!
-				cout << nodeInfo.NodeID << " - ECHO erfolgreich!" << endl;
-			} else {
-				Message echoMsg(MessageType::echo, message.getNumber(), nodeInfo.NodeID, "Echo");
-				sendTo(echoMsg, this->neighbors.at(echoData.FirstNeighborID));
-			}
+	}
+
+	if (this->echoData.counter == this->neighbors.size()) {
+		if (this->echoData.FirstNeighborID == nodeInfo.NodeID) {
+			//Echo erfolgreich!
+			cout << nodeInfo.NodeID << " - ECHO erfolgreich!" << endl;
+		} else {
+			cout << nodeInfo.NodeID << " - Send Echo!" << endl;
+			Message echoMsg(MessageType::echo, message.getNumber(), nodeInfo.NodeID, "Echo");
+			sendTo(echoMsg, this->neighbors.at(echoData.FirstNeighborID));
 		}
 	}
 }

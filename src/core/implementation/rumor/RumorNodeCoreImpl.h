@@ -34,6 +34,8 @@ public:
 	virtual ~RumorNodeCoreImpl();
 
 	virtual void process(const Message& message);
+	virtual void getState(string& state) {}
+
 	void sendResult(const Message& message);
 
 private:

@@ -24,6 +24,9 @@ public:
 	virtual ~CandidateNodeCoreImpl();
 
 	virtual void process(const Message& message);
+	virtual void getState(string& state);
+
+
 private:
 	const int recallPeriod;
 	const Party party;

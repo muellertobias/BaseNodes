@@ -10,6 +10,7 @@
 
 #include "../../message/Message.h"
 #include "../NodeCore.h"
+#include <string>
 
 namespace core {
 namespace implementation {
@@ -22,6 +23,7 @@ class INodeImpl {
 public:
 	virtual ~INodeImpl() {};
 	virtual void process(const Message& message) = 0;
+	virtual void getState(string& state) = 0;
 
 	void setSendToDestinations(NodeCore::_sendToAll sendToAll) {
 		this->sendToAll = sendToAll;

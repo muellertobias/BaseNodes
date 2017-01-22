@@ -28,6 +28,7 @@ public:
 	virtual ~NodeCoreBaseImpl() { };
 
 	virtual void process(const Message& message);
+	virtual void getState(string& state) {}
 
 	const MessageMap& getMessages() const {
 		return messages;

@@ -24,6 +24,7 @@ public:
 	virtual ~VoterNodeCoreImpl();
 
 	virtual void process(const Message& message);
+	virtual void getState(string& state);
 
 private:
 	ConfidenceLevels* confidenceLevels;
