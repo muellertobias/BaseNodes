@@ -25,6 +25,13 @@ public:
 	virtual void process(const Message& message) = 0;
 	virtual void getState(string& state) = 0;
 
+	void setSendEcho(NodeCore::_sendEcho sendEcho) {
+		this->sendEcho = sendEcho;
+	}
+	void setSendTo(NodeCore::_sendTo sendTo) {
+		this->sendTo = sendTo;
+	}
+
 	void setSendToDestinations(NodeCore::_sendToAll sendToAll) {
 		this->sendToAll = sendToAll;
 	}
@@ -43,6 +50,8 @@ public:
 
 protected:
 	NodeCore* core;
+	NodeCore::_sendEcho sendEcho;
+	NodeCore::_sendTo sendTo;
 	NodeCore::_sendToAll sendToAll;
 	NodeCore::_sendResult sendResultImpl;
 };

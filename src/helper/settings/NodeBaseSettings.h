@@ -47,7 +47,7 @@ public:
 	virtual network::TransceiverBase* getTransceiver();
 
 protected:
-	const int numberOfConnections = 10;
+	const int numberOfConnections = 30;
 
 	NodeMap allNodes;
 	int nodeID;

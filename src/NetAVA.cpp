@@ -4,14 +4,17 @@
  * @date 	27.10.2016
  */
 
+#include <unistd.h>
+#include <exception>
+#include <fstream>
 #include <iostream>
 #include <string>
-#include <vector>
+#include <sstream>
 
 #include "core/NodeCore.h"
-#include "helper/exception/NodeBaseException.h"
 #include "helper/neighborFinders/GraphvizNeighborsCreator.h"
 #include "helper/settings/NodeElectionSettings.h"
+#include "helper/utilities/utilities.h"
 #include "initiator/Initiator.h"
 #include "listener/NodeListener.h"
 #include "network/NodeTransceiver.h"
@@ -20,10 +23,7 @@
 using namespace std;
 using namespace core;
 using namespace network;
-using namespace helper::exception;
 using namespace helper::neighborFinders;
-
-void readNeighbors(vector<int>* nodeIDs, int startIndex, int endIndex, char** rawData);
 
 /**
  * Main-Methode
@@ -46,7 +46,6 @@ int main(int argc, char** argv) {
 
 		return -1;
 	}
-
 	string addressFilename(argv[1]);
 	string type(argv[2]);
 
@@ -76,18 +75,21 @@ int main(int argc, char** argv) {
 		try {
 			nodeID = stoi(argv[3]);
 			string config(argv[4]);
+			helper::utilities::localID = nodeID;
 
 			ISearchNeighbors* neighborSearcher = new helper::neighborFinders::GraphvizNeighborsCreator(argv[5]);
-			helper::settings::NodeBaseSettings settings(addressFilename, nodeID, neighborSearcher, config);
-			//helper::settings::NodeElectionSettings settings(addressFilename, nodeID, neighborSearcher, config);
+			//helper::settings::NodeBaseSettings settings(addressFilename, nodeID, neighborSearcher, config);
+			helper::settings::NodeElectionSettings settings(addressFilename, nodeID, neighborSearcher, config);
 			NodeCore node(&settings);
 			node.loop();
 
-		} catch (NodeBaseException& e) {
-			cerr << e.what() << endl;
+//		} catch (NodeBaseException& e) {
+//			cerr << nodeID << " - " << e.what() << endl;
 		} catch (std::exception& e) {
-			cerr << "Allgemeiner Fehler: " << e.what() << endl;
+			helper::utilities::writeLog("Allgemeiner Fehler: ", e);
 		}
+
+		cout << nodeID << " - Finish" << endl;
 	}
 
 	return 0;

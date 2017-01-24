@@ -115,7 +115,7 @@ NodeInfo NodeBaseSettings::readLine(const string& line) {
 
 network::TransceiverBase* NodeBaseSettings::getTransceiver() {
 	bool isReceiver = this->nodeID < 0 ? false : true;
-	return new network::NodeTransceiver(this->getCurrentNodeInfo(), numberOfConnections, isReceiver);
+	return new network::NodeTransceiver(this->getCurrentNodeInfo(), numberOfConnections, this->allNodes, isReceiver);
 }
 
 }

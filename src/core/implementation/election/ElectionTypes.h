@@ -14,12 +14,14 @@ namespace core {
 namespace implementation {
 namespace election {
 
-enum Party {
-	Red,
-	Blue
-};
+typedef std::map<int, int> ConfidenceLevels;
 
-typedef std::map<Party, int> ConfidenceLevels;
+typedef struct {
+	const int party1;
+	int confidenceLevel1;
+	const int party2;
+	int confidenceLevel2;
+} Politics;
 
 }
 }

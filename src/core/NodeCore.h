@@ -43,7 +43,9 @@ using namespace implementation;
 
 class NodeCore {
 public:
-	typedef bool (NodeCore::*_sendToAll)(const Message&, const int&);
+	typedef bool (NodeCore::*_sendEcho)(const string& content);
+	typedef bool (NodeCore::*_sendTo)(const Message&, const int& nodeID) const;
+	typedef bool (NodeCore::*_sendToAll)(const Message&, const int& excludedNodeID);
 	typedef bool (NodeCore::*_sendResult)(const Message&);
 
 	NodeCore(Settings* configurator);
@@ -59,6 +61,7 @@ public:
 
 	void loop();
 
+	bool sendTo(const Message& message, const int& nodeID) const;
 	bool sendTo(const Message& message, const NodeInfo& destination) const;
 
 	const NodeInfo& getNodeInfo() const {
@@ -77,13 +80,14 @@ private:
 	NodeInfo listenerNodeInfo;
 	helper::time::VectorTime* vectorTime;
 
-	Echos echoData;
+	EchoBuffer echoBuffer;
 
 	void showDetails();
 
 	void handleControlMessage(const Message& message);
 	void handleApplicationMessage(const Message& message);
 	void handleEchoMessage(const Message& message);
+	bool sendEcho(const string& content);
 	bool sendToDestinationsImpl(const Message& message, const NodeMap& destinations);
 	bool sendToDestinations(const Message& message, const int& expectedNodeID);
 

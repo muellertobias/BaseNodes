@@ -33,33 +33,31 @@ NodeElectionSettings::~NodeElectionSettings() {
 
 core::implementation::INodeImpl* NodeElectionSettings::getNodeImplementation() {
 	using namespace core::implementation::election;
-	int sizeOfGraph = this->allNodes.size() - 1;
-	cout << sizeOfGraph << endl;
-	if (this->nodeID == 1 || this->nodeID == sizeOfGraph) {
+	int biggestNodeID = this->allNodes.size() - 1;
+	//cout << biggestNodeID << endl;
+	if (this->nodeID == 1 || this->nodeID == biggestNodeID) {
 		// Kandidaten
-		Party party = this->nodeID == 1 ? Party::Red : Party::Blue;
-		cout << party << endl;
-		return new CandidateNodeCoreImpl(config, party);
+		return new CandidateNodeCoreImpl(config, this->nodeID);
 	} else {
 		// Wähler
 		core::implementation::election::ConfidenceLevels* confidenceLevels = new ConfidenceLevels();
-		confidenceLevels->insert(pair<Party,int>(Party::Red, 0));
-		confidenceLevels->insert(pair<Party,int>(Party::Blue, 0));
+
+		Politics politics = {1, 0, biggestNodeID, 0};
 
 		const NodeMap& neighbors = this->neighborSearcher->getNeighbors(this->nodeID);
 		if (neighbors.find(1) != neighbors.end()) {
 			// Parteifreund von 1
-			confidenceLevels->at(Party::Red) = 100;
-		} else if (neighbors.find(sizeOfGraph) != neighbors.end()) {
+			politics.confidenceLevel1 = 100;
+		} else if (neighbors.find(biggestNodeID) != neighbors.end()) {
 			// Parteifreund von n
-			confidenceLevels->at(Party::Blue) = 100;
+			politics.confidenceLevel2 = 100;
 		} else {
 			// Normaler Wähler
-			confidenceLevels->at(Party::Red) = randomizer::random(0, 100);
-			confidenceLevels->at(Party::Blue) = randomizer::random(0, 100);
+			politics.confidenceLevel1 = randomizer::random(0, 100);;
+			politics.confidenceLevel2 = randomizer::random(0, 100);;
 		}
 
-		return new VoterNodeCoreImpl(confidenceLevels);
+		return new VoterNodeCoreImpl(politics);
 	}
 }
 

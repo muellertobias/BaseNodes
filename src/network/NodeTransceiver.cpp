@@ -6,9 +6,18 @@
  */
 
 #include "NodeTransceiver.h"
+
+#include <stddef.h>
+#include <cctype>
+#include <cerrno>
+#include <cstring>
+#include <iostream>
+#include <map>
 #include <vector>
+
 #include "../helper/exception/NetworkException.h"
-#include "../message/Message.h"
+#include "../helper/NodeInfo.h"
+#include "../helper/utilities/utilities.h"
 
 namespace network {
 
@@ -19,10 +28,11 @@ NodeTransceiver::NodeTransceiver(const std::string& address, const int& port,
 	}
 }
 
-NodeTransceiver::NodeTransceiver(const NodeInfo& nodeInfo, const int& numberOfConnections, bool isReceiver) {
+NodeTransceiver::NodeTransceiver(const NodeInfo& nodeInfo, const int& numberOfConnections, const NodeMap& staticNames, bool isReceiver) {
 	if (isReceiver) {
 		createReceiver(nodeInfo, numberOfConnections);
 	}
+	staticNameService = staticNames;
 }
 
 NodeTransceiver::~NodeTransceiver() {
@@ -44,29 +54,42 @@ string NodeTransceiver::receive() const {
 	do {
 		memset(buffer.data(), '\0', buffer.size());
 		receivedSize = recv(clientSocketID, buffer.data(), buffer.size(), 0);
-		msg.append(buffer.begin(), buffer.end());
+		if (buffer.size() > 0)
+			msg.append(buffer.begin(), buffer.end());
 	} while (receivedSize == buffer.size());
 
 	close(clientSocketID);
+
 	return msg;
 }
 
 bool NodeTransceiver::sendTo(const NodeInfo& destination, const string& message) {
 	int socketID = socket(AF_INET, SOCK_STREAM, 0);
 	if (socketID < 0) {
-		//cerr << "Error: socket" << endl;
+		helper::utilities::writeLog(__FUNCTION__, "Error: socket to " + to_string(destination.NodeID));
 		return false;
 	}
-
+	//int connected = 5;
+	//do {
 	if (connect(socketID, (struct sockaddr*)&destination.Address, sizeof(destination.Address)) < 0) {
-		//cerr << "Error: connect" << endl;
+		helper::utilities::writeLog(__FUNCTION__, "Error: connect to " + to_string(destination.NodeID) + " - " + strerror(errno));
 		return false;
 	}
+			//			//return false;
+//			sleep(1);
+//			connected--;
+//		} else {
+//			connected = 0;
+//		}
+//	} while (connected > 0);
+
 
 	vector<char> cstr(message.c_str(), message.c_str() + message.size() + 1);
 
+	// Retry einbauen
 	if (send(socketID, cstr.data(), cstr.size(), 0) < 0) {
 		//cerr << "Error: send" << endl;
+		helper::utilities::writeLog(__FUNCTION__, "Error: send to " + to_string(destination.NodeID));
 		close(socketID);
 		return false;
 	}
@@ -74,14 +97,21 @@ bool NodeTransceiver::sendTo(const NodeInfo& destination, const string& message)
 	return true;
 }
 
-string NodeTransceiver::resolve(const NodeInfo& nodeInfo) const {
+void NodeTransceiver::resolve(const NodeInfo& nodeInfo, std::string& address) {
 	char cstr[INET_ADDRSTRLEN];
 	inet_ntop(AF_INET, &(nodeInfo.Address.sin_addr), cstr, INET_ADDRSTRLEN);
 
-	string addressStr(cstr);
-	addressStr.append(":");
-	addressStr.append(to_string(nodeInfo.Address.sin_port));
-	return addressStr;
+	address.append(cstr);
+	address.append(":");
+	address.append(to_string(nodeInfo.Address.sin_port));
+}
+
+void NodeTransceiver::resolve(const int& nodeID, NodeInfo& nodeInfo) {
+	if (nodeID == 0) {
+		nodeInfo = this->staticNameService.rbegin()->second;
+	} else {
+		nodeInfo = this->staticNameService.at(nodeID);
+	}
 }
 
 bool NodeTransceiver::createReceiver(const std::string& address,

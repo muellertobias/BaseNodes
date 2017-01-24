@@ -35,7 +35,10 @@ enum MessageType {
 class Message : public Serializable {
 public:
 	Message(const string& str);
+	Message(const MessageType& type, const string& content);
+	Message(const MessageType& type, int number, const string& content);
 	Message(const MessageType& type, int number, int sourceID, const string& content);
+
 	virtual ~Message();
 
 	const MessageType& getType() const {
@@ -83,7 +86,6 @@ public:
 	}
 
 private:
-
 	MessageType type;
 	int number;
 	int sourceID;

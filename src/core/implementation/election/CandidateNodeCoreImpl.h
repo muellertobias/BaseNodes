@@ -20,7 +20,7 @@ namespace election {
 
 class CandidateNodeCoreImpl : public INodeImpl {
 public:
-	CandidateNodeCoreImpl(const int& callPeriod, const Party& party);
+	CandidateNodeCoreImpl(const int& callPeriod, const int& party);
 	virtual ~CandidateNodeCoreImpl();
 
 	virtual void process(const Message& message);
@@ -29,7 +29,7 @@ public:
 
 private:
 	const int recallPeriod;
-	const Party party;
+	const int party;
 	int recalls;
 };
 

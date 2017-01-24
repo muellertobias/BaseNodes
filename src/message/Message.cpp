@@ -10,7 +10,8 @@
 #include "../helper/string/trim.h"
 #include "../helper/utilities/tinyxml2.h"
 #include <sstream>
-
+#include "../helper/randomizer/Random.h"
+#include "../helper/exception/NodeBaseException.h"
 
 namespace network {
 
@@ -22,6 +23,15 @@ Message::Message(const string& str) {
 	}
 }
 
+Message::Message(const MessageType& type, const string& content)
+	: Message(type, helper::randomizer::random(0, 9999), 0, content) {
+}
+
+Message::Message(const MessageType& type, int number, const string& content)
+	: Message(type, number, 0, content) {
+
+}
+
 Message::Message(const MessageType& type, int number ,int sourceID, const string& content)
 	: type(type), number(number), sourceID(sourceID), destinationID(-1), content(content) {
 }
@@ -30,6 +40,9 @@ Message::~Message() {
 }
 
 bool Message::read(const string& str) {
+	if (str.empty()) {
+		throw new helper::exception::NodeBaseException("Message creation failed! StringContent:" + str);
+	}
 	// TODO Error Handling
 	// XML
 	XMLDocument doc;
@@ -146,5 +159,3 @@ bool Message::setVectorTime(const int& nodeID, const int& time) {
 }
 
 } /* namespace network */
-
-
