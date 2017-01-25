@@ -15,7 +15,7 @@
 namespace core {
 namespace implementation {
 
-using namespace network;
+using namespace message;
 using namespace std;
 
 

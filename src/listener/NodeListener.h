@@ -15,7 +15,9 @@
 namespace helper {
 namespace listener {
 
+using namespace message;
 using namespace network;
+
 
 class NodeListener {
 public:

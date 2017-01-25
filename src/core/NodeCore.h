@@ -37,6 +37,7 @@ using namespace std;
 using namespace helper::settings;
 using namespace network;
 using namespace helper;
+using namespace message;
 
 namespace core {
 using namespace implementation;

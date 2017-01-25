@@ -6,8 +6,14 @@
  */
 
 #include "CandidateNodeCoreImpl.h"
+
+#include <exception>
+#include <iostream>
+#include <string>
+
 #include "../../../helper/randomizer/Random.h"
 #include "../../../helper/utilities/utilities.h"
+#include "../../NodeCore.h"
 
 namespace core {
 namespace implementation {

@@ -13,7 +13,7 @@
 #include "ElectionTypes.h"
 #include <set>
 
-using network::Message;
+using namespace message;
 
 namespace core {
 namespace implementation {

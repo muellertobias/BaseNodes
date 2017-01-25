@@ -16,6 +16,8 @@
 
 using namespace core;
 using namespace std;
+using namespace message;
+
 
 class Initiator {
 public:

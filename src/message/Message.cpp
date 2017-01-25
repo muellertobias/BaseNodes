@@ -13,7 +13,7 @@
 #include "../helper/randomizer/Random.h"
 #include "../helper/exception/NodeBaseException.h"
 
-namespace network {
+namespace message {
 
 using namespace tinyxml2;
 
@@ -158,4 +158,4 @@ bool Message::setVectorTime(const int& nodeID, const int& time) {
 
 }
 
-} /* namespace network */
+} /* namespace message */

@@ -11,7 +11,7 @@
 #include "../helper/utilities/tinyxml2.h"
 #include <string>
 
-namespace network {
+namespace message {
 
 class Serializable {
 public:

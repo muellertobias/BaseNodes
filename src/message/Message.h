@@ -8,7 +8,6 @@
 #ifndef MESSAGE_MESSAGE_H_
 #define MESSAGE_MESSAGE_H_
 
-#include <iostream>
 #include <string>
 
 #include "../helper/time/VectorTime.h"
@@ -19,7 +18,7 @@
 using namespace std;
 
 
-namespace network {
+namespace message {
 
 using namespace helper::time;
 

@@ -12,7 +12,8 @@
 #include "../INodeImpl.h"
 #include "ElectionTypes.h"
 
-using network::Message;
+using namespace message;
+
 
 namespace core {
 namespace implementation {

@@ -12,7 +12,7 @@
 #include "../../message/Message.h"
 #include <string>
 
-using namespace network;
+using namespace message;
 
 typedef int MessageSource;
 typedef int MessageNumber;
