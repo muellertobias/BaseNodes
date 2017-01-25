@@ -21,29 +21,31 @@ CandidateNodeCoreImpl::~CandidateNodeCoreImpl() {
 }
 
 void CandidateNodeCoreImpl::process(const Message& message) {
-	//cout << core->getNodeInfo().NodeID << " : Callperiod=" << recallPeriod << ", current Recalls= " << recalls << ", Party=" << party << endl;
 	try {
-		if (message.getType() == MessageType::explorer) {
+		if (message.getType() == MessageType::control) {
+			// Reset or Init
+		} else {
+			if (message.getType() == MessageType::explorer) {
 				// Campaign des Gegners!
-		} else if (message.getType() == MessageType::echo) {
-			// Die Antworten der eigenen Campaign
-			cout << party << " - " << "Campaign war erfolgreich!" << endl;
+			} else if (message.getType() == MessageType::echo) {
+				// Die Antworten der eigenen Campaign
+				cout << party << " - " << "Campaign war erfolgreich!" << endl;
 
-		} else if (message.getType() == MessageType::application) {
-			// Voter's Choice
-			cout << party << " - " << message.getSourceID() << ": " << message.getContent() << endl;
-		}
-		recalls++;
-		if (recalls % recallPeriod == 1) {
-			// starte Campaign oder VoteMe
-			int strategy = randomizer::random(0, 1);
-			if (strategy == 0) {
-				cout << party << " - " << "Start Campaign!" << endl;
-				(getCore()->*sendEcho)(to_string(party));
-			} else {
-				cout << party << " - " << "Start VoteMe!" << endl;
-				Message voteMe(MessageType::application, to_string(party));
-				(getCore()->*sendToAll)(voteMe, 0);
+			} else if (message.getType() == MessageType::application) {
+				// Voter's Choice
+				cout << party << " - " << message.getSourceID() << ": " << message.getContent() << endl;
+			}
+			recalls++;
+			if (recalls % recallPeriod == 1) {
+				// starte Campaign oder VoteMe
+				int strategy = randomizer::random(0, 1);
+				if (strategy == 0) {
+					cout << party << " - " << "Start Campaign!" << endl;
+					startCampaign();
+				} else {
+					cout << party << " - " << "Start VoteMe!" << endl;
+					callVoteMe();
+				}
 			}
 		}
 	} catch (std::exception& ex) {
@@ -64,6 +66,15 @@ void CandidateNodeCoreImpl::process(const Message& message) {
 }
 
 void CandidateNodeCoreImpl::getState(string& state) {
+}
+
+void CandidateNodeCoreImpl::startCampaign() {
+	(getCore()->*sendEcho)(to_string(party));
+}
+
+void CandidateNodeCoreImpl::callVoteMe() {
+	Message voteMe(MessageType::application, to_string(party));
+	(getCore()->*sendToAll)(voteMe, 0);
 }
 
 } /* namespace election */

@@ -31,6 +31,9 @@ private:
 	const int recallPeriod;
 	const int party;
 	int recalls;
+
+	void startCampaign();
+	void callVoteMe();
 };
 
 } /* namespace election */

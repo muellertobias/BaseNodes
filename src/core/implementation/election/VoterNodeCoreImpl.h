@@ -30,6 +30,9 @@ public:
 private:
 	Politics politics;
 	set<int> receivedMessageNumbers;
+
+	void resolveConfidenceLevels(const int& party, int& opponent, int* confidenceLevelOfCandidate, int* confidenceLevelOfOpponent);
+	void limitConfidenceLevel(int* confidenceLevel);
 };
 
 } /* namespace election */

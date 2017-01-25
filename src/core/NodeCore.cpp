@@ -8,19 +8,20 @@
 #include "NodeCore.h"
 
 #include <stddef.h>
+#include <initializer_list>
+#include <iostream>
 #include <iterator>
 #include <sstream>
+#include <utility>
 
 #include "../helper/Constants.h"
 #include "../helper/exception/NetworkException.h"
-#include "../helper/exception/NodeBaseException.h"
+#include "../helper/randomizer/Random.h"
 #include "../helper/settings/Settings.h"
 #include "../helper/utilities/tinyxml2.h"
 #include "../helper/utilities/utilities.h"
-#include "../network/NodeTransceiver.h"
+#include "../network/TransceiverBase.h"
 #include "implementation/INodeImpl.h"
-#include "implementation/NodeCoreBaseImpl.h"
-#include "../helper/randomizer/Random.h"
 
 
 namespace core {
