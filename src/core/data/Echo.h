@@ -16,7 +16,7 @@ typedef struct {
 	int counter;
 } Echos;
 
-typedef pair<int, Echos> EchoEntry;
-typedef map<int, Echos> EchoBuffer;
+typedef std::pair<int, Echos> EchoEntry;
+typedef std::map<int, Echos> EchoBuffer;
 
 #endif /* CORE_DATA_ECHO_H_ */

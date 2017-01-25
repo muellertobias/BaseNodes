@@ -18,6 +18,15 @@ namespace core {
 namespace implementation {
 namespace election {
 
+// Messages to handle
+// - Reset
+// - MessageType::explorer -> Campaign content=NodeID von C
+// - MessageType::application -> VoteMe content=NodeID von C
+
+// Messages to send
+// - MessageType::application -> IVoteYou directly to Candidate
+// - MessageType::application -> IDontVoteYou directly to Candidate
+
 VoterNodeCoreImpl::VoterNodeCoreImpl(const Politics& politics)
 : politics(politics) {
 }
@@ -25,20 +34,43 @@ VoterNodeCoreImpl::VoterNodeCoreImpl(const Politics& politics)
 VoterNodeCoreImpl::~VoterNodeCoreImpl() {
 }
 
-void VoterNodeCoreImpl::process(const Message& message) {
-	//cout << core->getNodeInfo().NodeID << " : Red=" << confidenceLevels->at(Party::Red) << ", Blue=" << confidenceLevels->at(Party::Blue) << endl;
-	if (message.getType() == MessageType::explorer) {
+
+void VoterNodeCoreImpl::process(Message* const message) {
+	if (dynamic_cast<ControlMessage*>(message) != NULL) {
+		process((ControlMessage*)message);
+	} else if (dynamic_cast<ApplicationMessage*>(message) != NULL) {
+		process((ApplicationMessage*)message);
+	}
+}
+
+void VoterNodeCoreImpl::process(ControlMessage* const message) {
+	cout << "Voter-"<< core->getNodeInfo().NodeID << " - Received ControlMessage" << endl;
+}
+
+void VoterNodeCoreImpl::process(ApplicationMessage* const message) {
+	//cout << "Voter-"<< core->getNodeInfo().NodeID << " - Received ApplicationMessage" << endl;
+	//cout << message->toString() << endl;
+	if (message->getType() == MessageSubType::explorer) {
 		// Campaign
-		if (!helper::utilities::isNumber(message.getContent())) {
-			helper::utilities::writeLog(message.getContent() + " is not a number! - ignored message");
+		if (!helper::utilities::isNumber(message->getContent())) {
+			helper::utilities::writeLog(message->getContent() + " is not a number! - ignored message");
 			return;
 		}
 
-		int party = stoi(message.getContent());
+		int party = stoi(message->getContent());
 		int opponent;
-		int* confidenceLevelOfCandidate = 0;
-		int* confidenceLevelOfOpponent = 0;
-		resolveConfidenceLevels(party, opponent, confidenceLevelOfCandidate, confidenceLevelOfOpponent);
+		int* confidenceLevelOfCandidate = NULL;
+		int* confidenceLevelOfOpponent = NULL;
+		if (party == 1) {
+			confidenceLevelOfCandidate = &politics.confidenceLevel1;
+			confidenceLevelOfOpponent = &politics.confidenceLevel2;
+			opponent = politics.party2;
+		} else {
+			confidenceLevelOfOpponent = &politics.confidenceLevel2;
+			confidenceLevelOfCandidate = &politics.confidenceLevel1;
+			opponent = politics.party1;
+		}
+		//resolveConfidenceLevels(party, opponent, confidenceLevelOfCandidate, confidenceLevelOfOpponent);
 
 		if (*confidenceLevelOfCandidate < *confidenceLevelOfOpponent) {
 			*confidenceLevelOfCandidate -= 1;
@@ -50,22 +82,32 @@ void VoterNodeCoreImpl::process(const Message& message) {
 
 		limitConfidenceLevel(confidenceLevelOfCandidate);
 		limitConfidenceLevel(confidenceLevelOfOpponent);
-		//cout << party << "=" << *cl1 << ", " << party2 << "=" << *cl2 << endl;
+		cout << party << "=" << *confidenceLevelOfCandidate << ", " << opponent << "=" << *confidenceLevelOfOpponent << endl;
 
-	} else if (message.getType() == MessageType::application) {
-		set<int>::iterator it = receivedMessageNumbers.find(message.getNumber());
+	} else if (message->getType() == MessageSubType::normal) {
+		set<int>::iterator it = receivedMessageNumbers.find(message->getNumber());
 		// nur VoteMe akzeptieren, wenn man es nicht schon gehört hat
 		if (it != receivedMessageNumbers.end()) {
 			return;
 		}
-		receivedMessageNumbers.insert(message.getNumber());
+		receivedMessageNumbers.insert(message->getNumber());
 
-		int party = stoi(message.getContent());
+		int party = stoi(message->getContent());
 		int* confidenceLevelOfCandidate = NULL;
 		int* confidenceLevelOfOpponent = NULL;
 		int opponent = 0;
 
-		resolveConfidenceLevels(party, opponent, confidenceLevelOfCandidate, confidenceLevelOfOpponent);
+		if (party == 1) {
+			confidenceLevelOfCandidate = &politics.confidenceLevel1;
+			confidenceLevelOfOpponent = &politics.confidenceLevel2;
+			opponent = politics.party2;
+		} else {
+			confidenceLevelOfOpponent = &politics.confidenceLevel2;
+			confidenceLevelOfCandidate = &politics.confidenceLevel1;
+			opponent = politics.party1;
+		}
+
+		//resolveConfidenceLevels(party, opponent, confidenceLevelOfCandidate, confidenceLevelOfOpponent);
 
 		(*confidenceLevelOfCandidate) += round(*confidenceLevelOfCandidate / 10);
 		if (*confidenceLevelOfCandidate > 100)
@@ -82,27 +124,25 @@ void VoterNodeCoreImpl::process(const Message& message) {
 			voting = "I Dont Vote You";
 		} else if (*confidenceLevelOfCandidate > *confidenceLevelOfOpponent) {
 			voting = "I Vote You";
-			(getCore()->*sendToAll)(message, message.getSourceID());
+			(getCore()->*sendToAll)(message, message->getSourceID());
 			// Dies verursacht das Unendliche Senden von VoteMe_messages
 			// Abgefangen durch sammeln der MessageNumbers
 		}
 
-		//cout << party << "=" << *cl1 << ", " << party2 << "=" << *cl2 << " - " << message.getNumber() << endl;
+		cout << party << "=" << *confidenceLevelOfCandidate << ", " << opponent << "=" << *confidenceLevelOfOpponent << " - " << message->getNumber() << endl;
 		if (!voting.empty()) {
-			Message replyMsg(MessageType::application, message.getNumber(), voting);
-			(getCore()->*sendTo)(replyMsg, (int)party);
+			ApplicationMessage* replyToCandidate = new ApplicationMessage(MessageSubType::normal, message->getNumber(), voting);
+			(getCore()->*sendTo)(replyToCandidate, (int)party);
 		}
 	}
-	// Messages to handle
-	// - Reset
-	// - MessageType::explorer -> Campaign content=NodeID von C
-	// - MessageType::application -> VoteMe content=NodeID von C
+}
 
-	// Messages to send
-	// - MessageType::application -> IVoteYou directly to Candidate
-	// - MessageType::application -> IDontVoteYou directly to Candidate
+/*
+void VoterNodeCoreImpl::process(const Message& message) {
+	//cout << core->getNodeInfo().NodeID << " : Red=" << confidenceLevels->at(Party::Red) << ", Blue=" << confidenceLevels->at(Party::Blue) << endl;
 
 }
+*/
 
 void VoterNodeCoreImpl::getState(string& state) {
 }

@@ -11,37 +11,36 @@
 #include <string>
 
 #include "../helper/time/VectorTime.h"
-#include "../helper/utilities/tinyxml2.h"
-#include "Serializable.h"
-
-
-using namespace std;
-
 
 namespace message {
 
+using namespace std;
 using namespace helper::time;
 
-enum MessageType {
+enum MessageSubType {
 	undefined,
-	control,
-	application,
+	normal,
 	log,
 	explorer,
 	echo
 };
 
-class Message : public Serializable {
+class Message {
 public:
-	Message(const string& str);
-	Message(const MessageType& type, const string& content);
-	Message(const MessageType& type, int number, const string& content);
-	Message(const MessageType& type, int number, int sourceID, const string& content);
+	Message(const MessageSubType& type, const string& content);
+	Message(const MessageSubType& type, int number, const string& content);
+	Message(const MessageSubType& type, int number, int sourceID, const string& content);
 
 	virtual ~Message();
 
-	const MessageType& getType() const {
+	virtual Message* prototype() = 0;
+
+	const MessageSubType& getType() const {
 		return type;
+	}
+
+	void setType(MessageSubType type) {
+		this->type = type;
 	}
 
 	int getNumber() const {
@@ -60,11 +59,7 @@ public:
 		return content;
 	}
 
-	virtual bool read(const string& str);
-	virtual string write() const;
-	virtual tinyxml2::XMLElement* writeXMLElement(tinyxml2::XMLDocument& doc) const;
-
-	string toString() const;
+	virtual string toString() const;
 
 	bool setVectorTime(const int& nodeID, const int& time);
 
@@ -84,8 +79,8 @@ public:
 		destinationID = destinationId;
 	}
 
-private:
-	MessageType type;
+protected:
+	MessageSubType type;
 	int number;
 	int sourceID;
 	int destinationID;

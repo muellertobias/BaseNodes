@@ -10,7 +10,6 @@
 
 #include <string>
 
-#include "../../core/implementation/rumor/RumorNodeCoreImpl.h"
 #include "../NodeInfo.h"
 #include "Settings.h"
 
@@ -34,14 +33,14 @@ public:
 
 	NodeInfo getCurrentNodeInfo();
 	NodeInfo getNodeInfo(int nodeID);
-	NodeMap getNeighbors();
+	NodeMap getNeighbors() const;
 
 	virtual int getNodeId() const {
 		return nodeID;
 	}
 
 	virtual core::implementation::INodeImpl* getNodeImplementation() {
-		return new core::implementation::rumor::RumorNodeCoreImpl(config);
+		return nullptr;
 	}
 
 	virtual network::TransceiverBase* getTransceiver();

@@ -8,9 +8,9 @@
 #ifndef LISTENER_NODELISTENER_H_
 #define LISTENER_NODELISTENER_H_
 
-#include "../message/Message.h"
 #include "../network/TransceiverBase.h"
-#include "../network/NodeTransceiver.h"
+#include "../message/Message.h"
+#include "../message/ControlMessage.h"
 
 namespace helper {
 namespace listener {
@@ -28,9 +28,11 @@ public:
 
 private:
 	TransceiverBase* transceiver;
+	bool isRunning;
 
-	Message receive() const;
-	void print(const Message& message);
+	Message* receive() const;
+	void handle(ControlMessage* message);
+	void print(Message* const message);
 };
 
 } /* namespace listener */

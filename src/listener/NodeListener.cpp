@@ -12,6 +12,7 @@
 
 #include "../helper/Constants.h"
 #include "../helper/utilities/tinyxml2.h"
+#include "../message/MessageFactory.h"
 
 namespace helper {
 namespace listener {
@@ -20,37 +21,30 @@ using namespace tinyxml2;
 
 NodeListener::NodeListener(TransceiverBase* transceiver) {
 	this->transceiver = transceiver;
+	this->isRunning = true;
 }
 
 NodeListener::~NodeListener() {
-	delete this->transceiver;
+	//delete this->transceiver;
 }
 
 void NodeListener::loop() {
-	bool isRunning = true;
 	while (isRunning) {
 		cout << "Listen..." << endl;
-		Message message = receive();
-
-		if (message.getType() == MessageType::control) {
-			const string& content = message.getContent();
-			if (content.find(constants::ShutdownMessage) != string::npos) {
-				isRunning = false;
-			}
-		}
-
+		Message* message = receive();
+		handle((ControlMessage*)message);
 		print(message);
 	}
 }
 
-Message NodeListener::receive() const {
+Message* NodeListener::receive() const {
 	string buffer = transceiver->receive();
-	return Message(buffer);
+	return MessageFactory::create(buffer);
 }
 
-void NodeListener::print(const Message& message) {
-	if (message.getType() == MessageType::log) {
-		string content = message.getContent();
+void NodeListener::print(Message* const message) {
+	if (message->getType() == MessageSubType::log) {
+		string content = message->getContent();
 		// XML
 		XMLDocument doc;
 		doc.Parse(content.c_str(), content.length());
@@ -64,7 +58,14 @@ void NodeListener::print(const Message& message) {
 			cout << element->GetText() << endl;
 		}
 	} else {
-		cout << message.getContent() << endl;
+		cout << message->getContent() << endl;
+	}
+}
+
+void NodeListener::handle(ControlMessage* message) {
+	const string& content = message->getContent();
+	if (content.find(constants::ShutdownMessage) != string::npos) {
+		this->isRunning = false;
 	}
 }
 

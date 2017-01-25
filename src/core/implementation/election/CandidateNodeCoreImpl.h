@@ -8,7 +8,8 @@
 #ifndef CORE_IMPLEMENTATION_ELECTION_CANDIDATENODECOREIMPL_H_
 #define CORE_IMPLEMENTATION_ELECTION_CANDIDATENODECOREIMPL_H_
 
-#include "../../../message/Message.h"
+#include "../../../message/ApplicationMessage.h"
+#include "../../../message/ControlMessage.h"
 #include "../INodeImpl.h"
 #include "ElectionTypes.h"
 
@@ -24,7 +25,7 @@ public:
 	CandidateNodeCoreImpl(const int& callPeriod, const int& party);
 	virtual ~CandidateNodeCoreImpl();
 
-	virtual void process(const Message& message);
+	virtual void process(Message* const message);
 	virtual void getState(string& state);
 
 
@@ -32,6 +33,9 @@ private:
 	const int recallPeriod;
 	const int party;
 	int recalls;
+
+	void process(ControlMessage* const message);
+	void process(ApplicationMessage* const message);
 
 	void startCampaign();
 	void callVoteMe();

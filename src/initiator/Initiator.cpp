@@ -7,14 +7,8 @@
 
 #include "Initiator.h"
 
-#include <iostream>
-#include <map>
-
-#include "../helper/Constants.h"
-#include "../helper/randomizer/Random.h"
-
-Initiator::Initiator(const NodeCore& core)
-: core(core), nodes(core.getNeighbors()) {
+Initiator::Initiator(Settings* settings)
+	: nodes(settings->getNeighbors()), transceiver(settings->getTransceiver()) {
 }
 
 void Initiator::loop() {
@@ -71,9 +65,8 @@ void Initiator::tell() {
 		cout << "Nachrichtentext > ";
 		string content = readInput();
 
-		int number = helper::randomizer::random(0, 9999);
-		Message message(MessageType::control, number, 0, content);
-
+		//Message message(MessageType::control, number, 0, content);
+		Message* message = new ControlMessage(MessageSubType::normal, 0, content);
 		if (sendTo(message, nodeInfo)) {
 			cout << "Erfolgreich!" << endl;
 		} else {
@@ -98,7 +91,7 @@ void Initiator::echo() {
 		cout << nodeInfo.NodeID << " gefunden!" << endl;
 
 		int number = helper::randomizer::random(0, 9999);
-		Message message(MessageType::control, number, 0, "Echo");
+		Message* message = new ControlMessage(MessageSubType::normal, number, 0, "Echo");
 
 		if (sendTo(message, nodeInfo)) {
 			cout << "Erfolgreich!" << endl;
@@ -157,11 +150,10 @@ void Initiator::snapshoot() {
 
 bool Initiator::sendTo(const string& content, const NodeInfo& nodeInfo, int sourceID) {
 	int number = helper::randomizer::random(0, 9999);
-
-	Message message(MessageType::control, number, sourceID, content);
-	return this->core.sendTo(message, nodeInfo);
+	Message* message = new ControlMessage(MessageSubType::normal, number, sourceID, content);
+	return this->sendTo(message, nodeInfo);
 }
 
-bool Initiator::sendTo(const Message& message, const NodeInfo& nodeInfo) {
-	return this->core.sendTo(message, nodeInfo);
+bool Initiator::sendTo(Message* const message, const NodeInfo& nodeInfo) {
+	return this->transceiver->sendTo(nodeInfo, MessageFactory::convertToString(message));
 }

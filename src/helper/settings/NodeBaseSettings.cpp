@@ -13,6 +13,7 @@
 #include <sys/socket.h>
 #include <cctype>
 #include <fstream>
+#include <initializer_list>
 #include <map>
 #include <utility>
 #include <vector>
@@ -53,7 +54,7 @@ NodeInfo NodeBaseSettings::getCurrentNodeInfo() {
 	return getNodeInfo(this->nodeID);
 }
 
-NodeMap NodeBaseSettings::getNeighbors() {
+NodeMap NodeBaseSettings::getNeighbors() const {
 	if (neighborSearcher != nullptr)
 		return neighborSearcher->getNeighbors(this->nodeID);
 	else

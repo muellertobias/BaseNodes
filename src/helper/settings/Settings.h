@@ -29,7 +29,7 @@ public:
 	virtual ~Settings() { }
 	virtual NodeInfo getCurrentNodeInfo() = 0;
 	virtual NodeInfo getNodeInfo(int nodeID) = 0;
-	virtual NodeMap getNeighbors() = 0;
+	virtual NodeMap getNeighbors() const = 0;
 	virtual int getNodeId() const = 0;
 	virtual core::implementation::INodeImpl* getNodeImplementation() = 0;
 	virtual network::TransceiverBase* getTransceiver() = 0;

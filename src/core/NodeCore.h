@@ -9,13 +9,22 @@
 #define NODECORE_H_
 
 #include <map>
-#include <vector>
 #include <string>
+#include <vector>
 
 #include "../helper/NodeInfo.h"
-#include "../helper/time/VectorTime.h"
-#include "../message/Message.h"
 #include "data/Echo.h"
+
+namespace helper {
+namespace time {
+class VectorTime;
+} /* namespace time */
+} /* namespace helper */
+namespace message {
+class ApplicationMessage;
+class ControlMessage;
+class Message;
+} /* namespace message */
 
 namespace core {
 namespace implementation {
@@ -45,9 +54,9 @@ using namespace implementation;
 class NodeCore {
 public:
 	typedef bool (NodeCore::*_sendEcho)(const string& content);
-	typedef bool (NodeCore::*_sendTo)(const Message&, const int& nodeID) const;
-	typedef bool (NodeCore::*_sendToAll)(const Message&, const int& excludedNodeID);
-	typedef bool (NodeCore::*_sendResult)(const Message&);
+	typedef bool (NodeCore::*_sendTo)(Message* const, const int& nodeID) const;
+	typedef bool (NodeCore::*_sendToAll)(Message* const, const int& excludedNodeID);
+	typedef bool (NodeCore::*_sendResult)(Message* const message);
 
 	NodeCore(Settings* configurator);
 	virtual ~NodeCore();
@@ -62,14 +71,14 @@ public:
 
 	void loop();
 
-	bool sendTo(const Message& message, const int& nodeID) const;
-	bool sendTo(const Message& message, const NodeInfo& destination) const;
+	bool sendTo(Message* const message, const int& nodeID) const;
+	bool sendTo(Message* const message, const NodeInfo& destination) const;
 
 	const NodeInfo& getNodeInfo() const {
 		return nodeInfo;
 	}
 
-	const Message receive();
+	Message* receive();
 
 private:
 	NodeInfo nodeInfo;
@@ -85,16 +94,16 @@ private:
 
 	void showDetails();
 
-	void handleControlMessage(const Message& message);
-	void handleApplicationMessage(const Message& message);
-	void handleEchoMessage(const Message& message);
+	void handleControlMessage(ControlMessage* const message);
+	void handleApplicationMessage(ApplicationMessage* const message);
+	void handleEchoMessage(Message* const message);
 	bool sendEcho(const string& content);
-	bool sendToDestinationsImpl(const Message& message, const NodeMap& destinations);
-	bool sendToDestinations(const Message& message, const int& expectedNodeID);
+	bool sendToDestinationsImpl(Message* const message, const NodeMap& destinations);
+	bool sendToDestinations(Message* const message, const int& expectedNodeID);
 
-	void shutdown(const Message& message);
+	void shutdown(ControlMessage* const message);
 	void sendSnapshot();
-	bool sendToListener(const Message& message);
+	bool sendToListener(Message* const message);
 	bool sendStatusToListener(const string& status);
 };
 

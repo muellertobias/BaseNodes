@@ -22,7 +22,8 @@ using namespace std;
 class INodeImpl {
 public:
 	virtual ~INodeImpl() {};
-	virtual void process(const Message& message) = 0;
+	virtual void process(Message* const message) = 0;
+
 	virtual void getState(string& state) = 0;
 
 	void setSendEcho(NodeCore::_sendEcho sendEcho) {

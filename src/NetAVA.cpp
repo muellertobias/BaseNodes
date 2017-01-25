@@ -14,6 +14,7 @@
 #include "core/NodeCore.h"
 #include "helper/neighborFinders/GraphvizNeighborsCreator.h"
 #include "helper/settings/NodeElectionSettings.h"
+#include "helper/settings/InitiatorSettings.h"
 #include "helper/utilities/utilities.h"
 #include "initiator/Initiator.h"
 #include "listener/NodeListener.h"
@@ -52,9 +53,8 @@ int main(int argc, char** argv) {
 	if (argc == 3) {
 		try {
 			cout << "load configure..." << endl;
-			helper::settings::NodeBaseSettings configReader(addressFilename);
+			helper::settings::InitiatorSettings settings(addressFilename);
 			cout << "init core configuration..." << endl;
-			NodeCore core(&configReader);
 			cout << "init core application..." << endl;
 
 
@@ -65,7 +65,7 @@ int main(int argc, char** argv) {
 				listener.loop();
 			} else if (type == "initiator") {
 				cout << "start Initiator..." << endl;
-				Initiator initiator(core);
+				Initiator initiator(&settings);
 				initiator.loop();
 			}
 		} catch (std::exception& e) {

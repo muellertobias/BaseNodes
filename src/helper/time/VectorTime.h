@@ -20,6 +20,7 @@ class VectorTime {
 public:
 	VectorTime();
 	VectorTime(const int& localID);
+	VectorTime(const VectorTime& time);
 	virtual ~VectorTime();
 
 	void setTime(const int& nodeID, const int& time);

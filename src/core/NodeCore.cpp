@@ -18,8 +18,13 @@
 #include "../helper/exception/NetworkException.h"
 #include "../helper/randomizer/Random.h"
 #include "../helper/settings/Settings.h"
+#include "../helper/time/VectorTime.h"
 #include "../helper/utilities/tinyxml2.h"
 #include "../helper/utilities/utilities.h"
+#include "../message/ApplicationMessage.h"
+#include "../message/ControlMessage.h"
+#include "../message/Message.h"
+#include "../message/MessageFactory.h"
 #include "../network/TransceiverBase.h"
 #include "implementation/INodeImpl.h"
 
@@ -39,7 +44,7 @@ NodeCore::NodeCore(Settings* settings) {
 	this->nodeImpl = settings->getNodeImplementation();
 	this->nodeImpl->setCore(this);
 	this->nodeImpl->setSendEcho(&NodeCore::sendEcho);
-	bool (NodeCore::*temp)(const Message&, const int&) const = &NodeCore::sendTo;
+	bool (NodeCore::*temp)(Message*, const int&) const = &NodeCore::sendTo;
 	this->nodeImpl->setSendTo(temp);
 	this->nodeImpl->setSendToDestinations(&NodeCore::sendToDestinations);
 	this->nodeImpl->setSendResult(&NodeCore::sendToListener);
@@ -73,23 +78,25 @@ void NodeCore::loop() {
 	try {
 		while (isRunning) {
 			try {
-				const Message& message = receive();
+				Message* message = receive();
 
-				switch (message.getType()) {
-				case MessageType::control:
-					handleControlMessage(message);
-					break;
-				case MessageType::application:
-					handleApplicationMessage(message);
-					break;
-				case MessageType::explorer:
-				case MessageType::echo:
+				if (message->getType() == MessageSubType::echo || message->getType() == MessageSubType::explorer) {
 					handleEchoMessage(message);
-					break;
-				default:
-					cerr << "Unexpected type of message!" << endl;
-					break;
+				} else if (dynamic_cast<ControlMessage*>(message) != NULL) {
+					handleControlMessage((ControlMessage*)message);
+				} else if (dynamic_cast<ApplicationMessage*>(message) != NULL) {
+					//cout << message->toString() << endl;
+					handleApplicationMessage((ApplicationMessage*)message);
 				}
+
+//				case MessageType::explorer:
+//				case MessageType::echo:
+//					handleEchoMessage(message);
+//					break;
+//				default:
+//					cerr << "Unexpected type of message!" << endl;
+//					break;
+//				}
 			} catch (const helper::exception::NetworkException& ex) {
 				helper::utilities::writeLog(__FUNCTION__, ex);
 			}
@@ -115,17 +122,19 @@ void NodeCore::showDetails() {
 	sendStatusToListener(strStream.str());
 }
 
-const Message NodeCore::receive() {
+Message* NodeCore::receive() {
 	try {
 		string incomingStr = transceiver->receive();
 
-		Message msg(incomingStr);
-		if (msg.getType() != MessageType::control) {
-			this->vectorTime->increase();
-			this->vectorTime->merge(msg.getVectorTimes());
-			this->vectorTime->setTime(this->nodeInfo.NodeID, this->vectorTime->getMaximum());
-			//cout << msg.toString() << "/" << nodeInfo.NodeID << "-Local: "<< this->vectorTime->getLocalTime() << std::endl;
-		}
+		Message* msg = MessageFactory::create(incomingStr);
+		//cout << incomingStr << endl;
+		//cout << msg->toString() << "/" << nodeInfo.NodeID << "-Local: "<< this->vectorTime->getLocalTime() << std::endl;
+
+		//if (dynamic_cast<ApplicationMessage*>(msg) != NULL) {
+		this->vectorTime->increase();
+		this->vectorTime->merge(msg->getVectorTimes());
+		this->vectorTime->setTime(this->nodeInfo.NodeID, this->vectorTime->getMaximum());
+		//}
 
 		//string* logStr = new string(to_string(this->vectorTime->getLocalTime()) + " Receive: " + msg.toString());
 		//log->push_back(logStr);
@@ -137,21 +146,20 @@ const Message NodeCore::receive() {
 	}
 }
 
-void NodeCore::handleControlMessage(const Message& message) {
+void NodeCore::handleControlMessage(ControlMessage* const message) {
 	try {
-		const string& content = message.getContent();
+		const string& content = message->getContent();
 		if (content == constants::ShutdownMessage) {
 			shutdown(message);
 		} else if (content == "Snapshot") {
 			sendSnapshot();
 		} else if (content == "Echo") {
 			Echos echo;
-			echo.EchoID = message.getNumber();
+			echo.EchoID = message->getNumber();
 			echo.FirstNeighborID = nodeInfo.NodeID;
 			echo.counter = 0;
 			this->echoBuffer.insert(EchoEntry(echo.EchoID, echo));
-
-			Message explorerMsg(MessageType::explorer, message.getNumber(), nodeInfo.NodeID, "Explorer");
+			Message* explorerMsg = new ControlMessage(MessageSubType::explorer, message->getNumber(), nodeInfo.NodeID, "Explorer");
 			sendToDestinationsImpl(explorerMsg, neighbors);
 		} else if (content == "Reset") {
 			// Resette Implementation und Vectorzeit
@@ -164,7 +172,7 @@ void NodeCore::handleControlMessage(const Message& message) {
 	}
 }
 
-void NodeCore::handleApplicationMessage(const Message& message) {
+void NodeCore::handleApplicationMessage(ApplicationMessage* const message) {
 	try {
 		nodeImpl->process(message);
 	} catch (std::exception& e) {
@@ -173,23 +181,24 @@ void NodeCore::handleApplicationMessage(const Message& message) {
 	}
 }
 
-void NodeCore::handleEchoMessage(const Message& message) {
+void NodeCore::handleEchoMessage(Message* const message) {
 	try {
-		EchoBuffer::iterator it = this->echoBuffer.find(message.getNumber());
+		EchoBuffer::iterator it = this->echoBuffer.find(message->getNumber());
 
-		if (message.getType() == MessageType::explorer) {
+		if (message->getType() == MessageSubType::explorer) {
 			if (it == this->echoBuffer.end()) {
 				Echos echo;
-				echo.EchoID = message.getNumber();
-				echo.FirstNeighborID = message.getSourceID();
+				echo.EchoID = message->getNumber();
+				echo.FirstNeighborID = message->getSourceID();
 				echo.counter = 1;
 				this->echoBuffer.insert(EchoEntry(echo.EchoID, echo));
 
 				nodeImpl->process(message);
 
-				Message explorerMsg(MessageType::explorer, message.getNumber(), nodeInfo.NodeID, message.getContent());
-				sendToDestinations(explorerMsg, message.getSourceID());
-				//cout << nodeInfo.NodeID << " - Send Explorer!" << endl;
+				Message* explorerMsg = message->prototype();
+				explorerMsg->setSourceID(nodeInfo.NodeID);
+				sendToDestinations(explorerMsg, message->getSourceID());
+				cout << nodeInfo.NodeID << " - Send Explorer!" << endl;
 			} else {
 				it->second.counter++;
 
@@ -197,7 +206,7 @@ void NodeCore::handleEchoMessage(const Message& message) {
 					// FEHLER?! Zweimal Explorer vom selben Knoten mit selber ECHO-ID (=MessageNumber)
 				//}
 			}
-		} else if (message.getType() == MessageType::echo) {
+		} else if (message->getType() == MessageSubType::echo) {
 			it->second.counter++;
 			//cout << nodeInfo.NodeID << " - Received Echo!" << endl;
 		}
@@ -205,12 +214,23 @@ void NodeCore::handleEchoMessage(const Message& message) {
 		if (it->second.counter == this->neighbors.size()) {
 			if (it->second.FirstNeighborID == nodeInfo.NodeID) {
 				//Echo erfolgreich!
-				//cout << nodeInfo.NodeID << " - ECHO erfolgreich!" << endl;
+				cout << nodeInfo.NodeID << " - ECHO erfolgreich!" << endl;
 				this->nodeImpl->process(message);
 			} else {
-				//cout << nodeInfo.NodeID << " - Send Echo!" << endl;
-				Message echoMsg(MessageType::echo, message.getNumber(), nodeInfo.NodeID, message.getContent());
+				cout << nodeInfo.NodeID << " - Send Echo!" << endl;
+				//Message echoMsg(MessageType::echo, message.getNumber(), nodeInfo.NodeID, message.getContent());
+				Message* echoMsg = echoMsg = message->prototype();
+				if (echoMsg->getType() != MessageSubType::echo) {
+					echoMsg->setType(MessageSubType::echo);
+				}
+
+				echoMsg->setSourceID(nodeInfo.NodeID);
 				sendTo(echoMsg, this->neighbors.at(it->second.FirstNeighborID));
+			}
+			if (dynamic_cast<ControlMessage*>(message) != NULL) {
+				if (message->getContent() == constants::ShutdownMessage) {
+					isRunning = !isRunning;
+				}
 			}
 		}
 	} catch (std::exception& e) {
@@ -219,7 +239,7 @@ void NodeCore::handleEchoMessage(const Message& message) {
 	}
 }
 
-bool NodeCore::sendToDestinationsImpl(const Message& message, const NodeMap& destinations) {
+bool NodeCore::sendToDestinationsImpl(Message* const message, const NodeMap& destinations) {
 	bool successfully = false;
 	for (NodeMap::const_iterator it = destinations.begin(); it != destinations.end(); ++it) {
 		successfully = sendTo(message, it->second);
@@ -227,7 +247,7 @@ bool NodeCore::sendToDestinationsImpl(const Message& message, const NodeMap& des
 	return successfully;
 }
 
-bool NodeCore::sendToDestinations(const Message& message, const int& excludedNodeID) {
+bool NodeCore::sendToDestinations(Message* const message, const int& excludedNodeID) {
 	if (excludedNodeID != 0) {
 		NodeMap otherNeighbors(neighbors.begin(), neighbors.end());
 		otherNeighbors.erase(excludedNodeID);
@@ -243,50 +263,39 @@ bool NodeCore::sendEcho(const string& content) {
 	echo.FirstNeighborID =  nodeInfo.NodeID;
 	echo.counter = 0;
 	this->echoBuffer.insert(EchoEntry(echo.EchoID, echo));
-	Message explorerMsg(MessageType::explorer, echo.EchoID, nodeInfo.NodeID, content);
+	Message* explorerMsg = new ApplicationMessage(MessageSubType::explorer, echo.EchoID, nodeInfo.NodeID, content);
 	return this->sendToDestinationsImpl(explorerMsg, neighbors);
 }
 
-bool NodeCore::sendTo(const Message& message, const int& nodeID) const {
+bool NodeCore::sendTo(Message* const message, const int& nodeID) const {
 	NodeInfo destination;
 	this->transceiver->resolve(nodeID, destination);
 	return this->sendTo(message, destination);
 }
 
-bool NodeCore::sendTo(const Message& message, const NodeInfo& destination) const {
-	if (message.getType() == MessageType::application) {
-		this->vectorTime->increase();
-	}
-	Message msg = const_cast<Message&>(message);
-	msg.setDestinationId(destination.NodeID);
-
-	if (msg.getSourceID() != -1)
-		msg.setSourceID(nodeInfo.NodeID);
-
-	if (this->nodeInfo.NodeID > 0)
-		msg.setVectorTimes(this->vectorTime->getTimeMap());
+bool NodeCore::sendTo(Message* const message, const NodeInfo& destination) const {
+	this->vectorTime->increase();
+	message->setDestinationId(destination.NodeID);
+	message->setSourceID(nodeInfo.NodeID);
+	message->setVectorTimes(this->vectorTime->getTimeMap());
 
 //	if (message.getType() != MessageType::log)
 //		log->push_back(new string(to_string(vectorTime->getLocalTime()) + " Send to "  + to_string(destination.NodeID) + ": " + msg.toString()));
 
-	return transceiver->sendTo(destination, msg.write());
+	return transceiver->sendTo(destination, MessageFactory::convertToString(message));
 }
 
-void NodeCore::shutdown(const Message& message) {
-	if (message.getSourceID() == this->nodeInfo.NodeID || message.getSourceID() == -1) {
-		isRunning = !isRunning;
-		sendSnapshot();
+void NodeCore::shutdown(ControlMessage* const message) {
+	if (message->getSourceID() == -1) {
+		Echos echo;
+		echo.EchoID = randomizer::random(0, 9999);
+		echo.FirstNeighborID =  nodeInfo.NodeID;
+		echo.counter = 0;
+		this->echoBuffer.insert(EchoEntry(echo.EchoID, echo));
+		Message* explorerMsg = new ControlMessage(MessageSubType::explorer, echo.EchoID, nodeInfo.NodeID, constants::ShutdownMessage);
+		this->sendToDestinationsImpl(explorerMsg, neighbors);
 	} else {
-		NodeMap::iterator node = neighbors.find(message.getSourceID());
-		if (node != neighbors.end()) {
-			sendToDestinationsImpl(message, neighbors);
-		} else {
-			sendTo(message, node->second);
-		}
-	}
-
-	if (message.getSourceID() == -1) {
-		sendToDestinationsImpl(message, neighbors);
+		isRunning = !isRunning;
 	}
 }
 
@@ -310,21 +319,18 @@ void NodeCore::sendSnapshot() {
 	XMLPrinter p;
 	doc.Print(&p);
 
-	Message msg(MessageType::log, 0, nodeInfo.NodeID, string(p.CStr()));
-	sendToListener(msg);
-
-	//cout << msg.toString() << endl;
+	ControlMessage* logMsg = new ControlMessage(MessageSubType::log, 0, nodeInfo.NodeID, string(p.CStr()));
+	sendToListener(logMsg);
 	doc.Clear();
 }
 
-bool NodeCore::sendToListener(const Message& message) {
-	Message msg = const_cast<Message&>(message);
-	msg.setVectorTimes(this->vectorTime->getTimeMap());
-	return sendTo(msg, listenerNodeInfo);
+bool NodeCore::sendToListener(Message* const message) {
+	message->setVectorTimes(this->vectorTime->getTimeMap());
+	return sendTo(message, listenerNodeInfo);
 }
 
 bool NodeCore::sendStatusToListener(const string& status) {
-	Message statusMsg(MessageType::control, 0, nodeInfo.NodeID, status);
+	Message* statusMsg = new ControlMessage(MessageSubType::normal, 0, nodeInfo.NodeID, status);
 	return sendToListener(statusMsg);
 }
 

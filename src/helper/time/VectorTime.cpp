@@ -19,6 +19,12 @@ VectorTime::VectorTime(const int& localID) : localID(localID) {
 	setTime(localID, 0);
 }
 
+
+VectorTime::VectorTime(const VectorTime& time)
+: VectorTime(time.localID) {
+	this->timeMap = time.timeMap;
+}
+
 VectorTime::~VectorTime() {
 	// TODO Auto-generated destructor stub
 }

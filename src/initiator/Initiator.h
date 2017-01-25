@@ -10,24 +10,35 @@
 
 #include <string>
 
-#include "../core/NodeCore.h"
 #include "../message/Message.h"
 #include "../helper/NodeInfo.h"
+#include "../network/TransceiverBase.h"
+#include <iostream>
+#include <map>
+#include <stdexcept>
 
-using namespace core;
+#include "../helper/Constants.h"
+#include "../helper/randomizer/Random.h"
+#include "../helper/settings/Settings.h"
+#include "../message/ControlMessage.h"
+#include "../message/MessageFactory.h"
+
+
 using namespace std;
 using namespace message;
+using namespace helper::settings;
+using namespace network;
 
 
 class Initiator {
 public:
-	Initiator(const NodeCore& core);
+	Initiator(Settings* settings);
 	virtual ~Initiator() { }
 
 	void loop();
 private:
-	const NodeCore& core;
-	const NodeMap& nodes;
+	NodeMap nodes;
+	TransceiverBase* transceiver;
 
 	void showDetails();
 	string readInput() const;
@@ -36,7 +47,7 @@ private:
 	void echo();
 	void snapshoot();
 	bool sendTo(const string& content, const NodeInfo& nodeID, int sourceID);
-	bool sendTo(const Message& message, const NodeInfo& nodeID);
+	bool sendTo(Message* const message, const NodeInfo& nodeID);
 };
 
 
