@@ -16,6 +16,7 @@
 
 #include "../helper/Constants.h"
 #include "../helper/exception/NetworkException.h"
+#include "../helper/exception/TerminationTimeReachedException.h"
 #include "../helper/randomizer/Random.h"
 #include "../helper/settings/Settings.h"
 #include "../helper/time/VectorTime.h"
@@ -85,22 +86,16 @@ void NodeCore::loop() {
 				} else if (dynamic_cast<ControlMessage*>(message) != NULL) {
 					handleControlMessage((ControlMessage*)message);
 				} else if (dynamic_cast<ApplicationMessage*>(message) != NULL) {
-					//cout << message->toString() << endl;
 					handleApplicationMessage((ApplicationMessage*)message);
 				}
-
-//				case MessageType::explorer:
-//				case MessageType::echo:
-//					handleEchoMessage(message);
-//					break;
-//				default:
-//					cerr << "Unexpected type of message!" << endl;
-//					break;
-//				}
 			} catch (const helper::exception::NetworkException& ex) {
 				helper::utilities::writeLog(__FUNCTION__, ex);
+			} catch (std::exception& e) {
+				throw e;
 			}
 		}
+	} catch (const helper::exception::TerminationTimeReachedException&) {
+		// Terminierung
 	} catch (std::exception& e) {
 		helper::utilities::writeLog(__FUNCTION__, e);
 	}
@@ -136,6 +131,9 @@ Message* NodeCore::receive() {
 		this->vectorTime->setTime(this->nodeInfo.NodeID, this->vectorTime->getMaximum());
 		//}
 
+		if (this->vectorTime->isTerminated()) {
+			throw helper::exception::TerminationTimeReachedException();
+		}
 		//string* logStr = new string(to_string(this->vectorTime->getLocalTime()) + " Receive: " + msg.toString());
 		//log->push_back(logStr);
 
@@ -149,20 +147,31 @@ Message* NodeCore::receive() {
 void NodeCore::handleControlMessage(ControlMessage* const message) {
 	try {
 		const string& content = message->getContent();
+		cout << content << endl;
 		if (content == constants::SHUTDOWN) {
-			shutdown(message);
+			isRunning = !isRunning;
+		} else if (content == constants::SHUTDOWN_ALL) {
+			Message* shutdownMsg = new ControlMessage(MessageSubType::normal, message->getNumber(), nodeInfo.NodeID, constants::SHUTDOWN_ALL);
+			this->sendToDestinationsImpl(shutdownMsg, neighbors);
+			isRunning = !isRunning;
 		} else if (content == constants::SNAPSHOT) {
 			sendSnapshot();
-		} else if (content == constants::ECHO_SHUTDOWN) {
+		} else if (content == constants::SHUTDOWN_ECHO) {
 			Echos echo;
 			echo.EchoID = message->getNumber();
 			echo.FirstNeighborID = nodeInfo.NodeID;
 			echo.counter = 0;
 			this->echoBuffer.insert(EchoEntry(echo.EchoID, echo));
-			Message* explorerMsg = new ControlMessage(MessageSubType::explorer, message->getNumber(), nodeInfo.NodeID, constants::ECHO_SHUTDOWN);
+			Message* explorerMsg = new ControlMessage(MessageSubType::explorer, message->getNumber(), nodeInfo.NodeID, constants::SHUTDOWN_ECHO);
 			sendToDestinationsImpl(explorerMsg, neighbors);
 		} else if (content == constants::RESET) {
 			// Resette Implementation und Vectorzeit
+		} else if (message->getType() == MessageSubType::parametrize){
+			// Parametriere Terminierungszeit
+			if (helper::utilities::isNumber(message->getContent())) {
+				this->vectorTime->setTermininationTime(stoi(message->getContent()));
+				// TODO noch die terminierungszeit überwachen!
+			}
 		} else {
 			this->nodeImpl->process(message);
 		}
@@ -228,7 +237,7 @@ void NodeCore::handleEchoMessage(Message* const message) {
 				sendTo(echoMsg, this->neighbors.at(it->second.FirstNeighborID));
 			}
 			if (dynamic_cast<ControlMessage*>(message) != NULL) {
-				if (message->getContent() == constants::SHUTDOWN) {
+				if (message->getContent() == constants::SHUTDOWN_ECHO) {
 					isRunning = !isRunning;
 				}
 			}
@@ -278,25 +287,15 @@ bool NodeCore::sendTo(Message* const message, const NodeInfo& destination) const
 	message->setDestinationId(destination.NodeID);
 	message->setSourceID(nodeInfo.NodeID);
 	message->setVectorTimes(this->vectorTime->getTimeMap());
+	if (this->vectorTime->isTerminated()) {
+		// throw new // Terminated!
+	}
+
 
 //	if (message.getType() != MessageType::log)
 //		log->push_back(new string(to_string(vectorTime->getLocalTime()) + " Send to "  + to_string(destination.NodeID) + ": " + msg.toString()));
 
 	return transceiver->sendTo(destination, MessageFactory::convertToString(message));
-}
-
-void NodeCore::shutdown(ControlMessage* const message) {
-	if (message->getSourceID() == -1) {
-		Echos echo;
-		echo.EchoID = randomizer::random(0, 9999);
-		echo.FirstNeighborID =  nodeInfo.NodeID;
-		echo.counter = 0;
-		this->echoBuffer.insert(EchoEntry(echo.EchoID, echo));
-		Message* explorerMsg = new ControlMessage(MessageSubType::explorer, echo.EchoID, nodeInfo.NodeID, constants::SHUTDOWN);
-		this->sendToDestinationsImpl(explorerMsg, neighbors);
-	} else {
-		isRunning = !isRunning;
-	}
 }
 
 void NodeCore::sendSnapshot() {

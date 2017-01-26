@@ -69,7 +69,7 @@ int main(int argc, char** argv) {
 				initiator.loop();
 			}
 		} catch (std::exception& e) {
-			cerr << "Fehler: " << e.what() << endl;
+			helper::utilities::writeLog("Allgemeiner Fehler: ", e);
 		}
 	} else {
 		try {

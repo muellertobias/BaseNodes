@@ -22,7 +22,8 @@ enum MessageSubType {
 	normal,
 	log,
 	explorer,
-	echo
+	echo,
+	parametrize
 };
 
 class Message {

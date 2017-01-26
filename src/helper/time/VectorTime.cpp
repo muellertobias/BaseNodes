@@ -17,6 +17,7 @@ VectorTime::VectorTime() : VectorTime(0) {
 
 VectorTime::VectorTime(const int& localID) : localID(localID) {
 	setTime(localID, 0);
+	this->termininationTime = 0;
 }
 
 
@@ -85,6 +86,10 @@ int VectorTime::getMaximum() {
         return p1.second < p2.second;
     });
 	return max->second;
+}
+
+bool VectorTime::isTerminated() {
+	return  this->getLocalTime() >= termininationTime && termininationTime > 0;
 }
 
 } /* namespace time */

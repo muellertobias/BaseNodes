@@ -43,8 +43,19 @@ public:
 	void merge(const VectorTimeMap& timeMap);
 	int getMaximum();
 
+	bool isTerminated();
+
+	int getTermininationTime() const {
+		return termininationTime;
+	}
+
+	void setTermininationTime(int termininationTime) {
+		this->termininationTime = termininationTime;
+	}
+
 private:
 	const int& localID;
+	int termininationTime;
 	VectorTimeMap timeMap;
 };
 

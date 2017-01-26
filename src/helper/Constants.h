@@ -19,11 +19,11 @@ using namespace std;
 
 namespace constants {
 
-const string INIT = "init";
 const string RESET = "reset";
-const string SHUTDOWN = "shutdown";
 const string SNAPSHOT = "snapshot";
-const string ECHO_SHUTDOWN = "echo shutdown";
+const string SHUTDOWN = "shutdown";
+const string SHUTDOWN_ALL = "shutdown all";
+const string SHUTDOWN_ECHO = "shutdown echo";
 
 }
 

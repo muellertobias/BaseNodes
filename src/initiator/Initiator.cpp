@@ -6,6 +6,7 @@
  */
 
 #include "Initiator.h"
+#include "../helper/utilities/utilities.h"
 
 Initiator::Initiator(Settings* settings)
 	: nodes(settings->getNeighbors()), transceiver(settings->getTransceiver()) {
@@ -39,6 +40,8 @@ void Initiator::loop() {
 			cout << nodeID << " nicht gefunden!" << endl;
 		} catch (const std::exception& ex) {
 			cout << "Falsche Eingabe!" << endl;
+		} catch (const string& ex) {
+			cout << ex << " ist keine Zahl!" << endl;
 		}
 	} while (isRunning);
 }
@@ -94,7 +97,7 @@ void Initiator::sendEchoShutdown() {
 	NodeInfo nodeInfo = readNodeID();
 
 	int number = helper::randomizer::random(0, 9999);
-	Message* message = new ControlMessage(MessageSubType::normal, number, 0, constants::ECHO_SHUTDOWN);
+	Message* message = new ControlMessage(MessageSubType::normal, number, 0, constants::SHUTDOWN_ECHO);
 
 	sendTo(message, nodeInfo);
 }
@@ -104,10 +107,13 @@ void Initiator::halt() {
 
 	int sourceID = nodeInfo.NodeID;
 	cout << "Alle Nodes anhalten? (y/n)> ";
+	string shutdownCommand;
 	if (readInput() == "y") {
-		sourceID = -1;
+		shutdownCommand = constants::SHUTDOWN_ALL;
+	} else {
+		shutdownCommand = constants::SHUTDOWN;
 	}
-	Message* message = new ControlMessage(MessageSubType::normal, sourceID, constants::SHUTDOWN);
+	Message* message = new ControlMessage(MessageSubType::normal, sourceID, shutdownCommand);
 	sendTo(message, nodeInfo);
 }
 
@@ -120,7 +126,13 @@ void Initiator::snapshoot() {
 void Initiator::sendInit() {
 	NodeInfo nodeInfo = readNodeID();
 
-	Message* message = new ControlMessage(MessageSubType::normal, constants::INIT);
+	cout << "Terminationzeit? > ";
+	string terminationTime = readInput();
+	if (!helper::utilities::isNumber(terminationTime)) {
+		throw terminationTime;
+	}
+
+	Message* message = new ControlMessage(MessageSubType::parametrize, terminationTime);
 	sendTo(message, nodeInfo);
 }
 
