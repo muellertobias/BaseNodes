@@ -13,7 +13,7 @@
 typedef struct {
 	int EchoID;
 	int FirstNeighborID;
-	int counter;
+	unsigned int counter;
 } Echos;
 
 typedef std::pair<int, Echos> EchoEntry;

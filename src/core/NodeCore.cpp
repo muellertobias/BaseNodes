@@ -149,19 +149,19 @@ Message* NodeCore::receive() {
 void NodeCore::handleControlMessage(ControlMessage* const message) {
 	try {
 		const string& content = message->getContent();
-		if (content == constants::ShutdownMessage) {
+		if (content == constants::SHUTDOWN) {
 			shutdown(message);
-		} else if (content == "Snapshot") {
+		} else if (content == constants::SNAPSHOT) {
 			sendSnapshot();
-		} else if (content == "Echo") {
+		} else if (content == constants::ECHO_SHUTDOWN) {
 			Echos echo;
 			echo.EchoID = message->getNumber();
 			echo.FirstNeighborID = nodeInfo.NodeID;
 			echo.counter = 0;
 			this->echoBuffer.insert(EchoEntry(echo.EchoID, echo));
-			Message* explorerMsg = new ControlMessage(MessageSubType::explorer, message->getNumber(), nodeInfo.NodeID, "Explorer");
+			Message* explorerMsg = new ControlMessage(MessageSubType::explorer, message->getNumber(), nodeInfo.NodeID, constants::ECHO_SHUTDOWN);
 			sendToDestinationsImpl(explorerMsg, neighbors);
-		} else if (content == "Reset") {
+		} else if (content == constants::RESET) {
 			// Resette Implementation und Vectorzeit
 		} else {
 			this->nodeImpl->process(message);
@@ -190,7 +190,7 @@ void NodeCore::handleEchoMessage(Message* const message) {
 				Echos echo;
 				echo.EchoID = message->getNumber();
 				echo.FirstNeighborID = message->getSourceID();
-				echo.counter = 1;
+				echo.counter = 1; // eine Nachricht von einem Nachbar schon erhalten
 				this->echoBuffer.insert(EchoEntry(echo.EchoID, echo));
 
 				nodeImpl->process(message);
@@ -219,7 +219,7 @@ void NodeCore::handleEchoMessage(Message* const message) {
 			} else {
 				cout << nodeInfo.NodeID << " - Send Echo!" << endl;
 				//Message echoMsg(MessageType::echo, message.getNumber(), nodeInfo.NodeID, message.getContent());
-				Message* echoMsg = echoMsg = message->prototype();
+				Message* echoMsg = message->prototype();
 				if (echoMsg->getType() != MessageSubType::echo) {
 					echoMsg->setType(MessageSubType::echo);
 				}
@@ -228,7 +228,7 @@ void NodeCore::handleEchoMessage(Message* const message) {
 				sendTo(echoMsg, this->neighbors.at(it->second.FirstNeighborID));
 			}
 			if (dynamic_cast<ControlMessage*>(message) != NULL) {
-				if (message->getContent() == constants::ShutdownMessage) {
+				if (message->getContent() == constants::SHUTDOWN) {
 					isRunning = !isRunning;
 				}
 			}
@@ -292,7 +292,7 @@ void NodeCore::shutdown(ControlMessage* const message) {
 		echo.FirstNeighborID =  nodeInfo.NodeID;
 		echo.counter = 0;
 		this->echoBuffer.insert(EchoEntry(echo.EchoID, echo));
-		Message* explorerMsg = new ControlMessage(MessageSubType::explorer, echo.EchoID, nodeInfo.NodeID, constants::ShutdownMessage);
+		Message* explorerMsg = new ControlMessage(MessageSubType::explorer, echo.EchoID, nodeInfo.NodeID, constants::SHUTDOWN);
 		this->sendToDestinationsImpl(explorerMsg, neighbors);
 	} else {
 		isRunning = !isRunning;

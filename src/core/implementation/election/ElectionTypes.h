@@ -14,8 +14,6 @@ namespace core {
 namespace implementation {
 namespace election {
 
-typedef std::map<int, int> ConfidenceLevels;
-
 typedef struct {
 	const int party1;
 	int confidenceLevel1;

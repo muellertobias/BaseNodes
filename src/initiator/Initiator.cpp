@@ -15,6 +15,7 @@ void Initiator::loop() {
 	showDetails();
 	bool isRunning = true;
 	do {
+		try {
 		cout << "> ";
 		string input = readInput();
 		if (input == "exit") {
@@ -28,7 +29,16 @@ void Initiator::loop() {
 		} else if (input == "snap") {
 			snapshoot();
 		} else if (input == "echo") {
-			echo();
+			sendEchoShutdown();
+		} else if (input == "init") {
+			sendInit();
+		} else if (input == "reset") {
+			sendReset();
+		}
+		} catch (const int& nodeID) {
+			cout << nodeID << " nicht gefunden!" << endl;
+		} catch (const std::exception& ex) {
+			cout << "Falsche Eingabe!" << endl;
 		}
 	} while (isRunning);
 }
@@ -38,7 +48,10 @@ void Initiator::showDetails() {
 			"exit - Beenden\n" <<
 			"tell - Löse Initialnachricht aus\n" <<
 			"snap - Erzeuge Schnappschuss\n" <<
-			"halt - Halte einen/alle Knoten an" << endl;
+			"halt - Halte einen/alle Knoten an\n" <<
+			"echo - Hält alle Knoten an mittels ECHO\n" <<
+			"init - Setzt Terminierungszeit\n" <<
+			"reset - Setzt ausgewählten Knoten zurück\n" << endl;
 	cout << "Mögliche Adressen:" << endl;
 
 	for (NodeMap::const_iterator it = nodes.begin(); it != nodes.end(); ++it) {
@@ -52,108 +65,72 @@ string Initiator::readInput() const {
 	return input;
 }
 
-void Initiator::tell() {
-	cout << "Node > ";
-	int nodeID = 0;
-
+NodeInfo Initiator::readNodeID() {
+	int nodeID;
 	try {
+		cout << "Node > ";
 		nodeID = stoi(readInput());
-
 		NodeInfo nodeInfo = nodes.at(nodeID);
 		cout << nodeInfo.NodeID << " gefunden!" << endl;
-
-		cout << "Nachrichtentext > ";
-		string content = readInput();
-
-		//Message message(MessageType::control, number, 0, content);
-		Message* message = new ControlMessage(MessageSubType::normal, 0, content);
-		if (sendTo(message, nodeInfo)) {
-			cout << "Erfolgreich!" << endl;
-		} else {
-			cout << "Fehlgeschlagen!" << endl;
-		}
-
+		return nodeInfo;
 	} catch (const out_of_range& ex) {
 		cout << nodeID << " nicht gefunden!" << endl;
-	} catch (const std::exception& ex) {
-		cout << "Falsche Eingabe!" << endl;
+		throw nodeID;
 	}
+	return NodeInfo();
 }
 
-void Initiator::echo() {
-	cout << "Node > ";
-	int nodeID = 0;
+void Initiator::tell() {
+	NodeInfo nodeInfo = readNodeID();
 
-	try {
-		nodeID = stoi(readInput());
+	cout << "Nachrichtentext > ";
+	string content = readInput();
 
-		NodeInfo nodeInfo = nodes.at(nodeID);
-		cout << nodeInfo.NodeID << " gefunden!" << endl;
+	Message* message = new ControlMessage(MessageSubType::normal, 0, content);
+	sendTo(message, nodeInfo);
+}
 
-		int number = helper::randomizer::random(0, 9999);
-		Message* message = new ControlMessage(MessageSubType::normal, number, 0, "Echo");
+void Initiator::sendEchoShutdown() {
+	NodeInfo nodeInfo = readNodeID();
 
-		if (sendTo(message, nodeInfo)) {
-			cout << "Erfolgreich!" << endl;
-		} else {
-			cout << "Fehlgeschlagen!" << endl;
-		}
+	int number = helper::randomizer::random(0, 9999);
+	Message* message = new ControlMessage(MessageSubType::normal, number, 0, constants::ECHO_SHUTDOWN);
 
-	} catch (const out_of_range& ex) {
-		cout << nodeID << " nicht gefunden!" << endl;
-	} catch (const std::exception& ex) {
-		cout << "Falsche Eingabe!" << endl;
-	}
+	sendTo(message, nodeInfo);
 }
 
 void Initiator::halt() {
-	cout << "Inititiator Node > ";
-	int nodeID = stoi(readInput());
+	NodeInfo nodeInfo = readNodeID();
 
-	try {
-		NodeInfo nodeInfo = nodes.at(nodeID);
-		cout << nodeInfo.NodeID << " gefunden!" << endl;
-
-		int sourceID = nodeID;
-		cout << "Alle Nodes anhalten? (y/n)> ";
-		if (readInput() == "y") {
-			sourceID = -1;
-		}
-
-		if (sendTo(constants::ShutdownMessage, nodeInfo, sourceID)) {
-			cout << "Erfolgreich!" << endl;
-		} else {
-			cout << "Fehlgeschlagen!" << endl;
-		}
-	} catch (const out_of_range& ex) {
-		cout << nodeID << " nicht gefunden!" << endl;
+	int sourceID = nodeInfo.NodeID;
+	cout << "Alle Nodes anhalten? (y/n)> ";
+	if (readInput() == "y") {
+		sourceID = -1;
 	}
+	Message* message = new ControlMessage(MessageSubType::normal, sourceID, constants::SHUTDOWN);
+	sendTo(message, nodeInfo);
 }
 
 void Initiator::snapshoot() {
-	cout << "Node > ";
-	int nodeID = stoi(readInput());
-	try {
-		NodeInfo nodeInfo = nodes.at(nodeID);
-		cout << nodeInfo.NodeID << " gefunden!" << endl;
+	const NodeInfo& nodeInfo = readNodeID();
+	Message* message = new ControlMessage(MessageSubType::normal, constants::SNAPSHOT);
+	sendTo(message, nodeInfo);
+}
 
-		if (sendTo("Snapshot", nodeInfo, 0)) {
-			cout << "Erfolgreich!" << endl;
-		} else {
-			cout << "Fehlgeschlagen!" << endl;
-		}
-	} catch (const out_of_range& ex) {
-		cout << nodeID << " nicht gefunden!" << endl;
+void Initiator::sendInit() {
+	NodeInfo nodeInfo = readNodeID();
+
+	Message* message = new ControlMessage(MessageSubType::normal, constants::INIT);
+	sendTo(message, nodeInfo);
+}
+
+void Initiator::sendReset() {
+}
+
+void Initiator::sendTo(Message* const message, const NodeInfo& nodeInfo) {
+	if (this->transceiver->sendTo(nodeInfo, MessageFactory::convertToString(message))) {
+		cout << "Erfolgreich!" << endl;
+	} else {
+		cout << "Fehlgeschlagen!" << endl;
 	}
-
-}
-
-bool Initiator::sendTo(const string& content, const NodeInfo& nodeInfo, int sourceID) {
-	int number = helper::randomizer::random(0, 9999);
-	Message* message = new ControlMessage(MessageSubType::normal, number, sourceID, content);
-	return this->sendTo(message, nodeInfo);
-}
-
-bool Initiator::sendTo(Message* const message, const NodeInfo& nodeInfo) {
-	return this->transceiver->sendTo(nodeInfo, MessageFactory::convertToString(message));
 }

@@ -40,8 +40,6 @@ core::implementation::INodeImpl* NodeElectionSettings::getNodeImplementation() {
 		return new CandidateNodeCoreImpl(config, this->nodeID);
 	} else {
 		// Wähler
-		core::implementation::election::ConfidenceLevels* confidenceLevels = new ConfidenceLevels();
-
 		Politics politics = {1, 0, biggestNodeID, 0};
 
 		const NodeMap& neighbors = this->neighborSearcher->getNeighbors(this->nodeID);

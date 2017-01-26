@@ -63,9 +63,8 @@ void NodeListener::print(Message* const message) {
 }
 
 void NodeListener::handle(ControlMessage* message) {
-	const string& content = message->getContent();
-	if (content.find(constants::ShutdownMessage) != string::npos) {
-		this->isRunning = false;
+	if (message->getContent() == constants::SHUTDOWN) {
+		this->isRunning = !isRunning;
 	}
 }
 

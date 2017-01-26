@@ -42,12 +42,17 @@ private:
 
 	void showDetails();
 	string readInput() const;
+	NodeInfo readNodeID();
+
+
 	void tell();
 	void halt();
-	void echo();
+	void sendEchoShutdown();
 	void snapshoot();
-	bool sendTo(const string& content, const NodeInfo& nodeID, int sourceID);
-	bool sendTo(Message* const message, const NodeInfo& nodeID);
+	void sendInit();
+	void sendReset();
+
+	void sendTo(Message* const message, const NodeInfo& nodeID);
 };
 
 

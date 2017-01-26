@@ -18,8 +18,13 @@
 using namespace std;
 
 namespace constants {
-	const string ShutdownMessage = "Shutdown";
-	const string SnapShotMessage = "Snapshot";
+
+const string INIT = "init";
+const string RESET = "reset";
+const string SHUTDOWN = "shutdown";
+const string SNAPSHOT = "snapshot";
+const string ECHO_SHUTDOWN = "echo shutdown";
+
 }
 
 #endif /* HELPER_CONSTANTS_H_ */
