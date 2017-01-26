@@ -69,11 +69,11 @@ void CandidateNodeCoreImpl::process(ApplicationMessage* const message) {
 		recalls++;
 		if (recalls % recallPeriod == 1) {
 			// starte Campaign oder VoteMe
-			int strategy = randomizer::random(0, 1);
+			int strategy = randomizer::random(0, 2);
 			if (strategy == 0) {
-				startCampaign();
-			} else {
 				callVoteMe();
+			} else {
+				startCampaign(); // Chance für Kampagne erhöht, wegen der Verteilung der Vectorzeit
 			}
 		}
 	} catch (std::exception& ex) {

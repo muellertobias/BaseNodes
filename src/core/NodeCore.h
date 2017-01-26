@@ -54,7 +54,7 @@ using namespace implementation;
 class NodeCore {
 public:
 	typedef bool (NodeCore::*_sendEcho)(const string& content);
-	typedef bool (NodeCore::*_sendTo)(Message* const, const int& nodeID) const;
+	typedef bool (NodeCore::*_sendTo)(Message* const, const int& nodeID);
 	typedef bool (NodeCore::*_sendToAll)(Message* const, const int& excludedNodeID);
 	typedef bool (NodeCore::*_sendResult)(Message* const message);
 
@@ -71,8 +71,8 @@ public:
 
 	void loop();
 
-	bool sendTo(Message* const message, const int& nodeID) const;
-	bool sendTo(Message* const message, const NodeInfo& destination) const;
+	bool sendTo(Message* const message, const int& nodeID);
+	bool sendTo(Message* const message, const NodeInfo& destination);
 
 	const NodeInfo& getNodeInfo() const {
 		return nodeInfo;

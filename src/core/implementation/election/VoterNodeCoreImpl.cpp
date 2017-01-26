@@ -44,7 +44,7 @@ void VoterNodeCoreImpl::process(Message* const message) {
 }
 
 void VoterNodeCoreImpl::process(ControlMessage* const message) {
-	cout << "Voter-"<< core->getNodeInfo().NodeID << " - Received ControlMessage" << endl;
+	//cout << "Voter-"<< core->getNodeInfo().NodeID << " - Received ControlMessage" << endl;
 }
 
 void VoterNodeCoreImpl::process(ApplicationMessage* const message) {
@@ -137,16 +137,10 @@ void VoterNodeCoreImpl::process(ApplicationMessage* const message) {
 	}
 }
 
-/*
-void VoterNodeCoreImpl::process(const Message& message) {
-	//cout << core->getNodeInfo().NodeID << " : Red=" << confidenceLevels->at(Party::Red) << ", Blue=" << confidenceLevels->at(Party::Blue) << endl;
-
-}
-*/
-
 void VoterNodeCoreImpl::getState(string& state) {
 }
 
+// TODO Funktioniert nicht!
 void VoterNodeCoreImpl::resolveConfidenceLevels(const int& party, int& opponent,
 		int* confidenceLevelOfCandidate, int* confidenceLevelOfOpponent) {
 

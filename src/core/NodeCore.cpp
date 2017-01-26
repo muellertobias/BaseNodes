@@ -45,7 +45,7 @@ NodeCore::NodeCore(Settings* settings) {
 	this->nodeImpl = settings->getNodeImplementation();
 	this->nodeImpl->setCore(this);
 	this->nodeImpl->setSendEcho(&NodeCore::sendEcho);
-	bool (NodeCore::*temp)(Message*, const int&) const = &NodeCore::sendTo;
+	bool (NodeCore::*temp)(Message*, const int&) = &NodeCore::sendTo;
 	this->nodeImpl->setSendTo(temp);
 	this->nodeImpl->setSendToDestinations(&NodeCore::sendToDestinations);
 	this->nodeImpl->setSendResult(&NodeCore::sendToListener);
@@ -55,9 +55,6 @@ NodeCore::NodeCore(Settings* settings) {
 
 	// Vectortime
 	vectorTime = new VectorTime(this->nodeInfo.NodeID);
-
-	// Echo
-	//this->echoData = { 0, 0, 0};
 }
 
 NodeCore::~NodeCore() {
@@ -125,15 +122,17 @@ Message* NodeCore::receive() {
 		//cout << incomingStr << endl;
 		//cout << msg->toString() << "/" << nodeInfo.NodeID << "-Local: "<< this->vectorTime->getLocalTime() << std::endl;
 
-		//if (dynamic_cast<ApplicationMessage*>(msg) != NULL) {
-		this->vectorTime->increase();
-		this->vectorTime->merge(msg->getVectorTimes());
-		this->vectorTime->setTime(this->nodeInfo.NodeID, this->vectorTime->getMaximum());
-		//}
-
-		if (this->vectorTime->isTerminated()) {
-			throw helper::exception::TerminationTimeReachedException();
+		if (dynamic_cast<ApplicationMessage*>(msg) != NULL) {
+			this->vectorTime->increase();
+			this->vectorTime->merge(msg->getVectorTimes());
+			this->vectorTime->setTime(this->nodeInfo.NodeID, this->vectorTime->getMaximum());
+			if (this->vectorTime->isTerminated()) {
+				throw helper::exception::TerminationTimeReachedException();
+			}
+			cout << nodeInfo.NodeID << " - Time: " << this->vectorTime->getLocalTime() << endl;
 		}
+
+
 		//string* logStr = new string(to_string(this->vectorTime->getLocalTime()) + " Receive: " + msg.toString());
 		//log->push_back(logStr);
 
@@ -147,7 +146,7 @@ Message* NodeCore::receive() {
 void NodeCore::handleControlMessage(ControlMessage* const message) {
 	try {
 		const string& content = message->getContent();
-		cout << content << endl;
+		//cout << content << endl;
 		if (content == constants::SHUTDOWN) {
 			isRunning = !isRunning;
 		} else if (content == constants::SHUTDOWN_ALL) {
@@ -167,10 +166,16 @@ void NodeCore::handleControlMessage(ControlMessage* const message) {
 		} else if (content == constants::RESET) {
 			// Resette Implementation und Vectorzeit
 		} else if (message->getType() == MessageSubType::parametrize){
-			// Parametriere Terminierungszeit
 			if (helper::utilities::isNumber(message->getContent())) {
-				this->vectorTime->setTermininationTime(stoi(message->getContent()));
+				//this->vectorTime->setTermininationTime(stoi(message->getContent()));
 				// TODO noch die terminierungszeit überwachen!
+				Echos echo;
+				echo.EchoID = message->getNumber();
+				echo.FirstNeighborID = nodeInfo.NodeID;
+				echo.counter = 0;
+				this->echoBuffer.insert(EchoEntry(echo.EchoID, echo));
+				Message* explorerMsg = new ControlMessage(MessageSubType::explorer, message->getNumber(), nodeInfo.NodeID, message->getContent());
+				sendToDestinationsImpl(explorerMsg, neighbors);
 			}
 		} else {
 			this->nodeImpl->process(message);
@@ -207,7 +212,7 @@ void NodeCore::handleEchoMessage(Message* const message) {
 				Message* explorerMsg = message->prototype();
 				explorerMsg->setSourceID(nodeInfo.NodeID);
 				sendToDestinations(explorerMsg, message->getSourceID());
-				cout << nodeInfo.NodeID << " - Send Explorer!" << endl;
+				//cout << nodeInfo.NodeID << " - Send Explorer!" << endl;
 			} else {
 				it->second.counter++;
 
@@ -223,11 +228,10 @@ void NodeCore::handleEchoMessage(Message* const message) {
 		if (it->second.counter == this->neighbors.size()) {
 			if (it->second.FirstNeighborID == nodeInfo.NodeID) {
 				//Echo erfolgreich!
-				cout << nodeInfo.NodeID << " - ECHO erfolgreich!" << endl;
+				//cout << nodeInfo.NodeID << " - ECHO erfolgreich!" << endl;
 				this->nodeImpl->process(message);
 			} else {
-				cout << nodeInfo.NodeID << " - Send Echo!" << endl;
-				//Message echoMsg(MessageType::echo, message.getNumber(), nodeInfo.NodeID, message.getContent());
+				//cout << nodeInfo.NodeID << " - Send Echo!" << endl;
 				Message* echoMsg = message->prototype();
 				if (echoMsg->getType() != MessageSubType::echo) {
 					echoMsg->setType(MessageSubType::echo);
@@ -239,6 +243,9 @@ void NodeCore::handleEchoMessage(Message* const message) {
 			if (dynamic_cast<ControlMessage*>(message) != NULL) {
 				if (message->getContent() == constants::SHUTDOWN_ECHO) {
 					isRunning = !isRunning;
+				} else if (helper::utilities::isNumber(message->getContent())) {
+					// Terminierungszeit erhalten
+					this->vectorTime->setTermininationTime(stoi(message->getContent()));
 				}
 			}
 		}
@@ -276,20 +283,25 @@ bool NodeCore::sendEcho(const string& content) {
 	return this->sendToDestinationsImpl(explorerMsg, neighbors);
 }
 
-bool NodeCore::sendTo(Message* const message, const int& nodeID) const {
+bool NodeCore::sendTo(Message* const message, const int& nodeID) {
 	NodeInfo destination;
 	this->transceiver->resolve(nodeID, destination);
 	return this->sendTo(message, destination);
 }
 
-bool NodeCore::sendTo(Message* const message, const NodeInfo& destination) const {
-	this->vectorTime->increase();
+bool NodeCore::sendTo(Message* const message, const NodeInfo& destination) {
+	if (dynamic_cast<ApplicationMessage*>(message) != NULL) {
+		this->vectorTime->increase();
+		if (this->vectorTime->isTerminated()) {
+			// sanft abschalten
+			isRunning = !isRunning;
+		}
+	}
+
 	message->setDestinationId(destination.NodeID);
 	message->setSourceID(nodeInfo.NodeID);
 	message->setVectorTimes(this->vectorTime->getTimeMap());
-	if (this->vectorTime->isTerminated()) {
-		// throw new // Terminated!
-	}
+
 
 
 //	if (message.getType() != MessageType::log)
