@@ -39,13 +39,12 @@ NodeTransceiver::~NodeTransceiver() {
 	closeReceiver();
 }
 
-string NodeTransceiver::receive() const {
+string NodeTransceiver::receive() {
 	string msg;
 
 	struct sockaddr_in client;
 
 	socklen_t length = sizeof(client);
-
 	int clientSocketID = accept(socketID, (struct sockaddr*)&client, &length);
 
 	vector<char> buffer(1024);

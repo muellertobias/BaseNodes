@@ -16,16 +16,17 @@ namespace network {
 class TransceiverBase {
 public:
 	virtual ~TransceiverBase() { };
-	virtual std::string receive() const = 0;
+	virtual std::string receive() = 0;
 	virtual bool sendTo(const NodeInfo& destination, const std::string& message) = 0;
 	virtual bool closeReceiver() = 0;
 	virtual void resolve(const NodeInfo& nodeInfo, std::string& address) = 0;
 	virtual void resolve(const int& nodeID, NodeInfo& nodeInfo) = 0;
 
-
+/*
 protected:
 	virtual bool createReceiver(const std::string& address, const int& port, const int& numberOfConnections) = 0;
 	virtual bool createReceiver(const NodeInfo& nodeInfo, const int& numberOfConnections) = 0;
+	*/
 };
 
 } /* namespace network */

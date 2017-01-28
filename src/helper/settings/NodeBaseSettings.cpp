@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "../../network/NodeTransceiver.h"
+#include "../../network/AsyncronousNodeTransceiver.h"
 #include "../exception/ConfigurationException.h"
 #include "../neighborFinders/ISearchNeighbors.h"
 #include "../string/trim.h"
@@ -115,8 +116,10 @@ NodeInfo NodeBaseSettings::readLine(const string& line) {
 }
 
 network::TransceiverBase* NodeBaseSettings::getTransceiver() {
+	using namespace network;
 	bool isReceiver = this->nodeID < 0 ? false : true;
-	return new network::NodeTransceiver(this->getCurrentNodeInfo(), numberOfConnections, this->allNodes, isReceiver);
+	TransceiverBase* impl =	new NodeTransceiver(this->getCurrentNodeInfo(), numberOfConnections, this->allNodes, isReceiver);
+	return new AsyncronousNodeTransceiver(impl);
 }
 
 }

@@ -18,6 +18,7 @@ public:
 	InitiatorSettings(const string& filename);
 	virtual ~InitiatorSettings();
 
+	virtual network::TransceiverBase* getTransceiver();
 };
 
 } /* namespace settings */

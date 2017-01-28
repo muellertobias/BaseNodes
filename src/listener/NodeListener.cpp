@@ -25,7 +25,7 @@ NodeListener::NodeListener(TransceiverBase* transceiver) {
 }
 
 NodeListener::~NodeListener() {
-	//delete this->transceiver;
+	delete this->transceiver;
 }
 
 void NodeListener::loop() {

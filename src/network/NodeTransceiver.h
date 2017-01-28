@@ -28,15 +28,15 @@ public:
 	NodeTransceiver(const std::string& address, const int& port, const int& numberOfConnections, bool isReceiver = true);
 	NodeTransceiver(const NodeInfo& nodeInfo, const int& numberOfConnections, const NodeMap& staticNames, bool isReceiver = true);
 	virtual ~NodeTransceiver();
-	virtual string receive() const;
+	virtual string receive();
 	virtual bool sendTo(const NodeInfo& destination, const string& message);
 	virtual bool closeReceiver();
 	virtual void resolve(const NodeInfo& nodeInfo, std::string& address);
 	virtual void resolve(const int& nodeID, NodeInfo& nodeInfo);
 
 protected:
-	virtual bool createReceiver(const std::string& address, const int& port, const int& numberOfConnections);
-	virtual bool createReceiver(const NodeInfo& nodeInfo, const int& numberOfConnections);
+	bool createReceiver(const std::string& address, const int& port, const int& numberOfConnections);
+	bool createReceiver(const NodeInfo& nodeInfo, const int& numberOfConnections);
 
 private:
 	int socketID;

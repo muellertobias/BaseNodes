@@ -69,7 +69,7 @@ void CandidateNodeCoreImpl::process(ApplicationMessage* const message) {
 		recalls++;
 		if (recalls % recallPeriod == 1) {
 			// starte Campaign oder VoteMe
-			int strategy = randomizer::random(0, 2);
+			int strategy = randomizer::random(0, 1);
 			if (strategy == 0) {
 				callVoteMe();
 			} else {
