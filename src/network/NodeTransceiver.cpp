@@ -68,20 +68,11 @@ bool NodeTransceiver::sendTo(const NodeInfo& destination, const string& message)
 		helper::utilities::writeLog(__FUNCTION__, "Error: socket to " + to_string(destination.NodeID));
 		return false;
 	}
-	//int connected = 5;
-	//do {
+
 	if (connect(socketID, (struct sockaddr*)&destination.Address, sizeof(destination.Address)) < 0) {
 		helper::utilities::writeLog(__FUNCTION__, "Error: connect to " + to_string(destination.NodeID) + " - " + strerror(errno));
 		return false;
 	}
-			//			//return false;
-//			sleep(1);
-//			connected--;
-//		} else {
-//			connected = 0;
-//		}
-//	} while (connected > 0);
-
 
 	vector<char> cstr(message.c_str(), message.c_str() + message.size() + 1);
 
@@ -141,13 +132,13 @@ bool NodeTransceiver::createReceiver(const NodeInfo& nodeInfo,
 		return false;
 	}
 
-	int b = bind(socketID, (struct sockaddr*)&nodeInfo.Address, sizeof(nodeInfo.Address));
-	if (b < 0) {
+	int isBound = bind(socketID, (struct sockaddr*)&nodeInfo.Address, sizeof(nodeInfo.Address));
+	if (isBound < 0) {
 		cout << strerror(errno) << endl;
 		throw helper::exception::NetworkException("Blocked Socket! - Bind");
 	}
-	int l = listen(socketID, numberOfConnections);
-	if (l < 0) {
+	int isListening = listen(socketID, numberOfConnections);
+	if (isListening < 0) {
 		throw helper::exception::NetworkException("Blocked Socket! - Listen");
 	}
 

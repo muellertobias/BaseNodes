@@ -11,6 +11,7 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include <map>
 #include <algorithm>
 
 #include "TransceiverBase.h"
@@ -18,28 +19,40 @@
 
 namespace network {
 
+using namespace std;
 using namespace helper::utilities;
+
+typedef map<int, int> Transporter; // NodeID & SocketID
+typedef map<int, thread> ReceiverThreads;
 
 class AsyncronousNodeTransceiver: public TransceiverBase {
 public:
-	AsyncronousNodeTransceiver(TransceiverBase* impl);
+	AsyncronousNodeTransceiver(const NodeInfo& nodeInfo, const int& numberOfConnections, const NodeMap& staticNames, bool isReceiver = true);
 	virtual ~AsyncronousNodeTransceiver();
 
 	virtual std::string receive();
-	virtual bool sendTo(const NodeInfo& destination, const std::string& message);
+	virtual bool sendTo(const NodeInfo& destination, const string& message);
 	virtual bool closeReceiver();
-	virtual void resolve(const NodeInfo& nodeInfo, std::string& address);
+	virtual void resolve(const NodeInfo& nodeInfo, string& address);
 	virtual void resolve(const int& nodeID, NodeInfo& nodeInfo);
 
 private:
-	TransceiverBase* impl;
-	ConcurrentQueue<std::string> queue;
-	bool isRunning;
-	std::thread receiverThread;
-	std::vector<std::thread> workers;
+	ConcurrentQueue<string> receiverQueue;
+
+	int socketID;
+	bool isRunning; //TODO Mutual machen
+	NodeMap staticNameService;
+	thread receiverThread;
+	//vector<thread> receivers;
+	ReceiverThreads receivers;
+	Transporter senders;
 
 	void asyncReceive();
+	int createConnection(const NodeInfo& destination);
+	void createReceiver(const NodeInfo& nodeInfo);
 
+	bool sendTo(int socketID, const string& message);
+	void receive(int clientSocketID);
 };
 
 } /* namespace network */
