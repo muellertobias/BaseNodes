@@ -70,7 +70,9 @@ Message* MessageFactory::read(const string& xmlRawData) {
 	}
 
 	element = root->FirstChildElement("Content");
-	content = string(element->GetText());
+	if(strlen(element->GetText()) > 0) {
+		content = string(element->GetText());
+	}
 
 	if (strcmp(root->Name(), "ControlMessage") == 0) {
 		message = new ControlMessage(subType, number, sourceID, content);

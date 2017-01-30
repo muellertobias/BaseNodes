@@ -18,7 +18,7 @@
 #include "helper/utilities/utilities.h"
 #include "initiator/Initiator.h"
 #include "listener/NodeListener.h"
-#include "network/NodeTransceiver.h"
+#include "network/AsyncronousNodeTransceiver.h"
 
 
 using namespace std;
@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
 
 			if (type == "listener") {
 				cout << "start Listener..." << endl;
-				TransceiverBase* transceiver = new NodeTransceiver("127.0.0.1", 5000, 10);
+				TransceiverBase* transceiver = new AsyncronousNodeTransceiver("127.0.0.1", 5000, 30);
 				helper::listener::NodeListener listener(transceiver);
 				listener.loop();
 			} else if (type == "initiator") {

@@ -9,14 +9,15 @@
 
 #include <arpa/inet.h>
 #include <asm-generic/socket.h>
+#include <netdb.h>
 #include <netinet/in.h>
 #include <sys/select.h>
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <unistd.h>
+#include <cctype>
 #include <cerrno>
 #include <cstring>
-#include <initializer_list>
 #include <iostream>
 #include <utility>
 
@@ -26,11 +27,19 @@
 
 namespace network {
 
+AsyncronousNodeTransceiver::AsyncronousNodeTransceiver(const std::string& address,
+		const int& port, const int& numberOfConnections, bool isReceiver) : isRunning(isReceiver) {
+	if (isReceiver) {
+		createReceiver(address, port, numberOfConnections);
+		this->receiverThread = thread(&AsyncronousNodeTransceiver::asyncReceive, this);
+	}
+}
+
 AsyncronousNodeTransceiver::AsyncronousNodeTransceiver(const NodeInfo& nodeInfo, const int& numberOfConnections,
 		const NodeMap& staticNames, bool isReceiver)
 	: isRunning(isReceiver), staticNameService(staticNames) {
 	if (isReceiver) {
-		createReceiver(nodeInfo);
+		createReceiver(nodeInfo, numberOfConnections);
 		this->receiverThread = thread(&AsyncronousNodeTransceiver::asyncReceive, this);
 	}
 
@@ -85,13 +94,6 @@ bool AsyncronousNodeTransceiver::closeReceiver() {
 			this->receiverThread.join();
 		}
 
-//		std::for_each(receivers.begin(), receivers.end(), [](thread& r) {
-//
-//			if (r.joinable()) {
-//				r.join();
-//			}
-//		});
-			//receiverThread.join();
 	} catch (std::exception& e) {
 		cout << e.what() << endl;
 	}
@@ -130,7 +132,7 @@ void AsyncronousNodeTransceiver::asyncReceive() {
 				})));
 			}
 		} catch (std::exception& e) {
-
+			cerr << e.what() << endl;
 		}
 	}
 }
@@ -186,7 +188,7 @@ void AsyncronousNodeTransceiver::receive(int clientSocketID) {
 	}
 }
 
-void AsyncronousNodeTransceiver::createReceiver(const NodeInfo& nodeInfo) {
+void AsyncronousNodeTransceiver::createReceiver(const NodeInfo& nodeInfo, const int& numberOfConnections) {
 
 	socketID = socket(AF_INET, SOCK_STREAM, 0);
 	if (socketID < 0) {
@@ -202,7 +204,7 @@ void AsyncronousNodeTransceiver::createReceiver(const NodeInfo& nodeInfo) {
 		cout << strerror(errno) << endl;
 		throw helper::exception::NetworkException("Blocked Socket! - Bind");
 	}
-	int isListening = listen(socketID, 30);
+	int isListening = listen(socketID, numberOfConnections);
 	if (isListening < 0) {
 		throw helper::exception::NetworkException("Blocked Socket! - Listen");
 	}
@@ -216,4 +218,26 @@ void AsyncronousNodeTransceiver::createReceiver(const NodeInfo& nodeInfo) {
 	select(socketID + 1, &rfds, NULL, NULL, &tv);
 }
 
+void AsyncronousNodeTransceiver::createReceiver(const std::string& address,
+		const int& port, const int& numberOfConnections) {
+	NodeInfo nodeInfo;
+	nodeInfo.NodeID = 0;
+
+	if (isdigit(address.at(0))) {
+		inet_pton(AF_INET, address.c_str(), &(nodeInfo.Address.sin_addr));
+	} else {
+		struct addrinfo *result;
+		getaddrinfo(address.c_str(), NULL, NULL, &result);
+		nodeInfo.Address = *(struct sockaddr_in*)result->ai_addr;
+		freeaddrinfo(result);
+	}
+
+	nodeInfo.Address.sin_port = port;
+	nodeInfo.Address.sin_family = AF_INET;
+
+	return createReceiver(nodeInfo, numberOfConnections);
+}
+
+
 } /* namespace network */
+

@@ -27,6 +27,7 @@ typedef map<int, thread> ReceiverThreads;
 
 class AsyncronousNodeTransceiver: public TransceiverBase {
 public:
+	AsyncronousNodeTransceiver(const std::string& address, const int& port, const int& numberOfConnections, bool isReceiver = true);
 	AsyncronousNodeTransceiver(const NodeInfo& nodeInfo, const int& numberOfConnections, const NodeMap& staticNames, bool isReceiver = true);
 	virtual ~AsyncronousNodeTransceiver();
 
@@ -49,7 +50,8 @@ private:
 
 	void asyncReceive();
 	int createConnection(const NodeInfo& destination);
-	void createReceiver(const NodeInfo& nodeInfo);
+	void createReceiver(const NodeInfo& nodeInfo, const int& numberOfConnections);
+	void createReceiver(const std::string& address, const int& port, const int& numberOfConnections);
 
 	bool sendTo(int socketID, const string& message);
 	void receive(int clientSocketID);

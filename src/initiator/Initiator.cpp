@@ -88,7 +88,9 @@ void Initiator::tell() {
 
 	cout << "Nachrichtentext > ";
 	string content = readInput();
-
+	if (content.empty()) {
+		content = "EMPTY";
+	}
 	Message* message = new ControlMessage(MessageSubType::normal, 0, content);
 	sendTo(message, nodeInfo);
 }

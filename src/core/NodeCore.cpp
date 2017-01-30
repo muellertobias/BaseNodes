@@ -119,8 +119,6 @@ Message* NodeCore::receive() {
 		string incomingStr = transceiver->receive();
 
 		Message* msg = MessageFactory::create(incomingStr);
-		//cout << incomingStr << endl;
-		//cout << msg->toString() << "/" << nodeInfo.NodeID << "-Local: "<< this->vectorTime->getLocalTime() << std::endl;
 
 		if (dynamic_cast<ApplicationMessage*>(msg) != NULL) {
 			this->vectorTime->increase();
