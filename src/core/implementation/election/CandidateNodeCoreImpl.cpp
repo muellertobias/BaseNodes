@@ -48,7 +48,7 @@ void CandidateNodeCoreImpl::process(Message* const message) {
 void CandidateNodeCoreImpl::process(ControlMessage* const message) {
 	// Reset or Init
 	if (message->getType() == MessageSubType::normal) {
-		cout << party << " - Init!" << endl;
+		//cout << party << " - Init!" << endl;
 		startCampaign();
 	}
 }
@@ -57,14 +57,14 @@ void CandidateNodeCoreImpl::process(ApplicationMessage* const message) {
 	try {
 		if (message->getType() == MessageSubType::explorer) {
 			// Campaign des Gegners!
-			cout << party << " - Campaign from Oppenent detected!" << endl;
+			//cout << party << " - Campaign from Oppenent detected!" << endl;
 		} else if (message->getType() == MessageSubType::echo) {
 			// Die Antworten der eigenen Campaign
-			cout << party << " - Campaign successful!" << endl;
+			//cout << party << " - Campaign successful!" << endl;
 
 		} else if (message->getType() == MessageSubType::normal) {
 			// Voter's Choice
-			cout << party << " - " << message->getSourceID() << ": " << message->getContent() << endl;
+			//cout << party << " - " << message->getSourceID() << ": " << message->getContent() << endl;
 		}
 		recalls++;
 		if (recalls % recallPeriod == 1) {
@@ -85,12 +85,12 @@ void CandidateNodeCoreImpl::getState(string& state) {
 }
 
 void CandidateNodeCoreImpl::startCampaign() {
-	cout << party << " - Start Campaign!" << endl;
+	//cout << party << " - Start Campaign!" << endl;
 	(getCore()->*sendEcho)(to_string(party));
 }
 
 void CandidateNodeCoreImpl::callVoteMe() {
-	cout << party << " - Start VoteMe!" << endl;
+	//cout << party << " - Start VoteMe!" << endl;
 	ApplicationMessage* voteMeMsg = new ApplicationMessage(MessageSubType::normal, to_string(party));
 	(getCore()->*sendToAll)(voteMeMsg, 0);
 }

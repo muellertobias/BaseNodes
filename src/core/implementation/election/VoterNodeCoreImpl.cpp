@@ -82,7 +82,7 @@ void VoterNodeCoreImpl::process(ApplicationMessage* const message) {
 
 		limitConfidenceLevel(confidenceLevelOfCandidate);
 		limitConfidenceLevel(confidenceLevelOfOpponent);
-		cout << party << "=" << *confidenceLevelOfCandidate << ", " << opponent << "=" << *confidenceLevelOfOpponent << endl;
+		//cout << party << "=" << *confidenceLevelOfCandidate << ", " << opponent << "=" << *confidenceLevelOfOpponent << endl;
 
 	} else if (message->getType() == MessageSubType::normal) {
 		set<int>::iterator it = receivedMessageNumbers.find(message->getNumber());
@@ -129,7 +129,7 @@ void VoterNodeCoreImpl::process(ApplicationMessage* const message) {
 			// Abgefangen durch sammeln der MessageNumbers
 		}
 
-		cout << party << "=" << *confidenceLevelOfCandidate << ", " << opponent << "=" << *confidenceLevelOfOpponent << " - " << message->getNumber() << endl;
+		//cout << party << "=" << *confidenceLevelOfCandidate << ", " << opponent << "=" << *confidenceLevelOfOpponent << " - " << message->getNumber() << endl;
 		if (!voting.empty()) {
 			ApplicationMessage* replyToCandidate = new ApplicationMessage(MessageSubType::normal, message->getNumber(), voting);
 			(getCore()->*sendTo)(replyToCandidate, (int)party);

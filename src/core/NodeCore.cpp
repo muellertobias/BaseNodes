@@ -127,7 +127,7 @@ Message* NodeCore::receive() {
 			if (this->vectorTime->isTerminated()) {
 				throw helper::exception::TerminationTimeReachedException();
 			}
-			cout << nodeInfo.NodeID << " - Time: " << this->vectorTime->getLocalTime() << endl;
+			//cout << nodeInfo.NodeID << " - Time: " << this->vectorTime->getLocalTime() << endl;
 		}
 
 
