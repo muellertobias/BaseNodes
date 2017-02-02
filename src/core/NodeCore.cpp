@@ -303,28 +303,11 @@ bool NodeCore::sendTo(Message* const message, const NodeInfo& destination) {
 }
 
 void NodeCore::sendSnapshot() {
-	using namespace tinyxml2;
-
-	XMLDocument doc;
-	XMLElement* root = doc.NewElement("log");
-	int length = log->size();
-	root->QueryIntAttribute("length", &length);
-
-	for (vector<string*>::const_iterator it = log->begin(); it != log->end(); ++it) {
-		string* entry = (*it);
-		XMLElement* element = doc.NewElement("logEntry");
-		element->SetText(entry->c_str());
-		root->InsertEndChild(element);
-	}
-
-	doc.InsertEndChild(root);
-
-	XMLPrinter p;
-	doc.Print(&p);
-
-	ControlMessage* logMsg = new ControlMessage(MessageSubType::log, 0, nodeInfo.NodeID, string(p.CStr()));
+	string state;
+	state.append(to_string(nodeInfo.NodeID) + "-");
+	this->nodeImpl->getState(state);
+	ControlMessage* logMsg = new ControlMessage(MessageSubType::normal, 0, nodeInfo.NodeID, state);
 	sendToListener(logMsg);
-	doc.Clear();
 }
 
 bool NodeCore::sendToListener(Message* const message) {

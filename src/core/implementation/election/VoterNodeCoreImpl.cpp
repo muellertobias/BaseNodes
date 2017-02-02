@@ -8,6 +8,7 @@
 #include "VoterNodeCoreImpl.h"
 
 #include <iostream>
+#include <sstream>
 #include <map>
 #include <cmath>
 #include <thread>         // std::this_thread::sleep_for
@@ -141,6 +142,9 @@ void VoterNodeCoreImpl::process(ApplicationMessage* const message) {
 }
 
 void VoterNodeCoreImpl::getState(string& state) {
+	stringstream strStream;
+	strStream << "Voter:" << politics.party1 << "=" << politics.confidenceLevel1 << "|" << politics.party2 << "=" << politics.confidenceLevel2;
+	state.append(strStream.str());
 }
 
 // TODO Funktioniert nicht!

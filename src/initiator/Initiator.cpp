@@ -23,7 +23,7 @@ void Initiator::loop() {
 			isRunning = false;
 		} else if (input == "help") {
 			showDetails();
-		} else if (input == "tell") {
+		} else if (input == "start") {
 			tell();
 		} else if (input == "halt") {
 			halt();
@@ -49,7 +49,7 @@ void Initiator::loop() {
 void Initiator::showDetails() {
 	cout << "Befehle:\nhelp - Zeige Hilfe an\n" <<
 			"exit - Beenden\n" <<
-			"tell - Löse Initialnachricht aus\n" <<
+			"start - Löse Initialnachricht an beide Kandidaten aus\n" <<
 			"snap - Erzeuge Schnappschuss\n" <<
 			"halt - Halte einen/alle Knoten an\n" <<
 			"echo - Hält alle Knoten an mittels ECHO\n" <<
@@ -84,15 +84,14 @@ NodeInfo Initiator::readNodeID() {
 }
 
 void Initiator::tell() {
-	NodeInfo nodeInfo = readNodeID();
+	cout << "Geben Sie die Kandidaten nacheinander ein!" << endl;
+	NodeInfo nodeInfo1 = readNodeID();
+	NodeInfo nodeInfo2 = readNodeID();
 
-	cout << "Nachrichtentext > ";
-	string content = readInput();
-	if (content.empty()) {
-		content = "EMPTY";
-	}
+	string content = "START";
 	Message* message = new ControlMessage(MessageSubType::normal, 0, content);
-	sendTo(message, nodeInfo);
+	sendTo(message, nodeInfo1);
+	sendTo(message, nodeInfo2);
 }
 
 void Initiator::sendEchoShutdown() {
