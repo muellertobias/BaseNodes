@@ -17,8 +17,7 @@ namespace network {
 class TransceiverBase {
 public:
 	virtual ~TransceiverBase() { };
-	virtual std::string receive() = 0;
-	virtual message::Message* receive(bool) = 0;
+	virtual message::Message* receive() = 0;
 	virtual bool sendTo(const NodeInfo& destination, const std::string& message) = 0;
 	virtual bool closeReceiver() = 0;
 	virtual void resolve(const NodeInfo& nodeInfo, std::string& address) = 0;

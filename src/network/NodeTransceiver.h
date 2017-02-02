@@ -30,9 +30,9 @@ public:
 	NodeTransceiver(const std::string& address, const int& port, const int& numberOfConnections, bool isReceiver = true);
 	NodeTransceiver(const NodeInfo& nodeInfo, const int& numberOfConnections, const NodeMap& staticNames, bool isReceiver = true);
 	virtual ~NodeTransceiver();
-	virtual string receive();
-	virtual message::Message* receive(bool) {
-		string incomingStr = this->receive();
+	string receive(bool);
+	virtual message::Message* receive() {
+		string incomingStr = this->receive(true);
 		return message::MessageFactory::create(incomingStr);
 	}
 	virtual bool sendTo(const NodeInfo& destination, const string& message);

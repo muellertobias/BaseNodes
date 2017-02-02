@@ -116,7 +116,7 @@ void NodeCore::showDetails() {
 
 Message* NodeCore::receive() {
 	try {
-		Message* msg = transceiver->receive(true);
+		Message* msg = transceiver->receive();
 
 		if (dynamic_cast<ApplicationMessage*>(msg) != NULL) {
 			this->vectorTime->increase();

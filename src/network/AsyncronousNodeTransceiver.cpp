@@ -50,11 +50,7 @@ AsyncronousNodeTransceiver::~AsyncronousNodeTransceiver() {
 	}
 }
 
-std::string AsyncronousNodeTransceiver::receive() {
-	return this->receiverQueue.pop()->toString();
-}
-
-message::Message* AsyncronousNodeTransceiver::receive(bool) {
+message::Message* AsyncronousNodeTransceiver::receive() {
 	return this->receiverQueue.pop();
 }
 

@@ -31,7 +31,7 @@ NodeListener::~NodeListener() {
 void NodeListener::loop() {
 	while (isRunning) {
 		cout << "Listen..." << endl;
-		Message* message = transceiver->receive(true);
+		Message* message = transceiver->receive();
 		handle((ControlMessage*)message);
 		print(message);
 	}

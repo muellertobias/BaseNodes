@@ -39,7 +39,7 @@ NodeTransceiver::~NodeTransceiver() {
 	closeReceiver();
 }
 
-string NodeTransceiver::receive() {
+string NodeTransceiver::receive(bool) {
 	string msg;
 
 	struct sockaddr_in client;

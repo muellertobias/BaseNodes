@@ -33,8 +33,7 @@ public:
 	AsyncronousNodeTransceiver(const NodeInfo& nodeInfo, const int& numberOfConnections, const NodeMap& staticNames, bool isReceiver = true);
 	virtual ~AsyncronousNodeTransceiver();
 
-	virtual std::string receive();
-	virtual message::Message* receive(bool);
+	virtual message::Message* receive();
 
 	virtual bool sendTo(const NodeInfo& destination, const string& message);
 	virtual bool closeReceiver();
