@@ -10,6 +10,8 @@
 #include <iostream>
 #include <map>
 #include <cmath>
+#include <thread>         // std::this_thread::sleep_for
+#include <chrono>         // std::chrono::seconds
 
 #include "../../../helper/utilities/utilities.h"
 #include "../../NodeCore.h"
@@ -48,6 +50,7 @@ void VoterNodeCoreImpl::process(ControlMessage* const message) {
 }
 
 void VoterNodeCoreImpl::process(ApplicationMessage* const message) {
+    std::this_thread::sleep_for (std::chrono::microseconds(700));
 	//cout << "Voter-"<< core->getNodeInfo().NodeID << " - Received ApplicationMessage" << endl;
 	//cout << message->toString() << endl;
 	if (message->getType() == MessageSubType::explorer) {
@@ -102,8 +105,8 @@ void VoterNodeCoreImpl::process(ApplicationMessage* const message) {
 			confidenceLevelOfOpponent = &politics.confidenceLevel2;
 			opponent = politics.party2;
 		} else {
-			confidenceLevelOfOpponent = &politics.confidenceLevel2;
-			confidenceLevelOfCandidate = &politics.confidenceLevel1;
+			confidenceLevelOfCandidate = &politics.confidenceLevel2;
+			confidenceLevelOfOpponent = &politics.confidenceLevel1;
 			opponent = politics.party1;
 		}
 

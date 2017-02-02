@@ -15,6 +15,7 @@
 #include "Message.h"
 #include "ControlMessage.h"
 #include "ApplicationMessage.h"
+#include <iostream>
 
 namespace message {
 
@@ -27,8 +28,8 @@ struct MessagePriorisation
 
 class MessagePriorityConcurrentQueue {
 public:
-	MessagePriorityConcurrentQueue();
-	virtual ~MessagePriorityConcurrentQueue();
+	MessagePriorityConcurrentQueue() { }
+	virtual ~MessagePriorityConcurrentQueue() { }
 
 	Message* pop() {
 		std::unique_lock<std::mutex> mlock(mutex_);
@@ -56,11 +57,13 @@ public:
 		cond_.notify_one();
 	}
 
-	void push(Message*& item) {
-		std::unique_lock<std::mutex> mlock(mutex_);
-		queue_.push(std::move(item));
-		mlock.unlock();
-		cond_.notify_one();
+	size_t length() const {
+		return queue_.size();
+	}
+
+	void clear() {
+		std::priority_queue<Message*, std::vector<Message*>, MessagePriorisation> empty;
+		std::swap(queue_, empty );
 	}
 
 private:

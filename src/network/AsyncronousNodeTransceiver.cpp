@@ -42,7 +42,6 @@ AsyncronousNodeTransceiver::AsyncronousNodeTransceiver(const NodeInfo& nodeInfo,
 		createReceiver(nodeInfo, numberOfConnections);
 		this->receiverThread = thread(&AsyncronousNodeTransceiver::asyncReceive, this);
 	}
-
 }
 
 AsyncronousNodeTransceiver::~AsyncronousNodeTransceiver() {
@@ -52,6 +51,10 @@ AsyncronousNodeTransceiver::~AsyncronousNodeTransceiver() {
 }
 
 std::string AsyncronousNodeTransceiver::receive() {
+	return this->receiverQueue.pop()->toString();
+}
+
+message::Message* AsyncronousNodeTransceiver::receive(bool) {
 	return this->receiverQueue.pop();
 }
 
@@ -63,7 +66,10 @@ bool AsyncronousNodeTransceiver::sendTo(const NodeInfo& destination,
 	if (sender != senders.end()) {
 		socketID = sender->second;
 	} else {
-		socketID = createConnection(destination);
+		socketID = createConnection(destination); // Prüfen, ob -1
+		if (socketID == -1) {
+			return false;
+		}
 		senders.insert(pair<int, int>(destination.NodeID, socketID));
 	}
 
@@ -85,7 +91,6 @@ bool AsyncronousNodeTransceiver::closeReceiver() {
 		close(socketID);
 		for (ReceiverThreads::iterator it = receivers.begin(); it != receivers.end(); it++) {
 			shutdown(it->first, SHUT_RDWR);
-
 			if (it->second.joinable()) {
 				it->second.join();
 			}
@@ -93,12 +98,9 @@ bool AsyncronousNodeTransceiver::closeReceiver() {
 		if (this->receiverThread.joinable()) {
 			this->receiverThread.join();
 		}
-
 	} catch (std::exception& e) {
 		cout << e.what() << endl;
 	}
-
-
 	return true;
 }
 
@@ -164,32 +166,38 @@ bool AsyncronousNodeTransceiver::sendTo(int socketID, const string& message) {
 }
 
 void AsyncronousNodeTransceiver::receive(int clientSocketID) {
-	while (this->isRunning) {
-		string message;
-		vector<char> buffer(1024);
-		int receivedSize;
+	try {
+		while (this->isRunning) {
+			string message;
+			vector<char> buffer(1024);
+			int receivedSize;
 
-		do {
-			memset(buffer.data(), '\0', buffer.size());
-			receivedSize = recv(clientSocketID, buffer.data(), buffer.size(), 0);
+			do {
+				memset(buffer.data(), '\0', buffer.size());
+				receivedSize = recv(clientSocketID, buffer.data(), buffer.size(), 0);
 
-			if (errno) {
-				cout << strerror(errno) << endl;
-				string errnoStr(strerror(errno));
-				throw helper::exception::NetworkException("Receive failed with: " + errnoStr);
+				if (errno) {
+					cout << strerror(errno) << endl;
+					string errnoStr(strerror(errno));
+					throw helper::exception::NetworkException("Receive failed with: " + errnoStr);
+				}
+
+				if (receivedSize > 0)
+					message.append(buffer.begin(), buffer.end());
+			} while (receivedSize == buffer.size());
+
+			if (message.length() > 0) {
+				this->receiverQueue.push(message::MessageFactory::create(message));
 			}
+		}
+	} catch (exception& e) {
 
-			if (receivedSize > 0)
-				message.append(buffer.begin(), buffer.end());
-		} while (receivedSize == buffer.size());
-
-		if (message.length() > 0)
-			this->receiverQueue.push(message);
 	}
+	close(clientSocketID);
+
 }
 
 void AsyncronousNodeTransceiver::createReceiver(const NodeInfo& nodeInfo, const int& numberOfConnections) {
-
 	socketID = socket(AF_INET, SOCK_STREAM, 0);
 	if (socketID < 0) {
 		cout << strerror(errno) << endl;
@@ -197,7 +205,7 @@ void AsyncronousNodeTransceiver::createReceiver(const NodeInfo& nodeInfo, const 
 	}
 
 	int yes = 1;
-    setsockopt(socketID, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
+    setsockopt(socketID, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)); // reuse socket!
 
 	int isBound = bind(socketID, (struct sockaddr*)&nodeInfo.Address, sizeof(nodeInfo.Address));
 	if (isBound < 0) {
@@ -209,6 +217,7 @@ void AsyncronousNodeTransceiver::createReceiver(const NodeInfo& nodeInfo, const 
 		throw helper::exception::NetworkException("Blocked Socket! - Listen");
 	}
 
+	// Timeout for receive to check if node is running
 	fd_set rfds;
 	struct timeval tv;
 	tv.tv_sec = 5;

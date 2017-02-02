@@ -36,7 +36,7 @@ else
 		./Debug/NetAVA $addressfile node $i $config $graphfile &
 	done
 
-	./Debug/NetAVA $addressfile initiator
+	gnome-terminal -e "./Debug/NetAVA $addressfile initiator"
 
 fi
 

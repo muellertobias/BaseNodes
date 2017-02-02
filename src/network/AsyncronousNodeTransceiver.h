@@ -16,6 +16,8 @@
 
 #include "TransceiverBase.h"
 #include "../helper/utilities/ConcurrentQueue.h"
+#include "../message/MessageFactory.h"
+#include "../message/MessagePriorityConcurrentQueue.h"
 
 namespace network {
 
@@ -32,19 +34,20 @@ public:
 	virtual ~AsyncronousNodeTransceiver();
 
 	virtual std::string receive();
+	virtual message::Message* receive(bool);
+
 	virtual bool sendTo(const NodeInfo& destination, const string& message);
 	virtual bool closeReceiver();
 	virtual void resolve(const NodeInfo& nodeInfo, string& address);
 	virtual void resolve(const int& nodeID, NodeInfo& nodeInfo);
 
 private:
-	ConcurrentQueue<string> receiverQueue;
+	message::MessagePriorityConcurrentQueue receiverQueue;
 
 	int socketID;
 	bool isRunning; //TODO Mutual machen
 	NodeMap staticNameService;
 	thread receiverThread;
-	//vector<thread> receivers;
 	ReceiverThreads receivers;
 	Transporter senders;
 

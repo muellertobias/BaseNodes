@@ -19,6 +19,8 @@
 
 #include <string>
 
+#include "../message/MessageFactory.h"
+
 namespace network {
 
 using namespace std;
@@ -29,6 +31,10 @@ public:
 	NodeTransceiver(const NodeInfo& nodeInfo, const int& numberOfConnections, const NodeMap& staticNames, bool isReceiver = true);
 	virtual ~NodeTransceiver();
 	virtual string receive();
+	virtual message::Message* receive(bool) {
+		string incomingStr = this->receive();
+		return message::MessageFactory::create(incomingStr);
+	}
 	virtual bool sendTo(const NodeInfo& destination, const string& message);
 	virtual bool closeReceiver();
 	virtual void resolve(const NodeInfo& nodeInfo, std::string& address);

@@ -116,9 +116,7 @@ void NodeCore::showDetails() {
 
 Message* NodeCore::receive() {
 	try {
-		string incomingStr = transceiver->receive();
-
-		Message* msg = MessageFactory::create(incomingStr);
+		Message* msg = transceiver->receive(true);
 
 		if (dynamic_cast<ApplicationMessage*>(msg) != NULL) {
 			this->vectorTime->increase();
@@ -213,10 +211,6 @@ void NodeCore::handleEchoMessage(Message* const message) {
 				//cout << nodeInfo.NodeID << " - Send Explorer!" << endl;
 			} else {
 				it->second.counter++;
-
-				//if (it->second.FirstNeighborID != message.getSourceID()) {
-					// FEHLER?! Zweimal Explorer vom selben Knoten mit selber ECHO-ID (=MessageNumber)
-				//}
 			}
 		} else if (message->getType() == MessageSubType::echo) {
 			it->second.counter++;
@@ -240,7 +234,7 @@ void NodeCore::handleEchoMessage(Message* const message) {
 			}
 			if (dynamic_cast<ControlMessage*>(message) != NULL) {
 				if (message->getContent() == constants::SHUTDOWN_ECHO) {
-					isRunning = !isRunning;
+					isRunning = false;
 				} else if (helper::utilities::isNumber(message->getContent())) {
 					// Terminierungszeit erhalten
 					this->vectorTime->setTermininationTime(stoi(message->getContent()));
@@ -292,7 +286,7 @@ bool NodeCore::sendTo(Message* const message, const NodeInfo& destination) {
 		this->vectorTime->increase();
 		if (this->vectorTime->isTerminated()) {
 			// sanft abschalten
-			isRunning = !isRunning;
+			isRunning = false;
 		}
 	}
 

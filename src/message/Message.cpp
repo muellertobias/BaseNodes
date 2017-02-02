@@ -8,13 +8,14 @@
 #include "Message.h"
 
 #include <sstream>
+#include <climits>
 
 #include "../helper/randomizer/Random.h"
 
 namespace message {
 
 Message::Message(const MessageSubType& type, const string& content)
-	: Message(type, helper::randomizer::random(0, 9999), 0, content) {
+	: Message(type, helper::randomizer::random(0, INT_MAX), 0, content) {
 }
 
 Message::Message(const MessageSubType& type, int number, const string& content)
