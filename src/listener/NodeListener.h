@@ -30,7 +30,6 @@ private:
 	TransceiverBase* transceiver;
 	bool isRunning;
 
-	Message* receive() const;
 	void handle(ControlMessage* message);
 	void print(Message* const message);
 };

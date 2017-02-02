@@ -19,7 +19,7 @@ namespace message {
 
 Message* MessageFactory::create(const string& xmlRawData) {
 	if (xmlRawData.empty()) {
-		throw new helper::exception::NodeBaseException("Message creation failed! StringContent:" + xmlRawData);
+		throw new helper::exception::NodeBaseException("Message creation failed! StringContent empty");
 	}
 	return read(xmlRawData);
 }

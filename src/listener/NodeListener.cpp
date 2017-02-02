@@ -31,15 +31,10 @@ NodeListener::~NodeListener() {
 void NodeListener::loop() {
 	while (isRunning) {
 		cout << "Listen..." << endl;
-		Message* message = receive();
+		Message* message = transceiver->receive(true);
 		handle((ControlMessage*)message);
 		print(message);
 	}
-}
-
-Message* NodeListener::receive() const {
-	string buffer = transceiver->receive();
-	return MessageFactory::create(buffer);
 }
 
 void NodeListener::print(Message* const message) {
