@@ -128,15 +128,15 @@ void VoterNodeCoreImpl::process(ApplicationMessage* const message) {
 			voting = "I Dont Vote You";
 		} else if (*confidenceLevelOfCandidate > *confidenceLevelOfOpponent) {
 			voting = "I Vote You";
-			(getCore()->*sendToAll)(message, message->getSourceID());
-			// Dies verursacht das Unendliche Senden von VoteMe_messages
-			// Abgefangen durch sammeln der MessageNumbers
+			//(getCore()->*sendToAll)(message, message->getSourceID());
+			sendToAll(message, message->getSourceID());
 		}
 
 		//cout << party << "=" << *confidenceLevelOfCandidate << ", " << opponent << "=" << *confidenceLevelOfOpponent << " - " << message->getNumber() << endl;
 		if (!voting.empty()) {
 			ApplicationMessage* replyToCandidate = new ApplicationMessage(MessageSubType::normal, message->getNumber(), voting);
-			(getCore()->*sendTo)(replyToCandidate, (int)party);
+			//(getCore()->*sendTo)(replyToCandidate, (int)party);
+			sendTo(replyToCandidate, (int)party);
 		}
 	}
 }
@@ -160,6 +160,11 @@ void VoterNodeCoreImpl::resolveConfidenceLevels(const int& party, int& opponent,
 		confidenceLevelOfCandidate = &politics.confidenceLevel1;
 		opponent = politics.party1;
 	}
+}
+
+INodeImpl* VoterNodeCoreImpl::prototype() {
+	INodeImpl* impl = new VoterNodeCoreImpl(*this);
+	return impl;
 }
 
 void VoterNodeCoreImpl::limitConfidenceLevel(int* confidenceLevel) {

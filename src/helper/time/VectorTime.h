@@ -42,6 +42,7 @@ public:
 
 	void merge(const VectorTimeMap& timeMap);
 	int getMaximum();
+	static int getMaximum(const VectorTimeMap& timeMap);
 
 	bool isTerminated();
 

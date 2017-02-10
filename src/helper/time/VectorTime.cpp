@@ -88,6 +88,13 @@ int VectorTime::getMaximum() {
 	return max->second;
 }
 
+int VectorTime::getMaximum(const VectorTimeMap& times) {
+	VectorTimeMap::const_iterator max = std::max_element(times.begin(), times.end(), [](const VectorTimePair& p1, const VectorTimePair& p2) {
+		return p1.second < p2.second;
+	});
+	return max->second;
+}
+
 bool VectorTime::isTerminated() {
 	return  this->getLocalTime() >= termininationTime && termininationTime > 0;
 }

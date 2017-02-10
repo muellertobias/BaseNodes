@@ -82,17 +82,25 @@ void CandidateNodeCoreImpl::process(ApplicationMessage* const message) {
 }
 
 void CandidateNodeCoreImpl::getState(string& state) {
+	state.append("Candidate");
 }
 
 void CandidateNodeCoreImpl::startCampaign() {
 	//cout << party << " - Start Campaign!" << endl;
-	(getCore()->*sendEcho)(to_string(party));
+	//(getCore()->*sendEcho)(to_string(party));
+	sendEcho(to_string(party));
 }
 
 void CandidateNodeCoreImpl::callVoteMe() {
 	//cout << party << " - Start VoteMe!" << endl;
 	ApplicationMessage* voteMeMsg = new ApplicationMessage(MessageSubType::normal, to_string(party));
-	(getCore()->*sendToAll)(voteMeMsg, 0);
+	//(getCore()->*sendToAll)(voteMeMsg, 0);
+	sendToAll(voteMeMsg, 0);
+}
+
+INodeImpl* CandidateNodeCoreImpl::prototype() {
+	INodeImpl* impl = new CandidateNodeCoreImpl(*this);
+	return impl;
 }
 
 } /* namespace election */

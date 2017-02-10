@@ -84,13 +84,14 @@ private:
 	NodeInfo nodeInfo;
 	NodeMap neighbors;
 	bool isRunning;
+	bool isShuttingDown;
+	bool isMarked;
 	TransceiverBase* transceiver;
 	INodeImpl* nodeImpl;
-	vector<string*>* log;
 	NodeInfo listenerNodeInfo;
 	helper::time::VectorTime* vectorTime;
-
 	EchoBuffer echoBuffer;
+	INodeImpl* pastImpl;
 
 	void showDetails();
 
@@ -105,6 +106,8 @@ private:
 	void sendSnapshot();
 	bool sendToListener(Message* const message);
 	bool sendStatusToListener(const string& status);
+
+	void createTemporaryPastImplementation();
 };
 
 } /* namespace view */

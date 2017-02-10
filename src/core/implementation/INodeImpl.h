@@ -8,6 +8,7 @@
 #ifndef CORE_IMPLEMENTATION_INODEIMPL_H_
 #define CORE_IMPLEMENTATION_INODEIMPL_H_
 
+#include <functional>
 #include "../../message/Message.h"
 #include "../NodeCore.h"
 #include <string>
@@ -26,19 +27,15 @@ public:
 
 	virtual void getState(string& state) = 0;
 
-	void setSendEcho(NodeCore::_sendEcho sendEcho) {
+	void setSendEcho(std::function<bool(const std::string& content)> sendEcho) {
 		this->sendEcho = sendEcho;
 	}
-	void setSendTo(NodeCore::_sendTo sendTo) {
+	void setSendTo(std::function<bool(Message*, const int&)> sendTo) {
 		this->sendTo = sendTo;
 	}
 
-	void setSendToDestinations(NodeCore::_sendToAll sendToAll) {
+	void setSendToDestinations(std::function<bool(Message* const, const int&)> sendToAll) {
 		this->sendToAll = sendToAll;
-	}
-
-	void setSendResult(NodeCore::_sendResult sendResult) {
-		this->sendResultImpl = sendResult;
 	}
 
 	NodeCore* getCore() const {
@@ -49,12 +46,18 @@ public:
 		this->core = core;
 	}
 
+	virtual INodeImpl* prototype() = 0;
+
 protected:
 	NodeCore* core;
-	NodeCore::_sendEcho sendEcho;
-	NodeCore::_sendTo sendTo;
-	NodeCore::_sendToAll sendToAll;
-	NodeCore::_sendResult sendResultImpl;
+	//NodeCore::_sendEcho sendEcho;
+	std::function<bool(const std::string& content)> sendEcho;
+
+	//NodeCore::_sendTo sendTo;
+	std::function<bool(Message*, const int&)> sendTo;
+
+	//NodeCore::_sendToAll sendToAll;
+	std::function<bool(Message* const, const int&)> sendToAll;
 };
 
 } /* namespace implementation */

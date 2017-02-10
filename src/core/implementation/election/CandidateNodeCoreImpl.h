@@ -28,6 +28,7 @@ public:
 	virtual void process(Message* const message);
 	virtual void getState(string& state);
 
+	virtual INodeImpl* prototype();
 
 private:
 	const int recallPeriod;
