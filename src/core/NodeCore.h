@@ -100,8 +100,9 @@ private:
 	bool sendStatusToListener(const string& status);
 
 	void createTemporaryPastImplementation();
-	void processImplementations(message::Message* const message);
+	void processImplementations(Message* const message);
 	void initilizeControlEchoMessage(const int& echoID, const string& content);
+	void processFirstEchoMessage(Message* const message);
 };
 
 } /* namespace view */

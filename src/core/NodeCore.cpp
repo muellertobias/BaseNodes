@@ -130,10 +130,10 @@ Message* NodeCore::receive() {
 			if (isShuttingDown) {
 				throw helper::exception::ShuttingDownException();
 			}
-
-			this->vectorTime->increase();
 			this->vectorTime->merge(msg->getVectorTimes());
 			this->vectorTime->setTime(this->nodeInfo.NodeID, this->vectorTime->getMaximum());
+			this->vectorTime->increase();
+
 			if (this->vectorTime->isTerminated() && !isMarked) {
 				createTemporaryPastImplementation();
 			}
@@ -208,13 +208,7 @@ void NodeCore::handleEchoMessage(Message* const message) {
 				echo.counter = 1; // eine Nachricht von einem Nachbar schon erhalten
 				this->echoBuffer.insert(EchoEntry(echo.EchoID, echo));
 
-				if (dynamic_cast<ControlMessage*>(message) != NULL) {
-					if (message->getContent() == constants::SHUTDOWN_ECHO) {
-						isShuttingDown = true;
-					}
-				}
-
-				processImplementations(message);
+				processFirstEchoMessage(message);
 
 				Message* explorerMsg = message->prototype();
 				explorerMsg->setSourceID(nodeInfo.NodeID);
@@ -222,14 +216,8 @@ void NodeCore::handleEchoMessage(Message* const message) {
 			} else {
 				it->second.counter++;
 			}
-			if (message->getContent() == constants::SHUTDOWN_ECHO) {
-				//cout << nodeInfo.NodeID << " - Received SHUTDOWN-EXPLORER " << message->getNumber() << " from " << message->getSourceID() << endl;
-			}
 		} else if (message->getType() == MessageSubType::echo) {
 			it->second.counter++;
-			if (message->getContent() == constants::SHUTDOWN_ECHO) {
-				//cout << nodeInfo.NodeID << " - Received SHUTDOWN-ECHO " << message->getNumber() << " from " << message->getSourceID() << endl;
-			}
 		}
 
 		if (it->second.counter == this->neighbors.size()) {
@@ -238,15 +226,14 @@ void NodeCore::handleEchoMessage(Message* const message) {
 				processImplementations(message);
 			} else {
 				Message* echoMsg = message->prototype();
-				echoMsg->setType(MessageSubType::echo);
+				echoMsg->setType(MessageSubType::echo); // change type from Explorer to Echo
 
 				echoMsg->setSourceID(nodeInfo.NodeID);
 				sendTo(echoMsg, this->neighbors.at(it->second.FirstNeighborID));
 			}
 			if (dynamic_cast<ControlMessage*>(message) != NULL) {
 				if (message->getContent() == constants::SHUTDOWN_ECHO) {
-					//cout << nodeInfo.NodeID << " - Send SHUTDOWN-ECHO " << message->getNumber() <<" to " << it->second.FirstNeighborID << endl;
-					isRunning = false; // Neighbors are shutting down
+					isRunning = false; // Neighbors are shutting down and so i can shutdown...
 				} else if (helper::utilities::isNumber(message->getContent())) {
 					// (Re-)Set Termination Time
 					this->vectorTime->setTermininationTime(stoi(message->getContent()));
@@ -340,6 +327,15 @@ void NodeCore::initilizeControlEchoMessage(const int& echoID, const string& cont
 	sendToDestinationsImpl(explorerMsg, neighbors);
 }
 
+
+void NodeCore::processFirstEchoMessage(Message* const message) {
+	if (dynamic_cast<ControlMessage*>(message) != NULL) {
+		if (message->getContent() == constants::SHUTDOWN_ECHO) {
+			isShuttingDown = true;
+		}
+	}
+	processImplementations(message);
+}
 
 } /* namespace node */
 

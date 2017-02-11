@@ -40,7 +40,7 @@ core::implementation::INodeImpl* NodeElectionSettings::getNodeImplementation() {
 		return new CandidateNodeCoreImpl(config, this->nodeID);
 	} else {
 		// Wähler
-		Politics politics = {1, 0, biggestNodeID, 0};
+		Politics politics = {0, 0};
 
 		const NodeMap& neighbors = this->neighborSearcher->getNeighbors(this->nodeID);
 		if (neighbors.find(1) != neighbors.end()) {

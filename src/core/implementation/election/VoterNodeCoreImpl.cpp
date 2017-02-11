@@ -47,13 +47,11 @@ void VoterNodeCoreImpl::process(Message* const message) {
 }
 
 void VoterNodeCoreImpl::process(ControlMessage* const message) {
-	//cout << "Voter-"<< core->getNodeInfo().NodeID << " - Received ControlMessage" << endl;
 }
 
 void VoterNodeCoreImpl::process(ApplicationMessage* const message) {
     std::this_thread::sleep_for (std::chrono::microseconds(700));
-	//cout << "Voter-"<< core->getNodeInfo().NodeID << " - Received ApplicationMessage" << endl;
-	//cout << message->toString() << endl;
+
 	if (message->getType() == MessageSubType::explorer) {
 		// Campaign
 		if (!helper::utilities::isNumber(message->getContent())) {
@@ -62,19 +60,15 @@ void VoterNodeCoreImpl::process(ApplicationMessage* const message) {
 		}
 
 		int party = stoi(message->getContent());
-		int opponent;
 		int* confidenceLevelOfCandidate = NULL;
 		int* confidenceLevelOfOpponent = NULL;
 		if (party == 1) {
 			confidenceLevelOfCandidate = &politics.confidenceLevel1;
 			confidenceLevelOfOpponent = &politics.confidenceLevel2;
-			opponent = politics.party2;
 		} else {
 			confidenceLevelOfOpponent = &politics.confidenceLevel2;
 			confidenceLevelOfCandidate = &politics.confidenceLevel1;
-			opponent = politics.party1;
 		}
-		//resolveConfidenceLevels(party, opponent, confidenceLevelOfCandidate, confidenceLevelOfOpponent);
 
 		if (*confidenceLevelOfCandidate < *confidenceLevelOfOpponent) {
 			*confidenceLevelOfCandidate -= 1;
@@ -86,7 +80,6 @@ void VoterNodeCoreImpl::process(ApplicationMessage* const message) {
 
 		limitConfidenceLevel(confidenceLevelOfCandidate);
 		limitConfidenceLevel(confidenceLevelOfOpponent);
-		//cout << party << "=" << *confidenceLevelOfCandidate << ", " << opponent << "=" << *confidenceLevelOfOpponent << endl;
 
 	} else if (message->getType() == MessageSubType::normal) {
 		set<int>::iterator it = receivedMessageNumbers.find(message->getNumber());
@@ -99,19 +92,14 @@ void VoterNodeCoreImpl::process(ApplicationMessage* const message) {
 		int party = stoi(message->getContent());
 		int* confidenceLevelOfCandidate = NULL;
 		int* confidenceLevelOfOpponent = NULL;
-		int opponent = 0;
 
 		if (party == 1) {
 			confidenceLevelOfCandidate = &politics.confidenceLevel1;
 			confidenceLevelOfOpponent = &politics.confidenceLevel2;
-			opponent = politics.party2;
 		} else {
 			confidenceLevelOfCandidate = &politics.confidenceLevel2;
 			confidenceLevelOfOpponent = &politics.confidenceLevel1;
-			opponent = politics.party1;
 		}
-
-		//resolveConfidenceLevels(party, opponent, confidenceLevelOfCandidate, confidenceLevelOfOpponent);
 
 		(*confidenceLevelOfCandidate) += round(*confidenceLevelOfCandidate / 10);
 		if (*confidenceLevelOfCandidate > 100)
@@ -128,14 +116,11 @@ void VoterNodeCoreImpl::process(ApplicationMessage* const message) {
 			voting = "I Dont Vote You";
 		} else if (*confidenceLevelOfCandidate > *confidenceLevelOfOpponent) {
 			voting = "I Vote You";
-			//(getCore()->*sendToAll)(message, message->getSourceID());
 			sendToAll(message, message->getSourceID());
 		}
 
-		//cout << party << "=" << *confidenceLevelOfCandidate << ", " << opponent << "=" << *confidenceLevelOfOpponent << " - " << message->getNumber() << endl;
 		if (!voting.empty()) {
 			ApplicationMessage* replyToCandidate = new ApplicationMessage(MessageSubType::normal, message->getNumber(), voting);
-			//(getCore()->*sendTo)(replyToCandidate, (int)party);
 			sendTo(replyToCandidate, (int)party);
 		}
 	}
@@ -143,23 +128,8 @@ void VoterNodeCoreImpl::process(ApplicationMessage* const message) {
 
 void VoterNodeCoreImpl::getState(string& state) {
 	stringstream strStream;
-	strStream << "Voter:" << politics.party1 << "=" << politics.confidenceLevel1 << "|" << politics.party2 << "=" << politics.confidenceLevel2;
+	strStream << "Voter:" << politics.confidenceLevel1 << "|" << politics.confidenceLevel2;
 	state.append(strStream.str());
-}
-
-// TODO Funktioniert nicht!
-void VoterNodeCoreImpl::resolveConfidenceLevels(const int& party, int& opponent,
-		int* confidenceLevelOfCandidate, int* confidenceLevelOfOpponent) {
-
-	if (party == 1) {
-		confidenceLevelOfCandidate = &politics.confidenceLevel1;
-		confidenceLevelOfOpponent = &politics.confidenceLevel2;
-		opponent = politics.party2;
-	} else {
-		confidenceLevelOfOpponent = &politics.confidenceLevel2;
-		confidenceLevelOfCandidate = &politics.confidenceLevel1;
-		opponent = politics.party1;
-	}
 }
 
 INodeImpl* VoterNodeCoreImpl::prototype() {

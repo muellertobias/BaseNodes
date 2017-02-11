@@ -15,9 +15,7 @@ namespace implementation {
 namespace election {
 
 typedef struct {
-	const int party1;
 	int confidenceLevel1;
-	const int party2;
 	int confidenceLevel2;
 } Politics;
 
