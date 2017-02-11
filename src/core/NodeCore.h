@@ -102,12 +102,11 @@ private:
 	bool sendToDestinationsImpl(Message* const message, const NodeMap& destinations);
 	bool sendToDestinations(Message* const message, const int& expectedNodeID);
 
-	void shutdown(ControlMessage* const message);
-	void sendSnapshot();
-	bool sendToListener(Message* const message);
 	bool sendStatusToListener(const string& status);
 
 	void createTemporaryPastImplementation();
+	void processImplementations(message::Message* const message);
+	void initilizeControlEchoMessage(const int& echoID, const string& content);
 };
 
 } /* namespace view */
