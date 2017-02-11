@@ -53,11 +53,6 @@ using namespace implementation;
 
 class NodeCore {
 public:
-	typedef bool (NodeCore::*_sendEcho)(const string& content);
-	typedef bool (NodeCore::*_sendTo)(Message* const, const int& nodeID);
-	typedef bool (NodeCore::*_sendToAll)(Message* const, const int& excludedNodeID);
-	typedef bool (NodeCore::*_sendResult)(Message* const message);
-
 	NodeCore(Settings* configurator);
 	virtual ~NodeCore();
 

@@ -31,7 +31,7 @@ void Initiator::loop() {
 			snapshoot();
 		} else if (input == "echo") {
 			sendEchoShutdown();
-		} else if (input == "init") {
+		} else if (input == "time") {
 			sendInit();
 		} else if (input == "reset") {
 			sendReset();
@@ -53,7 +53,7 @@ void Initiator::showDetails() {
 			"snap - Erzeuge Schnappschuss\n" <<
 			"halt - Halte einen/alle Knoten an\n" <<
 			"echo - Hält alle Knoten an mittels ECHO\n" <<
-			"init - Setzt Terminierungszeit\n" <<
+			"time - Setzt Terminierungszeit\n" <<
 			"reset - Setzt ausgewählten Knoten zurück\n" << endl;
 	cout << "Mögliche Adressen:" << endl;
 
@@ -138,6 +138,7 @@ void Initiator::sendInit() {
 }
 
 void Initiator::sendReset() {
+	cout << "Nicht implementiert" << endl;
 }
 
 void Initiator::sendTo(Message* const message, const NodeInfo& nodeInfo) {
