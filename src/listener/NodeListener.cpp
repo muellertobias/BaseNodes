@@ -7,17 +7,16 @@
 
 #include "NodeListener.h"
 
+#include <unistd.h>
+#include <fstream>
 #include <iostream>
+#include <sstream>
 #include <string>
 
 #include "../helper/Constants.h"
-#include "../helper/utilities/tinyxml2.h"
-#include "../message/MessageFactory.h"
 
 namespace helper {
 namespace listener {
-
-using namespace tinyxml2;
 
 NodeListener::NodeListener(TransceiverBase* transceiver) {
 	this->transceiver = transceiver;
@@ -38,28 +37,21 @@ void NodeListener::loop() {
 }
 
 void NodeListener::print(Message* const message) {
-	if (message->getType() == MessageSubType::log) {
-		string content = message->getContent();
-		// XML
-		XMLDocument doc;
-		doc.Parse(content.c_str(), content.length());
+	std::stringstream log;
+	log << message->getSourceID() << " - " << message->getContent() << endl;
+	cout << log.str();
 
-		XMLElement* root = doc.FirstChild()->ToElement();
-
-		int length = 0;
-		root->QueryAttribute("length", &length);
-
-		for (XMLElement* element = root->FirstChildElement("logEntry"); element != NULL; element = element->NextSiblingElement("logEntry")) {
-			cout << element->GetText() << endl;
-		}
-	} else {
-		cout << message->getContent() << endl;
-	}
+	std::stringstream logfilename;
+	logfilename << "listener_" << getpid() << ".txt";
+	std::ofstream logFile;
+	logFile.open(logfilename.str(), std::ios::app);
+	logFile << log.str();
+	logFile.close();
 }
 
 void NodeListener::handle(ControlMessage* message) {
 	if (message->getContent() == constants::SHUTDOWN) {
-		this->isRunning = !isRunning;
+		this->isRunning = false;
 	}
 }
 

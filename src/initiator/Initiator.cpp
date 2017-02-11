@@ -6,6 +6,7 @@
  */
 
 #include "Initiator.h"
+
 #include "../helper/utilities/utilities.h"
 
 Initiator::Initiator(Settings* settings)

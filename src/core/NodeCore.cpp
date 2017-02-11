@@ -164,6 +164,9 @@ void NodeCore::handleControlMessage(ControlMessage* const message) {
 			if (helper::utilities::isNumber(message->getContent())) {
 				initilizeControlEchoMessage(message->getNumber(), message->getContent());
 			}
+		} else {
+			// Initial message
+			nodeImpl->process(message);
 		}
 	} catch (std::exception& e) {
 		helper::utilities::writeLog(__FUNCTION__, e);
@@ -242,7 +245,7 @@ void NodeCore::handleEchoMessage(Message* const message) {
 			}
 			if (dynamic_cast<ControlMessage*>(message) != NULL) {
 				if (message->getContent() == constants::SHUTDOWN_ECHO) {
-					cout << nodeInfo.NodeID << " - Send SHUTDOWN-ECHO " << message->getNumber() <<" to " << it->second.FirstNeighborID << endl;
+					//cout << nodeInfo.NodeID << " - Send SHUTDOWN-ECHO " << message->getNumber() <<" to " << it->second.FirstNeighborID << endl;
 					isRunning = false; // Neighbors are shutting down
 				} else if (helper::utilities::isNumber(message->getContent())) {
 					// (Re-)Set Termination Time

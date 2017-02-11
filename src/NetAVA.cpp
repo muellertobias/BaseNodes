@@ -75,21 +75,17 @@ int main(int argc, char** argv) {
 		try {
 			nodeID = stoi(argv[3]);
 			string config(argv[4]);
-			helper::utilities::localID = nodeID;
 
 			ISearchNeighbors* neighborSearcher = new helper::neighborFinders::GraphvizNeighborsCreator(argv[5]);
-			//helper::settings::NodeBaseSettings settings(addressFilename, nodeID, neighborSearcher, config);
 			helper::settings::NodeElectionSettings settings(addressFilename, nodeID, neighborSearcher, config);
 			NodeCore node(&settings);
 			node.loop();
 
-//		} catch (NodeBaseException& e) {
-//			cerr << nodeID << " - " << e.what() << endl;
 		} catch (std::exception& e) {
 			helper::utilities::writeLog("Allgemeiner Fehler: ", e);
 		}
 
-		cout << nodeID << " - Finish" << endl;
+		//cout << nodeID << " - Finish" << endl;
 	}
 
 	return 0;
