@@ -34,6 +34,22 @@ VoterNodeCoreImpl::VoterNodeCoreImpl(const Politics& politics)
 : politics(politics) {
 }
 
+
+VoterNodeCoreImpl::VoterNodeCoreImpl(const VoterNodeCoreImpl& origin) {
+	this->core = origin.core;
+	this->politics = origin.politics;
+	this->receivedMessageNumbers = origin.receivedMessageNumbers;
+	// Set Dummy-Send-Functions
+	auto sendEchoFunction = [](const string&) -> bool { return true; };
+	this->setSendEcho(sendEchoFunction);
+
+	auto sendToFunction = [](Message*, const int&) -> bool { return true; };
+	this->setSendTo(sendToFunction);
+
+	auto sendToAllFunction = [](Message* const, const int&) -> bool { return true; };
+	this->setSendToDestinations(sendToAllFunction);
+}
+
 VoterNodeCoreImpl::~VoterNodeCoreImpl() {
 }
 

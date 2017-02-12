@@ -91,7 +91,7 @@ void NodeCore::loop() {
 
 				delete message;
 			} catch (const helper::exception::ShuttingDownException& ex) {
-				helper::utilities::writeLog(__FUNCTION__, "Ignore Application Message");
+				//helper::utilities::writeLog(__FUNCTION__, "Ignore Application Message");
 			} catch (const helper::exception::NetworkException& ex) {
 				helper::utilities::writeLog(__FUNCTION__, ex);
 			} catch (std::exception& e) {
@@ -133,13 +133,15 @@ Message* NodeCore::receive() {
 			this->vectorTime->merge(msg->getVectorTimes());
 			this->vectorTime->setTime(this->nodeInfo.NodeID, this->vectorTime->getMaximum());
 			this->vectorTime->increase();
-
+			//cout << vectorTime->getLocalTime() << endl;
 			if (this->vectorTime->isTerminated() && !isMarked) {
 				createTemporaryPastImplementation();
 			}
 		}
 
 		return msg;
+	} catch (helper::exception::ShuttingDownException& e) {
+		throw e;
 	} catch (std::exception& e) {
 		helper::utilities::writeLog(__FUNCTION__, e);
 		throw e;
@@ -172,6 +174,7 @@ void NodeCore::handleControlMessage(ControlMessage* const message) {
 		helper::utilities::writeLog(__FUNCTION__, e);
 		throw e;
 	}
+	sendStatusToListener("shutdown");
 }
 
 void NodeCore::handleApplicationMessage(ApplicationMessage* const message) {
@@ -304,15 +307,6 @@ void NodeCore::createTemporaryPastImplementation() {
 		delete pastImpl;
 	}
 	pastImpl = nodeImpl->prototype();
-	// Set Dummy-Send-Functions
-	auto sendEchoFunction = [](const string&) -> bool { return true; };
-	this->nodeImpl->setSendEcho(sendEchoFunction);
-
-	auto sendToFunction = [](Message*, const int&) -> bool { return true; };
-	this->nodeImpl->setSendTo(sendToFunction);
-
-	auto sendToAllFunction = [](Message* const, const int&) -> bool { return true; };
-	this->nodeImpl->setSendToDestinations(sendToAllFunction);
 
 	isMarked = true;
 }
@@ -332,6 +326,15 @@ void NodeCore::processFirstEchoMessage(Message* const message) {
 	if (dynamic_cast<ControlMessage*>(message) != NULL) {
 		if (message->getContent() == constants::SHUTDOWN_ECHO) {
 			isShuttingDown = true;
+			// Set Dummy-Send-Functions
+			auto sendEchoFunction = [](const string&) -> bool { return true; };
+			this->nodeImpl->setSendEcho(sendEchoFunction);
+
+			auto sendToFunction = [](Message*, const int&) -> bool { return true; };
+			this->nodeImpl->setSendTo(sendToFunction);
+
+			auto sendToAllFunction = [](Message* const, const int&) -> bool { return true; };
+			this->nodeImpl->setSendToDestinations(sendToAllFunction);
 		}
 	}
 	processImplementations(message);

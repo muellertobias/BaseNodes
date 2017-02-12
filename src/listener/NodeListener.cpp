@@ -29,10 +29,17 @@ NodeListener::~NodeListener() {
 
 void NodeListener::loop() {
 	while (isRunning) {
-		cout << "Listen..." << endl;
-		Message* message = transceiver->receive();
-		handle((ControlMessage*)message);
-		print(message);
+		try {
+			cout << "Listen..." << endl;
+			Message* message = transceiver->receive();
+			if (dynamic_cast<ControlMessage*>(message) != NULL) {
+				handle((ControlMessage*)message);
+			}
+			print(message);
+		} catch (std::exception& ex) {
+			cerr << ex.what() << endl;
+		}
+
 	}
 }
 

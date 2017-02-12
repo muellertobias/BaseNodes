@@ -23,6 +23,7 @@ namespace election {
 class CandidateNodeCoreImpl : public INodeImpl {
 public:
 	CandidateNodeCoreImpl(const int& callPeriod, const int& party);
+	CandidateNodeCoreImpl(const CandidateNodeCoreImpl& origin);
 	virtual ~CandidateNodeCoreImpl();
 
 	virtual void process(Message* const message);

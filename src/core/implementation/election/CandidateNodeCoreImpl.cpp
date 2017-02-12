@@ -34,6 +34,21 @@ CandidateNodeCoreImpl::CandidateNodeCoreImpl(const int& callPeriod, const int& p
 : recallPeriod(callPeriod), party(party), recalls(0) {
 }
 
+CandidateNodeCoreImpl::CandidateNodeCoreImpl(const CandidateNodeCoreImpl& origin)
+: recallPeriod(origin.recallPeriod), party(origin.party), recalls(origin.recalls){
+	this->core = origin.core;
+
+	// Set Dummy-Send-Functions
+	auto sendEchoFunction = [](const string&) -> bool { return true; };
+	this->setSendEcho(sendEchoFunction);
+
+	auto sendToFunction = [](Message*, const int&) -> bool { return true; };
+	this->setSendTo(sendToFunction);
+
+	auto sendToAllFunction = [](Message* const, const int&) -> bool { return true; };
+	this->setSendToDestinations(sendToAllFunction);
+}
+
 CandidateNodeCoreImpl::~CandidateNodeCoreImpl() {
 }
 

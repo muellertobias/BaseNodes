@@ -23,6 +23,7 @@ namespace election {
 class VoterNodeCoreImpl : public INodeImpl {
 public:
 	VoterNodeCoreImpl(const Politics& politics);
+	VoterNodeCoreImpl(const VoterNodeCoreImpl& origin);
 	virtual ~VoterNodeCoreImpl();
 
 	virtual void process(Message* const message);
@@ -37,7 +38,6 @@ private:
 	void process(ControlMessage* const message);
 	void process(ApplicationMessage* const message);
 
-	void resolveConfidenceLevels(const int& party, int& opponent, int* confidenceLevelOfCandidate, int* confidenceLevelOfOpponent);
 	void limitConfidenceLevel(int* confidenceLevel);
 };
 
