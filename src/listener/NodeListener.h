@@ -11,6 +11,8 @@
 #include "../network/TransceiverBase.h"
 #include "../message/Message.h"
 #include "../message/ControlMessage.h"
+#include "../message/ApplicationMessage.h"
+#include "../helper/string/trim.h"
 
 namespace helper {
 namespace listener {

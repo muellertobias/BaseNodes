@@ -146,6 +146,7 @@ int AsyncronousNodeTransceiver::createConnection(const NodeInfo& destination) {
 		helper::utilities::writeLog(__FUNCTION__, "Error: connect to " + to_string(destination.NodeID) + " - " + strerror(errno));
 		return -1;
 	}
+
 	return socketID;
 }
 

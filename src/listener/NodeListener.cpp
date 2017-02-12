@@ -35,6 +35,20 @@ void NodeListener::loop() {
 			if (dynamic_cast<ControlMessage*>(message) != NULL) {
 				handle((ControlMessage*)message);
 			}
+			if (dynamic_cast<ApplicationMessage*>(message) != NULL) {
+				if (message->getContent().find('|') != string::npos) {
+					vector<string> results = split(message->getContent(), "|");
+					int left = stoi(results.at(0));
+					int right = stoi(results.at(1));
+					if (left > right) {
+						cout << "L" << endl;
+					} else if (left < right) {
+						cout << "R" << endl;
+					} else {
+						cout << "/" << endl;
+					}
+				}
+			}
 			print(message);
 		} catch (std::exception& ex) {
 			cerr << ex.what() << endl;

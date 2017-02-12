@@ -7,29 +7,26 @@ port=5000
 if [ "$#" -lt 3 ]
 then
 	echo $#
-	echo "./start.h NumberOfNodes NumberOfEdge Config [Graphfile]"
+	echo "./start.h NumberOfNodes Config Graphfile [AddressFile]"
 else
 
 	numberOfNodes=$1
-	numberOfEdges=$2
-	config=$3
+	config=$2
+	graphfile=$3
 
 	gnome-terminal -e "./Debug/NetAVA $addressfile listener"
 
-	if [ "$#" -eq 4 ]
+	if [ "$#" -lt 4 ]
 	then
-		echo "use graphfile"
-		graphfile=$4
+		# Erstelle Adressdatei
+		echo "0 127.0.0.1:$port" > $addressfile
+		for ((i = 1 ; i <= numberOfNodes ; i++)); do 
+			((port+=1))
+			echo "$i 127.0.0.1:$port" >> $addressfile
+		done
 	else
-		# Erstelle zufälligen Graphen
-		./GraphGen $graphfile $numberOfNodes $numberOfEdges
+		addressfile=$4
 	fi
-	# Erstelle Adressdatei
-	echo "0 127.0.0.1:$port" > $addressfile
-	for ((i = 1 ; i <= numberOfNodes ; i++)); do 
-		((port+=1))
-		echo "$i 127.0.0.1:$port" >> $addressfile
-	done
 
 	# Starte Knoten und Initiator
 	for ((i = 1 ; i <= numberOfNodes ; i++)); do 

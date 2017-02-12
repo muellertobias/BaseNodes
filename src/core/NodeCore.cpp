@@ -101,7 +101,7 @@ void NodeCore::loop() {
 	} catch (std::exception& e) {
 		helper::utilities::writeLog(__FUNCTION__, e);
 	}
-
+	sendStatusToListener("stopped");
 	transceiver->closeReceiver();
 }
 
@@ -133,7 +133,6 @@ Message* NodeCore::receive() {
 			this->vectorTime->merge(msg->getVectorTimes());
 			this->vectorTime->setTime(this->nodeInfo.NodeID, this->vectorTime->getMaximum());
 			this->vectorTime->increase();
-			//cout << vectorTime->getLocalTime() << endl;
 			if (this->vectorTime->isTerminated() && !isMarked) {
 				createTemporaryPastImplementation();
 			}
@@ -174,7 +173,6 @@ void NodeCore::handleControlMessage(ControlMessage* const message) {
 		helper::utilities::writeLog(__FUNCTION__, e);
 		throw e;
 	}
-	sendStatusToListener("shutdown");
 }
 
 void NodeCore::handleApplicationMessage(ApplicationMessage* const message) {
