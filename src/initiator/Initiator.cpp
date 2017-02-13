@@ -98,8 +98,7 @@ void Initiator::tell() {
 void Initiator::sendEchoShutdown() {
 	NodeInfo nodeInfo = readNodeID();
 
-	int number = helper::randomizer::random(0, 9999);
-	Message* message = new ControlMessage(MessageSubType::normal, number, 0, constants::SHUTDOWN_ECHO);
+	Message* message = new ControlMessage(MessageSubType::normal, 0, constants::SHUTDOWN_ECHO);
 
 	sendTo(message, nodeInfo);
 }

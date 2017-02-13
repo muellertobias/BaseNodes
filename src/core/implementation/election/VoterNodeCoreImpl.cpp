@@ -144,7 +144,7 @@ void VoterNodeCoreImpl::process(ApplicationMessage* const message) {
 
 void VoterNodeCoreImpl::getState(string& state) {
 	stringstream strStream;
-	strStream << "Voter:" << politics.confidenceLevel1 << "|" << politics.confidenceLevel2;
+	strStream << politics.confidenceLevel1 << "|" << politics.confidenceLevel2;
 	state.append(strStream.str());
 }
 

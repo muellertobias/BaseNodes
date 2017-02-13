@@ -13,6 +13,7 @@
 #include <iterator>
 #include <sstream>
 #include <utility>
+#include <climits>
 
 #include "../helper/Constants.h"
 #include "../helper/exception/NetworkException.h"
@@ -191,7 +192,7 @@ void NodeCore::processImplementations(Message* const message) {
 		pastImpl->process(message);
 		// send SNAPSHOT
 		string status;
-		status.append(to_string(nodeInfo.NodeID) + "-");
+		//status.append(to_string(nodeInfo.NodeID) + "-");
 		pastImpl->getState(status);
 		sendStatusToListener(status);
 	}
@@ -203,6 +204,7 @@ void NodeCore::handleEchoMessage(Message* const message) {
 
 		if (message->getType() == MessageSubType::explorer) {
 			if (it == this->echoBuffer.end()) {
+				//cout << nodeInfo.NodeID << " - first ECHO " << message->getNumber() << endl;
 				Echos echo;
 				echo.EchoID = message->getNumber();
 				echo.FirstNeighborID = message->getSourceID();
@@ -268,7 +270,7 @@ bool NodeCore::sendToDestinations(Message* const message, const int& excludedNod
 
 bool NodeCore::sendEcho(const string& content) {
 	Echos echo;
-	echo.EchoID = randomizer::random(0, 9999);
+	echo.EchoID = randomizer::random(0, INT_MAX);
 	echo.FirstNeighborID =  nodeInfo.NodeID;
 	echo.counter = 0;
 	this->echoBuffer.insert(EchoEntry(echo.EchoID, echo));
@@ -305,8 +307,10 @@ void NodeCore::createTemporaryPastImplementation() {
 		delete pastImpl;
 	}
 	pastImpl = nodeImpl->prototype();
-
 	isMarked = true;
+	string status;
+	pastImpl->getState(status);
+	sendStatusToListener(status);
 }
 
 void NodeCore::initilizeControlEchoMessage(const int& echoID, const string& content) {

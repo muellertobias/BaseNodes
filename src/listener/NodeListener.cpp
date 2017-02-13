@@ -12,6 +12,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <map>
 
 #include "../helper/Constants.h"
 
@@ -28,6 +29,9 @@ NodeListener::~NodeListener() {
 }
 
 void NodeListener::loop() {
+
+	map<int,string> election;
+
 	while (isRunning) {
 		try {
 			cout << "Listen..." << endl;
@@ -35,26 +39,46 @@ void NodeListener::loop() {
 			if (dynamic_cast<ControlMessage*>(message) != NULL) {
 				handle((ControlMessage*)message);
 			}
-			if (dynamic_cast<ApplicationMessage*>(message) != NULL) {
-				if (message->getContent().find('|') != string::npos) {
-					vector<string> results = split(message->getContent(), "|");
-					int left = stoi(results.at(0));
-					int right = stoi(results.at(1));
-					if (left > right) {
-						cout << "L" << endl;
-					} else if (left < right) {
-						cout << "R" << endl;
-					} else {
-						cout << "/" << endl;
-					}
+			if (message->getContent().find('|') != string::npos && message->getContent().size() <= 7) {
+				vector<string> results = split(message->getContent(), "|");
+				int left = stoi(results.at(0));
+				int right = stoi(results.at(1));
+				string choice;
+				if (left > right) {
+					choice = "L";
+				} else if (left < right) {
+					choice = "R";
+				} else {
+					choice = "/";
 				}
+
+				map<int,string>::iterator it = election.find(message->getSourceID());
+				if (it != election.end()) {
+					it->second = choice;
+				} else {
+					election.insert(pair<int,string>(message->getSourceID(), choice));
+				}
+			} else {
+				print(message);
 			}
-			print(message);
 		} catch (std::exception& ex) {
 			cerr << ex.what() << endl;
 		}
 
 	}
+
+	std::stringstream log;
+	for (map<int,string>::iterator it = election.begin(); it != election.end(); ++it) {
+		log << it->first << "->" << it->second << endl;
+	}
+
+
+	std::stringstream logfilename;
+	logfilename << "election_" << getpid() << ".txt";
+	std::ofstream logFile;
+	logFile.open(logfilename.str(), std::ios::app);
+	logFile << log.str();
+	logFile.close();
 }
 
 void NodeListener::print(Message* const message) {
