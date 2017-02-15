@@ -13,7 +13,7 @@
 
 #include "core/NodeCore.h"
 #include "helper/neighborFinders/GraphvizNeighborsCreator.h"
-#include "helper/settings/NodeElectionSettings.h"
+#include "helper/settings/MutualNodeSettings.h"
 #include "helper/settings/InitiatorSettings.h"
 #include "helper/utilities/utilities.h"
 #include "initiator/Initiator.h"
@@ -77,7 +77,7 @@ int main(int argc, char** argv) {
 			string config(argv[4]);
 
 			ISearchNeighbors* neighborSearcher = new helper::neighborFinders::GraphvizNeighborsCreator(argv[5]);
-			helper::settings::NodeElectionSettings settings(addressFilename, nodeID, neighborSearcher, config);
+			helper::settings::MutualNodeSettings settings(addressFilename, nodeID, neighborSearcher, config);
 			NodeCore node(&settings);
 			node.loop();
 

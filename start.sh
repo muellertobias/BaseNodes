@@ -14,7 +14,7 @@ else
 	config=$2
 	graphfile=$3
 
-	gnome-terminal -e "./Debug/NetAVA $addressfile listener"
+	#gnome-terminal -e "./Debug/NetAVA $addressfile listener"
 
 	if [ "$#" -lt 4 ]
 	then

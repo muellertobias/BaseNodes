@@ -126,13 +126,12 @@ void NodeCore::showDetails() {
 Message* NodeCore::receive() {
 	try {
 		Message* msg = transceiver->receive();
-
 		if (dynamic_cast<ApplicationMessage*>(msg) != NULL) {
 			if (isShuttingDown) {
 				throw helper::exception::ShuttingDownException();
 			}
-			this->vectorTime->merge(msg->getVectorTimes());
-			this->vectorTime->setTime(this->nodeInfo.NodeID, this->vectorTime->getMaximum());
+			//this->vectorTime->merge(msg->getVectorTimes());
+			//this->vectorTime->setTime(this->nodeInfo.NodeID, this->vectorTime->getMaximum());
 			this->vectorTime->increase();
 			if (this->vectorTime->isTerminated() && !isMarked) {
 				createTemporaryPastImplementation();
@@ -252,6 +251,17 @@ void NodeCore::handleEchoMessage(Message* const message) {
 
 bool NodeCore::sendToDestinationsImpl(Message* const message, const NodeMap& destinations) {
 	bool successfully = false;
+	if (dynamic_cast<ApplicationMessage*>(message) != NULL) {
+		this->vectorTime->increase();
+	}
+	message->setVectorTimes(this->vectorTime->getTimeMap());
+
+	message->setSourceID(nodeInfo.NodeID);
+
+	if (dynamic_cast<ApplicationMessage*>(message) != NULL) {
+		this->nodeImpl->process(message); // to put request in requestqueue
+	}
+
 	for (NodeMap::const_iterator it = destinations.begin(); it != destinations.end(); ++it) {
 		successfully = sendTo(message, it->second);
 	}
@@ -280,26 +290,29 @@ bool NodeCore::sendEcho(const string& content) {
 
 bool NodeCore::sendTo(Message* const message, const int& nodeID) {
 	NodeInfo destination;
+	if (dynamic_cast<ApplicationMessage*>(message) != NULL) {
+		this->vectorTime->increase();
+	}
+	message->setVectorTimes(this->vectorTime->getTimeMap());
+
 	this->transceiver->resolve(nodeID, destination);
 	return this->sendTo(message, destination);
 }
 
 bool NodeCore::sendTo(Message* const message, const NodeInfo& destination) {
-	if (dynamic_cast<ApplicationMessage*>(message) != NULL) {
-		this->vectorTime->increase();
-	}
-
 	message->setDestinationId(destination.NodeID);
+
 	message->setSourceID(nodeInfo.NodeID);
-	message->setVectorTimes(this->vectorTime->getTimeMap());
 
 	return transceiver->sendTo(destination, MessageFactory::convertToString(message));
 }
 
 bool NodeCore::sendStatusToListener(const string& status) {
-	Message* statusMsg = new ControlMessage(MessageSubType::normal, 0, nodeInfo.NodeID, status);
-	statusMsg->setVectorTimes(this->vectorTime->getTimeMap());
-	return sendTo(statusMsg, listenerNodeInfo);
+//	Message* statusMsg = new ControlMessage(MessageSubType::normal, 0, nodeInfo.NodeID, status);
+//	statusMsg->setVectorTimes(this->vectorTime->getTimeMap());
+//	return sendTo(statusMsg, listenerNodeInfo);
+	cout << nodeInfo.NodeID << " - " << status << endl;
+	return true;
 }
 
 void NodeCore::createTemporaryPastImplementation() {
