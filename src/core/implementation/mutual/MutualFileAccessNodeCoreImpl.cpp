@@ -73,8 +73,11 @@ void MutualFileAccessNodeCoreImpl::process(Message* const message) {
 				queue->remove(core->getNodeInfo().NodeID);
 			}
 		}
-		ApplicationMessage* requestMessage = new ApplicationMessage(MessageSubType::normal, "REQUEST");
-		sendToAll(requestMessage, 0);
+		if (message->getContent() != "ACK" || message->getContent() != "RELEASE") {
+			ApplicationMessage* requestMessage = new ApplicationMessage(MessageSubType::normal, "REQUEST");
+			sendToAll(requestMessage, 0);
+		}
+
 	} else {
 		Request* request = new Request();
 		request->NodeID = message->getSourceID();
@@ -96,9 +99,9 @@ void MutualFileAccessNodeCoreImpl::criticalSection() {
 	int value = stoi(firstLine);
 
 	if (value == 0) {
-
+		terminiationCounter++;
 	}
-	//terminiationCounter++;
+
 	if (terminiationCounter == 3) {
 		int destination = -1;
 		ControlMessage* haltMessage = new ControlMessage(MessageSubType::normal, "shutdown");
@@ -118,13 +121,14 @@ void MutualFileAccessNodeCoreImpl::criticalSection() {
 		} else {
 			value++;
 		}
-		cout << core->getNodeInfo().NodeID << " - CS! - " << value << endl;
+		cout << core->getNodeInfo().NodeID << "["<< core->getLocalTime()<<"]" << " - CS! - " << value << endl;
 		file.seekp(0);
 		file.fill('0');
 		file.width(9);
 		file << value;
 		file.seekg(0, ios::end);
 		file << "\n" << core->getNodeInfo().NodeID;
+		queue->remove(core->getNodeInfo().NodeID);
 	}
 
 	file.close();

@@ -130,8 +130,8 @@ Message* NodeCore::receive() {
 			if (isShuttingDown) {
 				throw helper::exception::ShuttingDownException();
 			}
-			//this->vectorTime->merge(msg->getVectorTimes());
-			//this->vectorTime->setTime(this->nodeInfo.NodeID, this->vectorTime->getMaximum());
+			this->vectorTime->merge(msg->getVectorTimes());
+			this->vectorTime->setTime(this->nodeInfo.NodeID, this->vectorTime->getMaximum());
 			this->vectorTime->increase();
 			if (this->vectorTime->isTerminated() && !isMarked) {
 				createTemporaryPastImplementation();

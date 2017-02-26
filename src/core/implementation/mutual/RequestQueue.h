@@ -77,11 +77,13 @@ public:
 			Request* r = pop();
 			if (r->NodeID != NodeID) {
 				copy.push(r);
+				//cout << r->NodeID << "-" <<r->Timestamp << ",";
 				requestCounter.at(r->NodeID)++;
 			} else {
 				delete r;
 			}
 		}
+		//cout << endl;
 
 		std::swap(queue_, copy);
 	}

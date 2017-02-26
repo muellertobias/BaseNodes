@@ -10,9 +10,9 @@
 
 #include <map>
 #include <string>
-#include <vector>
 
 #include "../helper/NodeInfo.h"
+#include "../helper/time/VectorTime.h"
 #include "data/Echo.h"
 
 namespace helper {
@@ -74,6 +74,10 @@ public:
 	}
 
 	Message* receive();
+
+	int getLocalTime() const {
+		return this->vectorTime->getLocalTime();
+	}
 
 private:
 	NodeInfo nodeInfo;
